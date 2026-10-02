@@ -39,6 +39,13 @@ fun ProfileSettings.formatMoney(cents: Long): String {
     }
 }
 
+fun ProfileSettings.remainingLabel(remainingCents: Long): String =
+    if (remainingCents < 0L) {
+        "${formatMoney(-remainingCents)} over"
+    } else {
+        "${formatMoney(remainingCents)} left"
+    }
+
 fun ProfileSettings.formatDate(date: LocalDate): String =
     date.format(
         DateTimeFormatter.ofPattern(

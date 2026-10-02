@@ -1287,9 +1287,9 @@ internal fun statusText(
     profileSettings: ProfileSettings,
 ): String {
     return when {
-        remainingCents < 0 -> "${profileSettings.formatMoney(-remainingCents)} over"
+        remainingCents < 0 -> profileSettings.remainingLabel(remainingCents)
         spentCents == 0L -> "${profileSettings.formatMoney(0)} spent"
-        else -> "${profileSettings.formatMoney(remainingCents)} left"
+        else -> profileSettings.remainingLabel(remainingCents)
     }
 }
 

@@ -29,6 +29,14 @@ class ProfileFormattersTest {
     }
 
     @Test
+    fun remainingLabelSwitchesToOverWhenOverspent() {
+        assertEquals("€30 over", euros.remainingLabel(-3000))
+        assertEquals("€30.05 over", euros.remainingLabel(-3005))
+        assertEquals("€214 left", euros.remainingLabel(21400))
+        assertEquals("€0 left", euros.remainingLabel(0))
+    }
+
+    @Test
     fun formatMoneyPlacesCurrencyPerLocaleConvention() {
         assertEquals("$", ProfileSettings(currency = "USD - US Dollar").currencySymbol())
         assertEquals("1,234.56 zł", ProfileSettings(currency = "PLN - Polish Złoty").formatMoney(123456))

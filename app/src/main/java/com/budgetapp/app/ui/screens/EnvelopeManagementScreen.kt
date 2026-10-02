@@ -490,9 +490,13 @@ internal fun EnvelopeManagementCard(
         ) {
             Text(
                 text = if (envelope.type == EnvelopeType.Goal) {
-                    "${profileSettings.formatMoney(envelope.spentCents)} saved \u00b7 ${profileSettings.formatMoney(envelope.remainingCents)} to go"
+                    if (envelope.remainingCents < 0L) {
+                        "${profileSettings.formatMoney(envelope.spentCents)} saved \u00b7 ${profileSettings.remainingLabel(envelope.remainingCents)}"
+                    } else {
+                        "${profileSettings.formatMoney(envelope.spentCents)} saved \u00b7 ${profileSettings.formatMoney(envelope.remainingCents)} to go"
+                    }
                 } else {
-                    "${profileSettings.formatMoney(envelope.spentCents)} spent \u00b7 ${profileSettings.formatMoney(envelope.remainingCents)} left"
+                    "${profileSettings.formatMoney(envelope.spentCents)} spent \u00b7 ${profileSettings.remainingLabel(envelope.remainingCents)}"
                 },
                 color = MockNeutral,
                 fontSize = 14.sp,

@@ -249,9 +249,10 @@ internal fun EnvelopeDetailContent(
             Text(
                 text = when {
                     state.isGoal && state.spentCents == 0L -> "${state.profileSettings.formatMoney(0)} saved"
+                    state.isGoal && state.remainingCents < 0L -> state.profileSettings.remainingLabel(state.remainingCents)
                     state.isGoal -> "${state.profileSettings.formatMoney(state.remainingCents)} to go"
                     state.spentCents == 0L -> "${state.profileSettings.formatMoney(0)} spent"
-                    else -> "${state.profileSettings.formatMoney(state.remainingCents)} left"
+                    else -> state.profileSettings.remainingLabel(state.remainingCents)
                 },
                 color = if (state.spentCents == 0L) MockTextLightMuted else MockPrimaryGlowAlt,
                 fontSize = 41.sp,

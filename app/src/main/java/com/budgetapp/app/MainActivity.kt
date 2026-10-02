@@ -42,6 +42,10 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Restored so a rotation (or process death) does not drop the user back to the lock screen
+        // mid-task.
+        isUnlocked = savedInstanceState?.getBoolean(StateIsUnlocked) ?: false
+        hasRequestedInitialUnlock = savedInstanceState?.getBoolean(StateHasRequestedUnlock) ?: false
         if (!BuildConfig.ALLOW_SCREEN_CAPTURE) {
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_SECURE,
@@ -74,6 +78,12 @@ class MainActivity : FragmentActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(StateIsUnlocked, isUnlocked)
+        outState.putBoolean(StateHasRequestedUnlock, hasRequestedInitialUnlock)
+    }
+
     override fun onStop() {
         super.onStop()
         if (appLockCoordinator.shouldLockOnStop(isChangingConfigurations)) {
@@ -95,6 +105,11 @@ class MainActivity : FragmentActivity() {
                 isUnlocked = false
             },
         )
+    }
+
+    private companion object {
+        const val StateIsUnlocked = "state_is_unlocked"
+        const val StateHasRequestedUnlock = "state_has_requested_unlock"
     }
 }
 

@@ -68,6 +68,10 @@ import com.budgetapp.app.ui.theme.MockTextSecondary
 import com.budgetapp.app.ui.theme.MockTextTertiary
 import com.budgetapp.app.ui.theme.MockWarningBright
 import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.MockDivider
+import com.budgetapp.app.ui.theme.MockBorderPurple
+import com.budgetapp.app.ui.theme.MockPurpleDeep
+import com.budgetapp.app.ui.theme.MockPurpleInk
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -321,7 +325,7 @@ private fun MetricCard(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockBorderDeep, RoundedCornerShape(16.dp))
+            .border(1.dp, MockDivider, RoundedCornerShape(16.dp))
             .padding(16.dp),
     ) {
         Text(label.uppercase(Locale.US), color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.96.sp)
@@ -340,7 +344,7 @@ private fun TrendPanel(state: AnalyticsState) {
             .height(270.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockBorderDeep, RoundedCornerShape(18.dp))
+            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
             .padding(14.dp),
     ) {
         Text("${state.profileSettings.formatMoney(state.budgetCents)} budget", color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
@@ -441,7 +445,7 @@ private fun BreakdownPanel(envelopes: List<EnvelopeBalance>, profileSettings: Pr
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockBorderDeep, RoundedCornerShape(18.dp))
+            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -454,7 +458,7 @@ private fun BreakdownPanel(envelopes: List<EnvelopeBalance>, profileSettings: Pr
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(envelope.name, color = MockWhite, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(0.36f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Box(modifier = Modifier.weight(0.38f).height(4.dp).clip(RoundedCornerShape(99.dp)).background(MockBorderDeep)) {
+                Box(modifier = Modifier.weight(0.38f).height(4.dp).clip(RoundedCornerShape(99.dp)).background(MockBorderPurple)) {
                     Box(modifier = Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(4.dp).background(color))
                 }
                 Text("${profileSettings.formatMoney(envelope.spentCents)}/${profileSettings.formatMoney(envelope.ceilingCents)}", color = color, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(0.26f), maxLines = 1)
@@ -473,7 +477,7 @@ private fun ComparisonPanel(state: AnalyticsState) {
             .height(250.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockBorderDeep, RoundedCornerShape(18.dp))
+            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
             .padding(14.dp),
     ) {
         Text("budget", color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.align(Alignment.TopEnd))
@@ -528,7 +532,7 @@ private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings:
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockBorderDeep, RoundedCornerShape(18.dp))
+            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
             .padding(horizontal = 18.dp, vertical = 18.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
@@ -548,10 +552,10 @@ private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings:
                         val amount = amounts[day] ?: 0L
                         val ratio = amount.toFloat() / maxAmount
                         val color = when {
-                            amount == 0L -> MockAccentDeep.copy(alpha = 0.38f)
+                            amount == 0L -> MockPurpleDeep
                             ratio > 0.66f -> MockPrimaryAlt
                             ratio > 0.33f -> MockAccentDeep
-                            else -> MockPanel
+                            else -> MockPurpleInk
                         }
                         Box(
                             modifier = Modifier.weight(1f).height(42.dp).clip(RoundedCornerShape(9.dp)).background(color),

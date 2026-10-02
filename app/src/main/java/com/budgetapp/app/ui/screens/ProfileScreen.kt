@@ -1,0 +1,378 @@
+package com.budgetapp.app.ui.screens
+
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.budgetapp.app.data.model.ProfileSettings
+import com.budgetapp.app.ui.components.ProfileAvatar
+import com.budgetapp.app.ui.components.SimpleDarkHeader
+import com.budgetapp.app.ui.components.StandardLightHeader
+import com.budgetapp.app.ui.theme.MockBackground
+import com.budgetapp.app.ui.theme.MockDanger
+import com.budgetapp.app.ui.theme.MockInk
+import com.budgetapp.app.ui.theme.MockMaterialSurface
+import com.budgetapp.app.ui.theme.MockNeutral
+import com.budgetapp.app.ui.theme.MockPanelRaised
+import com.budgetapp.app.ui.theme.MockPrimary
+import com.budgetapp.app.ui.theme.MockPrimaryAlt
+import com.budgetapp.app.ui.theme.MockPrimaryDeep
+import com.budgetapp.app.ui.theme.MockPrimaryPale
+import com.budgetapp.app.ui.theme.MockPrimarySoft
+import com.budgetapp.app.ui.theme.MockPrimaryWash
+import com.budgetapp.app.ui.theme.MockSurface
+import com.budgetapp.app.ui.theme.MockSurfaceBarely
+import com.budgetapp.app.ui.theme.MockSurfaceDeep
+import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
+import com.budgetapp.app.ui.theme.MockSurfaceNearWhite
+import com.budgetapp.app.ui.theme.MockSurfacePale
+import com.budgetapp.app.ui.theme.MockSurfaceRaised
+import com.budgetapp.app.ui.theme.MockSurfaceTintAlt
+import com.budgetapp.app.ui.theme.MockTextLight
+import com.budgetapp.app.ui.theme.MockTextLightMuted
+import com.budgetapp.app.ui.theme.MockTextMuted
+import com.budgetapp.app.ui.theme.MockTextMutedBlue
+import com.budgetapp.app.ui.theme.MockTextSecondary
+import com.budgetapp.app.ui.theme.MockTextSoft
+import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.security.LocalTrustedExternalActivityCoordinator
+import com.budgetapp.app.security.launchTrustedExternalActivity
+
+@Composable
+fun ProfileScreen(
+    viewModel: ProfileViewModel,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val persistedSettings by viewModel.settings.collectAsState()
+    val context = LocalContext.current
+    val externalActivityCoordinator = LocalTrustedExternalActivityCoordinator.current
+    var name by remember { mutableStateOf(persistedSettings.name) }
+    var avatarUri by remember { mutableStateOf(persistedSettings.avatarUri) }
+    var currency by remember { mutableStateOf(persistedSettings.currency) }
+    var dateFormat by remember { mutableStateOf(persistedSettings.dateFormat) }
+    var firstDayOfWeek by remember { mutableStateOf(persistedSettings.firstDayOfWeek) }
+    var monthStartDay by remember { mutableStateOf(persistedSettings.monthStartDay) }
+    var isSaved by remember { mutableStateOf(false) }
+    val avatarLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        externalActivityCoordinator.end()
+        if (uri != null) {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION,
+            )
+            avatarUri = uri.toString()
+            isSaved = false
+        }
+    }
+
+    LaunchedEffect(persistedSettings) {
+        name = persistedSettings.name
+        avatarUri = persistedSettings.avatarUri
+        currency = persistedSettings.currency
+        dateFormat = persistedSettings.dateFormat
+        firstDayOfWeek = persistedSettings.firstDayOfWeek
+        monthStartDay = persistedSettings.monthStartDay
+        isSaved = false
+    }
+
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MockBackground),
+    ) {
+        StandardLightHeader(
+            title = "Profile",
+            heading = "Set your budget basics",
+            copy = "Choose the profile settings used across your envelopes.",
+            onBack = onBack,
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding =
+                androidx.compose.foundation.layout
+                    .PaddingValues(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 164.dp),
+        ) {
+            item {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MockWhite)
+                            .border(1.dp, MockSurfacePale, RoundedCornerShape(24.dp)),
+                ) {
+                    ProfileInputBlock(
+                        label = "Name",
+                        value = name,
+                        onValueChange = {
+                            name = it
+                            isSaved = false
+                        },
+                    )
+                    ProfileAvatarBlock(
+                        name = name,
+                        avatarUri = avatarUri,
+                        onChangePicture = {
+                            externalActivityCoordinator.launchTrustedExternalActivity {
+                                avatarLauncher.launch(arrayOf("image/*"))
+                            }
+                        },
+                    )
+                    ProfileSelectBlock(
+                        label = "Currency",
+                        value = currency,
+                        options = listOf("EUR - Euro", "USD - US Dollar", "GBP - British Pound", "PLN - Polish Zloty"),
+                        onSelect = {
+                            currency = it
+                            isSaved = false
+                        },
+                    )
+                    ProfileSelectBlock(
+                        label = "Date format",
+                        value = dateFormat,
+                        options = listOf("DD/MM/YYYY", "MM/DD/YYYY", "YYYY-MM-DD"),
+                        onSelect = {
+                            dateFormat = it
+                            isSaved = false
+                        },
+                    )
+                    ProfileSelectBlock(
+                        label = "First day of week",
+                        value = firstDayOfWeek,
+                        options = listOf("Monday", "Sunday"),
+                        onSelect = {
+                            firstDayOfWeek = it
+                            isSaved = false
+                        },
+                    )
+                    ProfileSelectBlock(
+                        label = "Month start day",
+                        value = monthStartDay,
+                        options = listOf("1st of the month", "15th of the month", "Custom"),
+                        onSelect = {
+                            monthStartDay = it
+                            isSaved = false
+                        },
+                        isLast = true,
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        viewModel.save(
+                            ProfileSettings(
+                                name = name,
+                                avatarUri = avatarUri,
+                                currency = currency,
+                                dateFormat = dateFormat,
+                                firstDayOfWeek = firstDayOfWeek,
+                                monthStartDay = monthStartDay,
+                            ),
+                        )
+                        isSaved = true
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MockPrimaryAlt, contentColor = MockWhite),
+                ) {
+                    Text("Save profile", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+                if (isSaved) {
+                    Text(
+                        text = "Profile saved",
+                        color = MockPrimaryAlt,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileSelectBlock(
+    label: String,
+    value: String,
+    options: List<String>,
+    onSelect: (String) -> Unit,
+    isLast: Boolean = false,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (!isLast) Modifier.border(0.dp, MockSurfacePale) else Modifier)
+                .padding(16.dp),
+    ) {
+        Text(label, color = MockTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(9.dp))
+        Box {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MockSurfaceTintAlt)
+                        .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp))
+                        .clickable { expanded = true }
+                        .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = value,
+                    color = MockMaterialSurface,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text("v", color = MockTextLight, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier =
+                    Modifier
+                        .background(MockWhite)
+                        .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp)),
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = option,
+                                color = MockMaterialSurface,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        },
+                        onClick = {
+                            onSelect(option)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProfileInputBlock(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isLast: Boolean = false,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (!isLast) Modifier.border(0.dp, MockSurfacePale) else Modifier)
+                .padding(16.dp),
+    ) {
+        Text(label, color = MockTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(9.dp))
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = TextStyle(color = MockMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MockSurfaceTintAlt)
+                    .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp))
+                    .padding(horizontal = 16.dp),
+            decorationBox = { inner -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) { inner() } },
+        )
+    }
+}
+
+@Composable
+private fun ProfileAvatarBlock(
+    name: String,
+    avatarUri: String?,
+    onChangePicture: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ProfileAvatar(
+            name = name,
+            avatarUri = avatarUri,
+            size = 58.dp,
+        )
+        Text(
+            text = "Change picture",
+            color = MockPrimaryAlt,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable(onClick = onChangePicture),
+        )
+    }
+}

@@ -61,13 +61,6 @@ class EncryptedBackupCodec {
         }
     }
 
-    fun deleteLocalKey() {
-        val keyStore = KeyStore.getInstance(AndroidKeyStore).apply { load(null) }
-        if (keyStore.containsAlias(KeyAlias)) {
-            keyStore.deleteEntry(KeyAlias)
-        }
-    }
-
     private fun getOrCreateKey(): SecretKey {
         val keyStore = KeyStore.getInstance(AndroidKeyStore).apply { load(null) }
         val existingKey = keyStore.getEntry(KeyAlias, null) as? KeyStore.SecretKeyEntry

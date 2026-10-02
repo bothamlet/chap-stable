@@ -162,7 +162,7 @@ fun BackupRestoreScreen(
                     }
                     BackupMetaPanel(lastBackup = formatBackupTimestamp(state.lastBackupAtMillis))
                     Text(
-                        text = "Backup files stay on your device unless you choose to share or store them elsewhere. Current backups are protected by this device's local key.",
+                        text = "Backup files stay on your device unless you choose to share or store them elsewhere. They are protected by a key held in this app install, so they restore here only.",
                         color = MockNeutral,
                         fontSize = 13.sp,
                         lineHeight = 19.sp,
@@ -322,7 +322,7 @@ private fun DeleteDataConfirmation(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "This permanently removes everything stored locally on this device.",
+            text = "This permanently removes every envelope, transaction, rule and profile setting on this device. Backups you already saved are kept and still restore here.",
             color = MockNeutral,
             fontSize = 15.sp,
             lineHeight = 21.sp,

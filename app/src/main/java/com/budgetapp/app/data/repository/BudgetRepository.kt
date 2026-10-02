@@ -123,7 +123,9 @@ class BudgetRepository(
             profilePreferences.edit(commit = true) {
                 clear()
             }
-            encryptedBackupCodec.deleteLocalKey()
+            // The backup key is deliberately kept: deleting it would make every backup the user
+            // already exported permanently unreadable, including the one they made just before
+            // wiping to start over.
         }
         profileSettings.value = ProfileSettings()
     }

@@ -68,6 +68,7 @@ fun BackupRestoreScreen(
     val context = LocalContext.current
     val externalActivityCoordinator = LocalTrustedExternalActivityCoordinator.current
     var isDeleteConfirming by remember { mutableStateOf(false) }
+    var pendingRestoreUri by remember { mutableStateOf<Uri?>(null) }
     val createBackupLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(BackupMimeType),
     ) { uri ->
@@ -82,22 +83,23 @@ fun BackupRestoreScreen(
         ActivityResultContracts.OpenDocument(),
     ) { uri ->
         externalActivityCoordinator.end()
-        uri?.let { sourceUri ->
-            viewModel.restoreBackup {
-                context.readBackupBytes(sourceUri)
-            }
-        }
+        // Restoring overwrites everything, so the file is only read after the user confirms.
+        uri?.let { sourceUri -> pendingRestoreUri = sourceUri }
     }
-    LaunchedEffect(isDeleteConfirming) {
-        onModalVisibleChange(isDeleteConfirming)
+    LaunchedEffect(isDeleteConfirming, pendingRestoreUri) {
+        onModalVisibleChange(isDeleteConfirming || pendingRestoreUri != null)
     }
     LaunchedEffect(state.error) {
         if (state.error != null) {
             isDeleteConfirming = false
+            pendingRestoreUri = null
         }
     }
-    if (isDeleteConfirming) {
-        BackHandler { isDeleteConfirming = false }
+    if (isDeleteConfirming || pendingRestoreUri != null) {
+        BackHandler {
+            isDeleteConfirming = false
+            pendingRestoreUri = null
+        }
     }
 
     Box(
@@ -176,25 +178,55 @@ fun BackupRestoreScreen(
                 }
             }
         }
-        if (isDeleteConfirming) {
+        if (isDeleteConfirming || pendingRestoreUri != null) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .background(MockInk.copy(alpha = 0.54f))
-                        .clickable { isDeleteConfirming = false },
+                        .clickable {
+                            isDeleteConfirming = false
+                            pendingRestoreUri = null
+                        },
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                DeleteDataConfirmation(
-                    onCancel = { isDeleteConfirming = false },
-                    onDelete = {
-                        viewModel.deleteAllData {
-                            isDeleteConfirming = false
-                        }
-                    },
-                    isDeleting = state.isDeletingData,
-                    modifier = Modifier.clickable {},
-                )
+                if (isDeleteConfirming) {
+                    ConfirmSheet(
+                        title = "Delete all data?",
+                        body = "This permanently removes every envelope, transaction, rule and profile setting on this device. Backups you already saved are kept and still restore here.",
+                        confirmLabel = "Delete",
+                        busyLabel = "Deleting...",
+                        confirmColor = MockDanger,
+                        isBusy = state.isDeletingData,
+                        onCancel = { isDeleteConfirming = false },
+                        onConfirm = {
+                            viewModel.deleteAllData {
+                                isDeleteConfirming = false
+                            }
+                        },
+                        modifier = Modifier.clickable {},
+                    )
+                } else {
+                    val restoreUri = pendingRestoreUri
+                    ConfirmSheet(
+                        title = "Restore this backup?",
+                        body = "Restoring replaces every envelope, transaction, rule and profile setting currently on this device. Create a backup first if you still need the current data.",
+                        confirmLabel = "Restore",
+                        busyLabel = "Restoring...",
+                        confirmColor = MockPrimaryAlt,
+                        isBusy = state.isRestoringBackup,
+                        onCancel = { pendingRestoreUri = null },
+                        onConfirm = {
+                            if (restoreUri != null) {
+                                pendingRestoreUri = null
+                                viewModel.restoreBackup {
+                                    context.readBackupBytes(restoreUri)
+                                }
+                            }
+                        },
+                        modifier = Modifier.clickable {},
+                    )
+                }
             }
         }
     }
@@ -295,10 +327,15 @@ private fun BackupMetaRow(
 }
 
 @Composable
-private fun DeleteDataConfirmation(
+private fun ConfirmSheet(
+    title: String,
+    body: String,
+    confirmLabel: String,
+    busyLabel: String,
+    confirmColor: androidx.compose.ui.graphics.Color,
+    isBusy: Boolean,
     onCancel: () -> Unit,
-    onDelete: () -> Unit,
-    isDeleting: Boolean,
+    onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -313,7 +350,7 @@ private fun DeleteDataConfirmation(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Delete all data?",
+            text = title,
             color = MockMaterialSurface,
             fontSize = 22.sp,
             lineHeight = 25.sp,
@@ -322,7 +359,7 @@ private fun DeleteDataConfirmation(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "This permanently removes every envelope, transaction, rule and profile setting on this device. Backups you already saved are kept and still restore here.",
+            text = body,
             color = MockNeutral,
             fontSize = 15.sp,
             lineHeight = 21.sp,
@@ -335,7 +372,7 @@ private fun DeleteDataConfirmation(
         ) {
             Button(
                 onClick = onCancel,
-                enabled = !isDeleting,
+                enabled = !isBusy,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MockSurfaceNearWhite, contentColor = MockTextMuted),
@@ -343,13 +380,13 @@ private fun DeleteDataConfirmation(
                 Text("Cancel", fontWeight = FontWeight.Bold)
             }
             Button(
-                onClick = onDelete,
-                enabled = !isDeleting,
+                onClick = onConfirm,
+                enabled = !isBusy,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MockDanger, contentColor = MockWhite),
+                colors = ButtonDefaults.buttonColors(containerColor = confirmColor, contentColor = MockWhite),
             ) {
-                Text(if (isDeleting) "Deleting..." else "Delete", fontWeight = FontWeight.Bold)
+                Text(if (isBusy) busyLabel else confirmLabel, fontWeight = FontWeight.Bold)
             }
         }
     }

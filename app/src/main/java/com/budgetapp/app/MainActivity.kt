@@ -1,8 +1,11 @@
 package com.budgetapp.app
 
 import android.os.Bundle
+import android.provider.Settings
+import android.content.Intent
 import android.view.WindowManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +41,7 @@ class MainActivity : FragmentActivity() {
     private var isUnlocked by mutableStateOf(false)
     private var isAuthenticating = false
     private var hasRequestedInitialUnlock = false
+    private var lockNotice by mutableStateOf<String?>(null)
     private val appLockCoordinator = AppLockCoordinator()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +67,15 @@ class MainActivity : FragmentActivity() {
                     if (isUnlocked) {
                         BudgetNavHost()
                     } else {
-                        LockedScreen(onUnlock = ::unlock)
+                        LockedScreen(
+                            onUnlock = ::unlock,
+                            notice = lockNotice,
+                            onOpenSecuritySettings = ::openSecuritySettings,
+                            onContinueWithoutLock = {
+                                lockNotice = null
+                                isUnlocked = true
+                            },
+                        )
                     }
                 }
             }
@@ -104,7 +116,17 @@ class MainActivity : FragmentActivity() {
                 isAuthenticating = false
                 isUnlocked = false
             },
+            onUnavailable = { message ->
+                isAuthenticating = false
+                isUnlocked = false
+                lockNotice = message
+            },
         )
+    }
+
+    private fun openSecuritySettings() {
+        runCatching { startActivity(Intent(Settings.ACTION_SECURITY_SETTINGS)) }
+            .onFailure { lockNotice = "Could not open security settings." }
     }
 
     private companion object {
@@ -116,6 +138,9 @@ class MainActivity : FragmentActivity() {
 @Composable
 private fun LockedScreen(
     onUnlock: () -> Unit,
+    notice: String?,
+    onOpenSecuritySettings: () -> Unit,
+    onContinueWithoutLock: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -133,7 +158,7 @@ private fun LockedScreen(
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = "Unlock to view your budget.",
+            text = notice ?: "Unlock to view your budget.",
             color = MockTextLightMuted,
             fontSize = 16.sp,
             lineHeight = 22.sp,
@@ -141,13 +166,33 @@ private fun LockedScreen(
             modifier = Modifier.padding(top = 10.dp, bottom = 28.dp),
         )
         Button(
-            onClick = onUnlock,
+            onClick = if (notice == null) onUnlock else onOpenSecuritySettings,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MockPrimaryAlt,
                 contentColor = MockWhite,
             ),
         ) {
-            Text("Unlock", fontWeight = FontWeight.Bold)
+            Text(if (notice == null) "Unlock" else "Open security settings", fontWeight = FontWeight.Bold)
+        }
+        if (notice != null) {
+            Text(
+                text = "Continue without the lock",
+                color = MockPrimaryAlt,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .clickable(onClick = onContinueWithoutLock)
+                    .padding(12.dp),
+            )
+            Text(
+                text = "Your budget stays encrypted on this device either way.",
+                color = MockTextLightMuted,
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
     }
 }

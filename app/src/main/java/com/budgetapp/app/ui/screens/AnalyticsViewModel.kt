@@ -46,7 +46,7 @@ data class AnalyticsState(
     val forecastCents: Long = forecast(spentCents, period)
     val topEnvelope: EnvelopeBalance? = spendingEnvelopes.maxByOrNull { it.spentCents }
     val mostActiveDay: String =
-        assignedExpenses
+        periodExpenses
             .groupingBy { it.postedAtMillis.toAnalyticsDate().dayOfWeek }
             .eachCount()
             .maxByOrNull { it.value }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -77,6 +74,9 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1024,22 +1024,36 @@ internal fun EnvelopeSection(
                 fontWeight = FontWeight.Bold,
             )
         }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        // Rows are laid out by hand instead of a LazyVerticalGrid: the grid needed a magic
+        // height to survive being nested in the screen's LazyColumn, which clipped the last row
+        // and cut card text at larger font scales.
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height((((envelopes.size + 1) / 2) * 196).dp)
                 .padding(top = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            userScrollEnabled = false,
         ) {
-            items(envelopes) { envelope ->
-                EnvelopeCard(
-                    envelope = envelope,
-                    profileSettings = profileSettings,
-                    onClick = { onOpenEnvelope(envelope.id) },
-                )
+            envelopes.chunked(2).forEach { row ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    row.forEach { envelope ->
+                        EnvelopeCard(
+                            envelope = envelope,
+                            profileSettings = profileSettings,
+                            onClick = { onOpenEnvelope(envelope.id) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                        )
+                    }
+                    repeat(2 - row.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -1050,6 +1064,7 @@ internal fun EnvelopeCard(
     envelope: EnvelopeBalance,
     profileSettings: ProfileSettings,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val remaining = envelope.ceilingCents - envelope.spentCents
     val progress = if (envelope.ceilingCents <= 0) {
@@ -1065,12 +1080,12 @@ internal fun EnvelopeCard(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.92f)
+            .heightIn(min = 140.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(20.dp))
+            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
     ) {

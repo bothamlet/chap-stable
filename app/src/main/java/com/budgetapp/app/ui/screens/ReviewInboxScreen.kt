@@ -395,6 +395,7 @@ private fun InboxEmptyScreen(
             StandardEmptyState(
                 title = "All caught up",
                 copy = "New transactions will categorize automatically.",
+                copyColor = MockLavenderMuted,
                 icon = {
                     InboxIcon(InboxIconKind.Check, Modifier.size(42.dp), MockPrimaryAlt)
                 },

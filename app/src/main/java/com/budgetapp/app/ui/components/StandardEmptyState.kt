@@ -16,13 +16,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockTextMutedBlue
+import com.budgetapp.app.ui.theme.MockTextLightMuted
 import com.budgetapp.app.ui.theme.MockWhite
 
 @Composable
@@ -33,6 +34,7 @@ fun StandardEmptyState(
     modifier: Modifier = Modifier,
     actionText: String? = null,
     onAction: (() -> Unit)? = null,
+    copyColor: Color = MockTextLightMuted,
 ) {
     Column(
         modifier = modifier.widthIn(max = 330.dp),
@@ -51,7 +53,7 @@ fun StandardEmptyState(
         Spacer(modifier = Modifier.height(13.dp))
         Text(
             text = copy,
-            color = MockTextMutedBlue,
+            color = copyColor,
             fontSize = 17.sp,
             lineHeight = 22.sp,
             textAlign = TextAlign.Center,

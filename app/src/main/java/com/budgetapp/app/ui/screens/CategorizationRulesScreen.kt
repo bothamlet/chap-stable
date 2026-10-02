@@ -160,6 +160,7 @@ private fun RulesEmptyContent(
             StandardEmptyState(
                 title = "No rules yet",
                 copy = "Rules are created automatically when you categorize transactions.",
+                copyColor = MockLavenderAlt,
                 icon = {
                     RulesIcon(RulesIconKind.Sparkles, Modifier.size(36.dp), MockPrimaryGlow)
                 },

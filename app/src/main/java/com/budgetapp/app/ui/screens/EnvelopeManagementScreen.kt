@@ -90,6 +90,7 @@ import com.budgetapp.app.ui.theme.MockTextLightMuted
 import com.budgetapp.app.ui.theme.MockTextMutedBlue
 import com.budgetapp.app.ui.theme.MockWhite
 import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.ui.theme.MockLavenderAlt
 import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
@@ -216,6 +217,7 @@ internal fun EmptyEnvelopeManagement(
             StandardEmptyState(
                 title = "No envelopes yet",
                 copy = "Create envelopes to plan where your money goes.",
+                copyColor = MockLavenderAlt,
                 actionText = "Create envelope",
                 onAction = onCreate,
                 icon = {

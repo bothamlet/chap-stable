@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
@@ -374,6 +375,21 @@ private fun TrendChart(
             val last = points.last()
             drawCircle(MockPrimaryAlt, radius = 7.dp.toPx(), center = last)
             drawLine(MockPrimaryAlt.copy(alpha = 0.45f), Offset(last.x, 0f), Offset(last.x, height), strokeWidth = 1.dp.toPx())
+            // Show projected spending as a dashed line.
+            val forecastEndY = height - (height * ((running.toFloat() / todayIndex) * days / maxValue))
+            val forecastPath = Path().apply {
+                moveTo(last.x, last.y)
+                lineTo(width, forecastEndY.coerceIn(0f, height))
+            }
+            drawPath(
+                path = forecastPath,
+                color = MockWarningBright,
+                style = Stroke(
+                    width = 2.dp.toPx(),
+                    cap = StrokeCap.Round,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 4.dp.toPx())),
+                ),
+            )
         }
         val budgetY = height - (height * (budgetCents / maxValue))
         drawLine(MockTextLightMuted.copy(alpha = 0.55f), Offset(0f, budgetY), Offset(width, budgetY), strokeWidth = 1.2.dp.toPx())

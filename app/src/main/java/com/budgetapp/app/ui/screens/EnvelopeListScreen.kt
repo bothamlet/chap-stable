@@ -30,11 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -516,11 +520,17 @@ internal fun BurnRateChart(
     period: BudgetPeriod,
     modifier: Modifier = Modifier,
 ) {
+    val textMeasurer = rememberTextMeasurer()
     Canvas(modifier = modifier.semantics { contentDescription = "Spending forecast" }) {
         val gridColor = MockSurfaceBarelyAlt
-        val actualColor = MockLavenderPale
-        val forecastColor = MockWhite
-        val stroke = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+        val actualColor = MockPrimaryAlt
+        val forecastColor = MockLavenderPale
+        val actualStroke = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
+        val forecastStroke = Stroke(
+            width = 3.dp.toPx(),
+            cap = StrokeCap.Round,
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 8.dp.toPx())),
+        )
         val width = size.width
         val height = size.height
 
@@ -555,18 +565,34 @@ internal fun BurnRateChart(
                 moveTo(points.first().x, points.first().y)
                 points.drop(1).forEach { lineTo(it.x, it.y) }
             }
-            drawPath(actual, actualColor, style = stroke)
+            drawPath(actual, actualColor, style = actualStroke)
             val last = points.last()
             val forecastEndY = height - (height * 0.88f * ((running.toFloat() / todayIndex) * period.lengthInDays / maxValue)) - height * 0.06f
             val forecast = Path().apply {
                 moveTo(last.x, last.y)
                 lineTo(width, forecastEndY.coerceIn(height * 0.06f, height * 0.94f))
             }
-            drawPath(forecast, forecastColor, style = stroke)
+            drawPath(forecast, forecastColor, style = forecastStroke)
+            drawCircle(
+                color = MockWhite,
+                radius = 6.5.dp.toPx(),
+                center = last,
+            )
             drawCircle(
                 color = MockPrimaryAlt,
                 radius = 5.dp.toPx(),
                 center = last,
+            )
+            val label = textMeasurer.measure(
+                AnnotatedString("forecast"),
+                style = TextStyle(color = MockNeutral, fontSize = 12.sp, fontWeight = FontWeight.Bold),
+            )
+            drawText(
+                textLayoutResult = label,
+                topLeft = Offset(
+                    x = (last.x + 10.dp.toPx()).coerceAtMost(width - label.size.width),
+                    y = (last.y - label.size.height - 18.dp.toPx()).coerceAtLeast(0f),
+                ),
             )
         }
     }

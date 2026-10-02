@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -54,6 +56,8 @@ import com.budgetapp.app.ui.theme.MockMaterialSurface
 import com.budgetapp.app.ui.theme.MockNeutral
 import com.budgetapp.app.ui.theme.MockPanel
 import com.budgetapp.app.ui.theme.MockPrimaryAlt
+import com.budgetapp.app.ui.theme.MockPrimaryDeep
+import com.budgetapp.app.ui.theme.MockPrimaryWash
 import com.budgetapp.app.ui.theme.MockPrimaryLight
 import com.budgetapp.app.ui.theme.MockSurface
 import com.budgetapp.app.ui.theme.MockSurfaceDeep
@@ -236,25 +240,43 @@ private fun PeriodTabs() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .border(0.dp, MockBorderDeep)
-            .padding(bottom = 16.dp),
+            .padding(bottom = 16.dp)
+            // ANALYTICS-FULL.html gives the tab row a 1px rgba(255,255,255,0.07) bottom border.
+            .drawBehind {
+                drawLine(
+                    color = MockWhite.copy(alpha = 0.07f),
+                    start = Offset(0f, size.height),
+                    end = Offset(size.width, size.height),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        listOf("This Month", "3 Months", "Year").forEachIndexed { index, label ->
+        // Only the current period is available. Leave the other labels visible without
+        // styling or click targets that would make them look interactive.
+        listOf("This Month" to true, "3 Months" to false, "Year" to false).forEach { (label, isActive) ->
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(41.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(if (index == 0) MockSurfaceMuted else MockSurface)
-                    .border(1.dp, if (index == 0) MockBorderDeep else MockSurface, RoundedCornerShape(99.dp)),
+                    .then(
+                        if (isActive) {
+                            Modifier
+                                .background(MockSurfaceMuted)
+                                .border(1.dp, MockBorderDeep, RoundedCornerShape(99.dp))
+                        } else {
+                            Modifier.semantics { disabled() }
+                        },
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = label,
-                    color = if (index == 0) MockWhite else MockTextTertiary,
+                    color = if (isActive) MockWhite else MockTextSecondary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
             }
         }

@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 data class BudgetPeriod(
     val start: LocalDate,
@@ -27,8 +26,17 @@ fun ProfileSettings.currencySymbol(): String =
 
 fun ProfileSettings.formatMoney(cents: Long): String {
     val sign = if (cents < 0L) "-" else ""
-    val rounded = abs(cents / 100.0).roundToInt()
-    return "$sign${currencySymbol()}${"%,d".format(Locale.US, rounded)}"
+    val absolute = abs(cents)
+    val whole = "%,d".format(Locale.US, absolute / 100)
+    val remainder = absolute % 100
+    val fraction = if (remainder == 0L) "" else ".%02d".format(Locale.US, remainder)
+    val symbol = currencySymbol()
+    // Show cents only when the amount has a fractional part.
+    return if (symbol == "zł") {
+        "$sign$whole$fraction $symbol"
+    } else {
+        "$sign$symbol$whole$fraction"
+    }
 }
 
 fun ProfileSettings.formatDate(date: LocalDate): String =

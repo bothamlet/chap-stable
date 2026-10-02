@@ -14,8 +14,20 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY postedAtMillis DESC, id DESC")
     fun observeTransactions(): Flow<List<TransactionEntity>>
 
-    @Query("SELECT * FROM transactions WHERE envelopeId = :envelopeId ORDER BY postedAtMillis DESC, id DESC")
-    fun observeTransactionsForEnvelope(envelopeId: Long): Flow<List<TransactionEntity>>
+    @Query(
+        """
+        SELECT * FROM transactions
+        WHERE envelopeId = :envelopeId
+            AND postedAtMillis >= :periodStartMillis
+            AND postedAtMillis < :periodEndMillis
+        ORDER BY postedAtMillis DESC, id DESC
+        """,
+    )
+    fun observeTransactionsForEnvelopeInPeriod(
+        envelopeId: Long,
+        periodStartMillis: Long,
+        periodEndMillis: Long,
+    ): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE envelopeId IS NULL ORDER BY postedAtMillis DESC, id DESC")
     fun observeInbox(): Flow<List<TransactionEntity>>

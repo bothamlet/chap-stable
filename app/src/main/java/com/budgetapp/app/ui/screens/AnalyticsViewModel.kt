@@ -7,6 +7,8 @@ import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.repository.BudgetRepository
+import com.budgetapp.app.domain.BudgetPeriod
+import com.budgetapp.app.domain.budgetPeriod
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine

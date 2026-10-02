@@ -55,12 +55,22 @@ interface BudgetDao {
             ) AS spentCents
         FROM envelopes
         LEFT JOIN transactions ON transactions.envelopeId = envelopes.id
+            AND (
+                envelopes.type = 'goal'
+                OR (
+                    transactions.postedAtMillis >= :periodStartMillis
+                    AND transactions.postedAtMillis < :periodEndMillis
+                )
+            )
         WHERE envelopes.isArchived = 0
         GROUP BY envelopes.id
         ORDER BY envelopes.sortOrder ASC, envelopes.name ASC
         """,
     )
-    fun observeEnvelopeBalances(): Flow<List<EnvelopeBalance>>
+    fun observeEnvelopeBalances(
+        periodStartMillis: Long,
+        periodEndMillis: Long,
+    ): Flow<List<EnvelopeBalance>>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertEnvelope(envelope: EnvelopeEntity): Long

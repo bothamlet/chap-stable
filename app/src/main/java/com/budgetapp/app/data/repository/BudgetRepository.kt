@@ -18,6 +18,7 @@ import com.budgetapp.app.data.entity.CategorizationRuleEntity
 import com.budgetapp.app.data.entity.EnvelopeEntity
 import com.budgetapp.app.data.entity.ImportBatchEntity
 import com.budgetapp.app.data.entity.TransactionEntity
+import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.ImportResult
 import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
@@ -25,9 +26,13 @@ import com.budgetapp.app.data.model.RuleMatchField
 import com.budgetapp.app.data.model.TransactionStatus
 import com.budgetapp.app.data.model.toEnvelopeType
 import com.budgetapp.app.domain.CategorizationEngine
+import com.budgetapp.app.domain.budgetPeriod
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
@@ -62,12 +67,30 @@ class BudgetRepository(
 
     fun observeActiveEnvelopes() = budgetDao.observeActiveEnvelopes()
 
-    fun observeEnvelopeBalances() = budgetDao.observeEnvelopeBalances()
+    /**
+     * Envelope balances for the current budget period. Goal envelopes accumulate savings across
+     * periods, everything else resets when the period rolls over.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observeEnvelopeBalances(): Flow<List<EnvelopeBalance>> =
+        profileSettings.flatMapLatest { settings ->
+            val period = settings.budgetPeriod()
+            budgetDao.observeEnvelopeBalances(period.startMillis(), period.endExclusiveMillis())
+        }
 
     fun observeTransactions() = transactionDao.observeTransactions()
 
-    fun observeTransactionsForEnvelope(envelopeId: Long) =
-        transactionDao.observeTransactionsForEnvelope(envelopeId)
+    /** Transactions of one envelope inside the current budget period, newest first. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun observePeriodTransactionsForEnvelope(envelopeId: Long): Flow<List<TransactionEntity>> =
+        profileSettings.flatMapLatest { settings ->
+            val period = settings.budgetPeriod()
+            transactionDao.observeTransactionsForEnvelopeInPeriod(
+                envelopeId = envelopeId,
+                periodStartMillis = period.startMillis(),
+                periodEndMillis = period.endExclusiveMillis(),
+            )
+        }
 
     fun observeInbox() = transactionDao.observeInbox()
 

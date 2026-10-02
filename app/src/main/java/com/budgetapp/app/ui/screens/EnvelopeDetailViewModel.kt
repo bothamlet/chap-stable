@@ -7,10 +7,14 @@ import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.repository.BudgetRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -52,22 +56,28 @@ data class DetailAddTransactionEditorState(
     val amountError: Boolean = hasSubmitted && amountText.toDetailCentsOrNull() == null
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class EnvelopeDetailViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
     private val envelopeId = MutableStateFlow<Long?>(null)
 
+    private val periodTransactions: Flow<List<TransactionEntity>> =
+        envelopeId.flatMapLatest { id ->
+            if (id == null) flowOf(emptyList()) else repository.observePeriodTransactionsForEnvelope(id)
+        }
+
     val state: StateFlow<EnvelopeDetailState> =
         combine(
             envelopeId,
             repository.observeEnvelopeBalances(),
-            repository.observeTransactions(),
+            periodTransactions,
             repository.observeProfileSettings(),
         ) { id, envelopes, transactions, profileSettings ->
             EnvelopeDetailState(
                 envelope = envelopes.firstOrNull { it.id == id },
                 envelopes = envelopes,
-                transactions = transactions.filter { it.envelopeId == id },
+                transactions = transactions,
                 profileSettings = profileSettings,
             )
         }.stateIn(

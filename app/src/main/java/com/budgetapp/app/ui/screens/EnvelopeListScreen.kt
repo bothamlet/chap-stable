@@ -96,6 +96,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import com.budgetapp.app.ui.theme.MockLavenderTint
 import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.ui.theme.MockSurfacePale
 import kotlinx.coroutines.delay
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.EaseOut
@@ -448,9 +449,9 @@ internal fun SummaryCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
             .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(20.dp))
+            .border(1.dp, MockSurfacePale, RoundedCornerShape(22.dp))
             .padding(horizontal = 22.dp, vertical = 20.dp),
     ) {
         Row(
@@ -473,7 +474,7 @@ internal fun SummaryCard(
                 )
                 Text(
                     text = profileSettings.formatMoney(remaining),
-                    color = MockInk,
+                    color = MockPrimaryAlt,
                     fontSize = 32.sp,
                     lineHeight = 32.sp,
                     fontWeight = FontWeight.Bold,

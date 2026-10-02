@@ -23,9 +23,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,8 +80,8 @@ fun ReviewInboxScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
-    val selectedEnvelopeIds = remember { mutableStateMapOf<String, Long>() }
-    val ruleToggles = remember { mutableStateMapOf<String, Boolean>() }
+    var selectedEnvelopeIds by rememberSaveable { mutableStateOf(emptyMap<String, Long>()) }
+    var ruleToggles by rememberSaveable { mutableStateOf(emptyMap<String, Boolean>()) }
 
     if (state.groups.isEmpty()) {
         InboxEmptyScreen(onBack = onBack, modifier = modifier)
@@ -90,8 +92,8 @@ fun ReviewInboxScreen(
                 selectedEnvelopeIds[group.key] ?: state.envelopes.firstOrNull()?.id
             },
             isRuleEnabled = { group -> ruleToggles[group.key] ?: true },
-            onEnvelopeSelected = { group, envelopeId -> selectedEnvelopeIds[group.key] = envelopeId },
-            onRuleToggle = { group -> ruleToggles[group.key] = !(ruleToggles[group.key] ?: true) },
+            onEnvelopeSelected = { group, envelopeId -> selectedEnvelopeIds = selectedEnvelopeIds + (group.key to envelopeId) },
+            onRuleToggle = { group -> ruleToggles = ruleToggles + (group.key to !(ruleToggles[group.key] ?: true)) },
             onAssign = { group, envelopeId ->
                 viewModel.assignGroup(
                     group = group,

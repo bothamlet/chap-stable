@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,13 +90,13 @@ fun ProfileScreen(
     val persistedSettings by viewModel.settings.collectAsState()
     val context = LocalContext.current
     val externalActivityCoordinator = LocalTrustedExternalActivityCoordinator.current
-    var name by remember { mutableStateOf(persistedSettings.name) }
-    var avatarUri by remember { mutableStateOf(persistedSettings.avatarUri) }
-    var currency by remember { mutableStateOf(persistedSettings.currency) }
-    var dateFormat by remember { mutableStateOf(persistedSettings.dateFormat) }
-    var firstDayOfWeek by remember { mutableStateOf(persistedSettings.firstDayOfWeek) }
-    var monthStartDay by remember { mutableStateOf(persistedSettings.monthStartDay) }
-    var isSaved by remember { mutableStateOf(false) }
+    var name by rememberSaveable { mutableStateOf(persistedSettings.name) }
+    var avatarUri by rememberSaveable { mutableStateOf(persistedSettings.avatarUri) }
+    var currency by rememberSaveable { mutableStateOf(persistedSettings.currency) }
+    var dateFormat by rememberSaveable { mutableStateOf(persistedSettings.dateFormat) }
+    var firstDayOfWeek by rememberSaveable { mutableStateOf(persistedSettings.firstDayOfWeek) }
+    var monthStartDay by rememberSaveable { mutableStateOf(persistedSettings.monthStartDay) }
+    var isSaved by rememberSaveable { mutableStateOf(false) }
     val avatarLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         externalActivityCoordinator.end()
         if (uri != null) {
@@ -108,15 +109,9 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(persistedSettings) {
-        name = persistedSettings.name
-        avatarUri = persistedSettings.avatarUri
-        currency = persistedSettings.currency
-        dateFormat = persistedSettings.dateFormat
-        firstDayOfWeek = persistedSettings.firstDayOfWeek
-        monthStartDay = persistedSettings.monthStartDay
-        isSaved = false
-    }
+    // No LaunchedEffect syncing the form from persistedSettings here: the repository reads the
+    // stored values once at startup, so the fields below are already seeded from them, and an
+    // effect keyed on the flow would overwrite in-progress edits (including after a rotation).
 
     Column(
         modifier =

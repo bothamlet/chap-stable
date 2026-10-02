@@ -43,6 +43,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,17 +97,35 @@ import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
+private val EnvelopeEditorStateSaver: Saver<EnvelopeEditorState?, List<Any?>> =
+    Saver(
+        save = { editor ->
+            editor?.let {
+                arrayListOf<Any?>(it.envelopeId, it.name, it.amountText, it.iconToken, it.type, it.isDeleteConfirming)
+            }
+        },
+        restore = { saved ->
+            EnvelopeEditorState(
+                envelopeId = saved[0] as? Long,
+                name = saved[1] as String,
+                amountText = saved[2] as String,
+                iconToken = saved[3] as String,
+                type = saved[4] as String,
+                isDeleteConfirming = saved[5] as Boolean,
+            )
+        },
+    )
+
 @Composable
-fun EnvelopeManagementScreen(
-    viewModel: EnvelopeManagementViewModel,
+fun EnvelopeManagementScreen(    viewModel: EnvelopeManagementViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     createRequestKey: Int = 0,
     onModalVisibleChange: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
-    var editor by remember { mutableStateOf<EnvelopeEditorState?>(null) }
-    var handledCreateRequestKey by remember { mutableIntStateOf(createRequestKey) }
+    var editor by rememberSaveable(stateSaver = EnvelopeEditorStateSaver) { mutableStateOf<EnvelopeEditorState?>(null) }
+    var handledCreateRequestKey by rememberSaveable { mutableIntStateOf(createRequestKey) }
 
     LaunchedEffect(createRequestKey) {
         if (createRequestKey > handledCreateRequestKey) {

@@ -228,7 +228,7 @@ internal fun EmptyEnvelopeManagement(
     onBack: () -> Unit,
     onCreate: () -> Unit,
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
@@ -241,8 +241,8 @@ internal fun EmptyEnvelopeManagement(
         )
         StandardEmptyStateViewport(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+                .fillMaxSize(),
+            horizontalPadding = 0.dp,
         ) {
             StandardEmptyState(
                 title = "No envelopes yet",

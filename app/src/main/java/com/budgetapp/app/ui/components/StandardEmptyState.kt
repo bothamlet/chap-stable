@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -69,7 +70,7 @@ fun StandardEmptyState(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 5.dp)
-                    .height(56.dp),
+                    .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MockPrimaryAlt,
@@ -90,15 +91,16 @@ fun StandardEmptyState(
 fun StandardEmptyStateViewport(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = 32.dp,
-    bottomPadding: Dp = 132.dp,
-    verticalOffset: Dp = 19.dp,
+    bottomPadding: Dp = 118.dp,
+    topPadding: Dp = 138.dp,
+    verticalOffset: Dp = 0.dp,
     content: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = horizontalPadding)
-            .padding(bottom = bottomPadding),
+            .padding(top = topPadding, bottom = bottomPadding),
         contentAlignment = Alignment.Center,
     ) {
         Column(

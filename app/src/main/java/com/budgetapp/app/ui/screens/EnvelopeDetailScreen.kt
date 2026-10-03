@@ -266,7 +266,11 @@ internal fun EnvelopeDetailContent(
                     state.spentCents == 0L -> "${state.profileSettings.formatMoney(0)} spent"
                     else -> state.profileSettings.remainingLabel(state.remainingCents)
                 },
-                color = if (state.spentCents == 0L) MockTextLightMuted else MockPrimaryGlowAlt,
+                color = when {
+                    state.remainingCents < 0L -> MockDanger
+                    state.spentCents == 0L -> MockTextLightMuted
+                    else -> MockPrimaryGlowAlt
+                },
                 fontSize = 41.sp,
                 lineHeight = 42.sp,
                 fontWeight = FontWeight.Bold,

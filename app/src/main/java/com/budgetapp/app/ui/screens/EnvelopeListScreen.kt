@@ -55,6 +55,7 @@ import com.budgetapp.app.domain.toDatePickerMillis
 import com.budgetapp.app.domain.toDatePickerDate
 import com.budgetapp.app.domain.budgetPeriod
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
+import com.budgetapp.app.ui.components.StandardEmptyStateViewport
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.EnvelopePickerList
 import com.budgetapp.app.ui.theme.MockBackground
@@ -283,33 +284,22 @@ internal fun EmptyDashboard(
     onNextPeriod: () -> Unit,
     onCurrentPeriod: () -> Unit,
 ) {
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 132.dp),
-        ) {
-            HeaderBlock(
-                monthLabel = state.monthLabel,
-                dayLine = state.dayLine,
-                isCurrentPeriod = state.isCurrentPeriod,
-                canGoBack = state.canGoBack,
-                canGoForward = state.canGoForward,
-                onPreviousPeriod = onPreviousPeriod,
-                onNextPeriod = onNextPeriod,
-                onCurrentPeriod = onCurrentPeriod,
-                modifier = Modifier.padding(top = 92.dp),
-            )
-            EmptyContent(
-                onCreateEnvelope = onCreateEnvelope,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
-            )
+        HeaderBlock(
+            monthLabel = state.monthLabel,
+            dayLine = state.dayLine,
+            isCurrentPeriod = state.isCurrentPeriod,
+            canGoBack = state.canGoBack,
+            canGoForward = state.canGoForward,
+            onPreviousPeriod = onPreviousPeriod,
+            onNextPeriod = onNextPeriod,
+            onCurrentPeriod = onCurrentPeriod,
+            modifier = Modifier.padding(horizontal = 24.dp).padding(top = 92.dp),
+        )
+        StandardEmptyStateViewport(modifier = Modifier.weight(1f), topPadding = 46.dp) {
+            EmptyContent(onCreateEnvelope = onCreateEnvelope, modifier = Modifier.fillMaxWidth())
         }
     }
 }

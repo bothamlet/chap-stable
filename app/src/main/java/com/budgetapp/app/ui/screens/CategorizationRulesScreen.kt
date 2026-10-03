@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -75,6 +76,7 @@ import com.budgetapp.app.ui.theme.MockTextLightMuted
 import com.budgetapp.app.ui.theme.MockTextMutedBlue
 import com.budgetapp.app.ui.theme.MockWhite
 import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.ui.theme.MockTextTertiary
 
 @Composable
 fun CategorizationRulesScreen(
@@ -116,9 +118,9 @@ fun CategorizationRulesScreen(
             RuleEditorDrawer(
                 row = editing,
                 envelopes = state.envelopes,
-                onEnvelopeSelected = { envelopeId ->
+                onSave = { pattern, envelopeId ->
                     editing?.let { row ->
-                        viewModel.moveRule(row.rule, envelopeId) { editing = null }
+                        viewModel.saveRule(row.rule, pattern, envelopeId) { editing = null }
                     }
                 },
                 onDelete = {
@@ -369,13 +371,14 @@ private fun EnvelopePill(
 private fun RuleEditorDrawer(
     row: RuleRow?,
     envelopes: List<EnvelopeBalance>,
-    onEnvelopeSelected: (Long) -> Unit,
+    onSave: (String, Long) -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (row == null) return
 
     var selectedEnvelopeId by remember(row.rule.id) { mutableLongStateOf(row.rule.envelopeId) }
+    var pattern by rememberSaveable(row.rule.id) { mutableStateOf(row.rule.pattern) }
     var isDeleteConfirming by remember(row.rule.id) { mutableStateOf(false) }
 
     Column(
@@ -414,13 +417,58 @@ private fun RuleEditorDrawer(
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            text = "${row.rule.pattern} will be assigned automatically.",
+            text = "Match any transaction whose merchant or description contains this text.",
             color = MockNeutral,
             fontSize = 15.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.fillMaxWidth(),
         )
+        Spacer(modifier = Modifier.height(14.dp))
+        Text(
+            text = "MATCH TEXT",
+            color = MockNeutral,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 0.96.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(7.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MockWhiteSoft)
+                .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+                .padding(horizontal = 14.dp),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            BasicTextField(
+                value = pattern,
+                onValueChange = { pattern = it },
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = MockMaterialSurface,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { inner ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (pattern.isBlank()) {
+                            Text(
+                                text = row.rule.pattern,
+                                color = MockTextTertiary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                            )
+                        }
+                        inner()
+                    }
+                },
+            )
+        }
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = "ENVELOPE",
@@ -439,7 +487,7 @@ private fun RuleEditorDrawer(
         )
         Spacer(modifier = Modifier.height(18.dp))
         Button(
-            onClick = { onEnvelopeSelected(selectedEnvelopeId) },
+            onClick = { onSave(pattern, selectedEnvelopeId) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

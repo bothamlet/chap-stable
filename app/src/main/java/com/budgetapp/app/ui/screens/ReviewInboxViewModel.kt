@@ -57,10 +57,13 @@ class ReviewInboxViewModel(
             group.transactionIds.forEach { transactionId ->
                 repository.assignTransactionToEnvelope(transactionId, envelopeId)
             }
-            if (createRule) {
+            val pattern = group.title.toInboxRulePattern()
+            // A blank pattern would match every future row (contains("") is always true), so a
+            // merchant name with no word characters simply creates no rule.
+            if (createRule && pattern.isNotBlank()) {
                 runCatching {
                     repository.createRule(
-                        pattern = group.title.toInboxRulePattern(),
+                        pattern = pattern,
                         envelopeId = envelopeId,
                     )
                 }
@@ -84,9 +87,13 @@ private fun List<TransactionEntity>.toInboxGroups(): List<InboxTransactionGroup>
         )
     }.sortedByDescending { it.postedAtMillis }
 
-private fun String.toInboxRulePattern(): String =
-    trim()
-        .split(Regex("\\s+"))
-        .firstOrNull()
-        .orEmpty()
-        .ifBlank { trim() }
+/**
+ * Rule text derived from a merchant name. The first word is enough, but it has to lose its
+ * punctuation: "Coffee, large" used to produce the pattern "Coffee," which then only matched rows
+ * that also contained a comma, so sibling merchants kept landing in the inbox.
+ */
+internal fun String.toInboxRulePattern(): String {
+    val firstWord = trim().split(Regex("\\s+")).firstOrNull().orEmpty()
+    val cleaned = firstWord.trim { !it.isLetterOrDigit() }
+    return cleaned.ifBlank { trim().trim { !it.isLetterOrDigit() } }
+}

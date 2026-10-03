@@ -482,10 +482,6 @@ private fun List<TransactionEntity>.toInboxGroups(): List<InboxTransactionGroup>
     }.sortedByDescending { it.postedAtMillis }
 }
 
-private fun String.toInboxRulePattern(): String {
-    return trim().split(Regex("\\s+")).firstOrNull().orEmpty().ifBlank { trim() }
-}
-
 private fun Long.toInboxDateLabel(profileSettings: ProfileSettings): String {
     val date = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
     return if (date == LocalDate.now()) {

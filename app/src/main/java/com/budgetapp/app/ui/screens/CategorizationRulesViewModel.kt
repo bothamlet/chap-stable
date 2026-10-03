@@ -67,13 +67,18 @@ class CategorizationRulesViewModel(
         query.value = value
     }
 
-    fun moveRule(
+    fun saveRule(
         rule: CategorizationRuleEntity,
+        pattern: String,
         envelopeId: Long,
         onDone: () -> Unit,
     ) {
+        val cleaned = pattern.trim()
+        if (cleaned.isBlank()) {
+            return
+        }
         viewModelScope.launch {
-            repository.updateRule(rule.copy(envelopeId = envelopeId))
+            repository.updateRule(rule.copy(pattern = cleaned, envelopeId = envelopeId))
             onDone()
         }
     }

@@ -195,7 +195,10 @@ class BudgetRepository(
     suspend fun createEnvelope(
         name: String,
         ceilingCents: Long,
-        colorToken: String,
+        // The colour token survives from the ported data layer and the backup format, but the
+        // mocks render every envelope in the accent colour and no screen reads it, so new
+        // envelopes get the default instead of whatever the editor happened to hold.
+        colorToken: String = DefaultColorToken,
         type: String = EnvelopeType.Variable,
         iconToken: String = "wallet",
     ): Long {
@@ -679,6 +682,7 @@ class BudgetRepository(
 
     private companion object {
         const val DatabaseBackupVersion = 3
+        const val DefaultColorToken = "accent"
         const val ProfileNameKey = "profile_name"
         const val ProfileAvatarUriKey = "profile_avatar_uri"
         const val ProfileCurrencyKey = "profile_currency"

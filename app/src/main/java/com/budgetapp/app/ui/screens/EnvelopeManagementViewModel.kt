@@ -94,7 +94,6 @@ class EnvelopeManagementViewModel(
                     repository.createEnvelope(
                         name = name,
                         ceilingCents = amountCents,
-                        colorToken = editor.type,
                         type = editor.type,
                         iconToken = editor.iconToken,
                     )
@@ -108,7 +107,6 @@ class EnvelopeManagementViewModel(
                             current.copy(
                                 name = name,
                                 ceilingCents = amountCents,
-                                colorToken = editor.type,
                                 iconToken = editor.iconToken,
                                 type = editor.type.toEnvelopeType(),
                             ),

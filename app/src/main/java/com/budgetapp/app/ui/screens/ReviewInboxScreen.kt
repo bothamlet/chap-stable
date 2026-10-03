@@ -2,6 +2,9 @@ package com.budgetapp.app.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -344,6 +347,7 @@ private fun InboxChip(
             .background(if (selected) MockPrimaryAlt else MockSurfaceTintAlt)
             .border(1.dp, if (selected) MockPrimaryAlt.copy(alpha = 0.35f) else MockSurfaceLight, RoundedCornerShape(99.dp))
             .clickable(onClick = onClick)
+            .heightIn(min = 48.dp)
             .padding(horizontal = 13.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
@@ -361,23 +365,37 @@ private fun InboxChip(
 private fun InboxSwitch(
     checked: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    // The visual track stays 54x32dp, but the touch target and the semantics are a real switch:
+    // TalkBack needs the checked state (INBOX.html uses role="switch" aria-checked) and the
+    // interactive area needs to be at least 48dp tall.
     Box(
-        modifier = Modifier
-            .size(width = 54.dp, height = 32.dp)
-            .clip(RoundedCornerShape(99.dp))
-            .background(if (checked) MockPurplePale else MockSurfaceBarely)
-            .clickable(onClick = onClick)
-            .padding(4.dp)
-            .semantics { contentDescription = "Always assign rule" },
-        contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
+        modifier = modifier
+            .heightIn(min = 48.dp)
+            .toggleable(
+                value = checked,
+                role = Role.Switch,
+                onValueChange = { onClick() },
+            )
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(if (checked) MockPrimaryBright else MockNeutral),
-        )
+                .size(width = 54.dp, height = 32.dp)
+                .clip(RoundedCornerShape(99.dp))
+                .background(if (checked) MockPurplePale else MockSurfaceBarely)
+                .padding(4.dp),
+            contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(if (checked) MockPrimaryBright else MockNeutral),
+            )
+        }
     }
 }
 

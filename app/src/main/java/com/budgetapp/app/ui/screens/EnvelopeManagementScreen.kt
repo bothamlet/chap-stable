@@ -200,6 +200,7 @@ internal fun EnvelopeManagementContent(
             )
             EnvelopeEditorDrawer(
                 editor = editor,
+                errorMessage = state.errorMessage,
                 profileSettings = state.profileSettings,
                 onEditorChange = onEditorChange,
                 onSave = onSave,
@@ -539,6 +540,7 @@ internal fun EnvelopeManagementCard(
 @Composable
 internal fun EnvelopeEditorDrawer(
     editor: EnvelopeEditorState,
+    errorMessage: String?,
     profileSettings: ProfileSettings,
     onEditorChange: (EnvelopeEditorState) -> Unit,
     onSave: (EnvelopeEditorState) -> Unit,
@@ -645,6 +647,7 @@ internal fun EnvelopeEditorDrawer(
         } else {
             EnvelopeEditorForm(
                 editor = editor,
+                errorMessage = errorMessage,
                 profileSettings = profileSettings,
                 onEditorChange = onEditorChange,
                 onSave = onSave,
@@ -656,6 +659,7 @@ internal fun EnvelopeEditorDrawer(
 @Composable
 internal fun EnvelopeEditorForm(
     editor: EnvelopeEditorState,
+    errorMessage: String?,
     profileSettings: ProfileSettings,
     onEditorChange: (EnvelopeEditorState) -> Unit,
     onSave: (EnvelopeEditorState) -> Unit,
@@ -699,6 +703,17 @@ internal fun EnvelopeEditorForm(
             SegmentedTypeControl(
                 selectedType = editor.type,
                 onSelected = { onEditorChange(editor.copy(type = it)) },
+            )
+        }
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = errorMessage,
+                color = MockDanger,
+                fontSize = 14.sp,
+                lineHeight = 19.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         Spacer(modifier = Modifier.height(19.dp))

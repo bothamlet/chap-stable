@@ -203,6 +203,24 @@ class BudgetRepository(
         iconToken: String = "wallet",
     ): Long {
         val now = now()
+        val trimmedName = name.trim()
+        // The unique name index covers archived rows too, and archiving is one-way, so a name the
+        // user has deleted is still taken. Reuse that row instead of failing the constraint: the
+        // user is asking for an envelope with this name and these numbers.
+        val archived = budgetDao.getAllEnvelopes().firstOrNull { it.name == trimmedName && it.isArchived }
+        if (archived != null) {
+            budgetDao.updateEnvelope(
+                archived.copy(
+                    ceilingCents = ceilingCents,
+                    colorToken = colorToken,
+                    iconToken = iconToken,
+                    type = type,
+                    isArchived = false,
+                    updatedAtMillis = now,
+                ),
+            )
+            return archived.id
+        }
         val sortOrder = budgetDao.getActiveEnvelopes().size
         return budgetDao.insertEnvelope(
             EnvelopeEntity(

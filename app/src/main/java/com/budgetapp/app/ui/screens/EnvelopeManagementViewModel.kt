@@ -8,6 +8,7 @@ import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.model.toEnvelopeType
 import com.budgetapp.app.data.repository.BudgetRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -50,12 +51,15 @@ data class EnvelopeEditorState(
 class EnvelopeManagementViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    private val errorMessage = MutableStateFlow<String?>(null)
+
     val state: StateFlow<EnvelopeManagementState> =
         combine(
             repository.observeActiveEnvelopes(),
             repository.observeEnvelopeBalances(),
             repository.observeProfileSettings(),
-        ) { entities, balances, profileSettings ->
+            errorMessage,
+        ) { entities, balances, profileSettings, error ->
             val byId = balances.associateBy { it.id }
             EnvelopeManagementState(
                 envelopes =
@@ -71,6 +75,7 @@ class EnvelopeManagementViewModel(
                         )
                     },
                 profileSettings = profileSettings,
+                errorMessage = error,
             )
         }.stateIn(
             scope = viewModelScope,
@@ -89,6 +94,7 @@ class EnvelopeManagementViewModel(
         }
 
         viewModelScope.launch {
+            errorMessage.value = null
             try {
                 if (editor.envelopeId == null) {
                     repository.createEnvelope(
@@ -115,7 +121,8 @@ class EnvelopeManagementViewModel(
                 }
                 onClose()
             } catch (_: SQLiteConstraintException) {
-                // Keep the drawer open; duplicate names are blocked by Room.
+                // Keep the drawer open and say why, instead of silently doing nothing.
+                errorMessage.value = "An envelope named \"$name\" already exists."
             }
         }
     }

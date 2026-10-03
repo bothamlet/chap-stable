@@ -69,6 +69,49 @@ class CsvParserTest {
         ).map { it.externalId })
     }
 
+    @Test
+    fun parseReadsEuropeanAndUsAmountGrouping() {
+        // "1.234,56" used to be read as 123 cents because the comma was stripped unconditionally.
+        assertEquals(123456, amountOf("1.234,56"))
+        assertEquals(123456, amountOf("1,234.56"))
+        assertEquals(123456, amountOf("1234.56"))
+        assertEquals(123456, amountOf("1 234,56"))
+        // A lone separator followed by three digits is a thousands group, not a decimal point.
+        assertEquals(123400, amountOf("1,234"))
+        assertEquals(123400, amountOf("1.234"))
+        assertEquals(1250, amountOf("12,5"))
+        assertEquals(5, amountOf("0,05"))
+    }
+
+    @Test
+    fun externalIdsAreSha256OnEveryPath() {
+        val withSourceId = parser.parse(bankCsv()).first()
+        val withoutSourceId =
+            parser.parseMapped(
+                content = "date;description;amount\n2026-06-10;Coffee;-12,50",
+                hasHeader = true,
+                dateIndex = 0,
+                descriptionIndex = 1,
+                amountIndex = 2,
+            ).first()
+
+        assertEquals(64, withSourceId.externalId.length)
+        assertEquals(64, withoutSourceId.externalId.length)
+        assertEquals(withSourceId.externalId, parser.parse(bankCsv()).first().externalId)
+    }
+
+    private fun amountOf(rawAmount: String): Long {
+        val rows =
+            parser.parseMapped(
+                content = "date;description;amount\n2026-06-10;Coffee;$rawAmount",
+                hasHeader = true,
+                dateIndex = 0,
+                descriptionIndex = 1,
+                amountIndex = 2,
+            )
+        return rows.single().amountCents
+    }
+
     private fun bankCsv(reversed: Boolean = false): String {
         val header = """
             "SASKAITOS ISRASAS";

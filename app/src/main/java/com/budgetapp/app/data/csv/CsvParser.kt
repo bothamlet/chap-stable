@@ -182,11 +182,7 @@ class CsvParser {
             .replace("\u00a0", "")
             .replace(" ", "")
             .trim()
-        val normalized = if (stripped.contains(',') && !stripped.contains('.')) {
-            stripped.replace(',', '.')
-        } else {
-            stripped.replace(",", "")
-        }
+        val normalized = normalizeAmount(stripped)
         val cents = (normalized.toBigDecimal() * 100.toBigDecimal()).toLong()
         val sign = when (debitCredit?.lowercase(Locale.US)) {
             "d", "debetas", "debit" -> -1L
@@ -194,6 +190,26 @@ class CsvParser {
             else -> if (cents < 0L) -1L else 1L
         }
         return kotlin.math.abs(cents) * sign
+    }
+
+    /**
+     * Money in CSV files is written both as "1.234,56" (European) and "1,234.56" (US), and some
+     * exports use a lone separator for thousands ("1,234"). Treating the last separator as the
+     * decimal point when it is followed by one or two digits covers every case; a longer trailing
+     * group is a thousands separator. Getting this wrong multiplies or divides the amount by 1000.
+     */
+    private fun normalizeAmount(value: String): String {
+        val digits = value.filter { it.isDigit() || it == '-' }
+        val separatorIndex = maxOf(value.lastIndexOf(','), value.lastIndexOf('.'))
+        if (separatorIndex == -1) {
+            return digits
+        }
+        val fraction = value.substring(separatorIndex + 1).filter { it.isDigit() }
+        if (fraction.length !in 1..2) {
+            return digits
+        }
+        val whole = value.substring(0, separatorIndex).filter { it.isDigit() || it == '-' }
+        return "$whole.${fraction.padEnd(2, '0')}"
     }
 
     private fun stableExternalId(
@@ -207,11 +223,9 @@ class CsvParser {
     ): String {
         val normalizedSourceId = sourceExternalId?.trim()?.lowercase(Locale.US)
         if (normalizedSourceId != null && sourceOccurrence == 0) {
-            return listOf("source", normalizedSourceId, postedAtMillis, amountCents)
-                .joinToString("|")
-                .hashCode()
-                .toUInt()
-                .toString(16)
+            return sha256(
+                listOf("source", normalizedSourceId, postedAtMillis, amountCents).joinToString("|"),
+            )
         }
         if (normalizedSourceId != null) {
             return sha256(
@@ -225,11 +239,10 @@ class CsvParser {
                 ).joinToString("|"),
             )
         }
-        return listOf("row", rowIndex, postedAtMillis, description.trim().lowercase(Locale.US), amountCents)
-            .joinToString("|")
-            .hashCode()
-            .toUInt()
-            .toString(16)
+        return sha256(
+            listOf("row", rowIndex, postedAtMillis, description.trim().lowercase(Locale.US), amountCents)
+                .joinToString("|"),
+        )
     }
 
     private fun normalizedRow(row: List<String>): String =

@@ -323,6 +323,50 @@ class BudgetRepository(
         )
     }
 
+    /**
+     * Splits one transaction across two envelopes: the original row is replaced by two rows that sum
+     * to the same amount, the first in [firstEnvelopeId] and the remainder in the original envelope.
+     * The first part keeps the original external id so re-importing the source file still skips it.
+     */
+    suspend fun splitTransaction(
+        transaction: TransactionEntity,
+        firstEnvelopeId: Long,
+        firstAmountCents: Long,
+        secondEnvelopeId: Long?,
+    ) {
+        val total = kotlin.math.abs(transaction.amountCents)
+        require(firstAmountCents > 0L && firstAmountCents < total) {
+            "Split amount must be smaller than the transaction."
+        }
+        require(firstEnvelopeId != secondEnvelopeId) {
+            "The two parts must go to different envelopes."
+        }
+        val remainder = total - firstAmountCents
+        val now = now()
+        database.withTransaction {
+            transactionDao.deleteById(transaction.id)
+            transactionDao.insert(
+                transaction.copy(
+                    id = 0,
+                    envelopeId = firstEnvelopeId,
+                    amountCents = firstAmountCents.withEnvelopeSign(firstEnvelopeId),
+                    updatedAtMillis = now,
+                ),
+            )
+            transactionDao.insert(
+                transaction.copy(
+                    id = 0,
+                    envelopeId = secondEnvelopeId,
+                    amountCents = secondEnvelopeId
+                        ?.let { remainder.withEnvelopeSign(it) }
+                        ?: -remainder,
+                    externalId = null,
+                    updatedAtMillis = now,
+                ),
+            )
+        }
+    }
+
     suspend fun updateTransaction(transaction: TransactionEntity) {
         transactionDao.update(transaction.copy(updatedAtMillis = now()))
     }

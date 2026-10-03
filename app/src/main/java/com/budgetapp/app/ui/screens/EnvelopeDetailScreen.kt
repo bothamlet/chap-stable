@@ -181,9 +181,11 @@ fun EnvelopeDetailScreen(
             TransactionEditorDrawer(
                 editor = editor,
                 envelopes = state.envelopes,
+                profileSettings = state.profileSettings,
                 onEditorChange = { editor = it },
                 onSave = { current -> viewModel.saveTransaction(current) { editor = null } },
                 onDelete = { id -> viewModel.deleteTransaction(id) { editor = null } },
+                onSplit = { current -> viewModel.splitTransaction(current) { editor = null } },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .pointerInput(Unit) {
@@ -498,9 +500,11 @@ internal fun TransactionCard(
 internal fun TransactionEditorDrawer(
     editor: TransactionEditorState?,
     envelopes: List<EnvelopeBalance>,
+    profileSettings: ProfileSettings,
     onEditorChange: (TransactionEditorState) -> Unit,
     onSave: (TransactionEditorState) -> Unit,
     onDelete: (Long) -> Unit,
+    onSplit: (TransactionEditorState) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (editor == null) return
@@ -523,13 +527,19 @@ internal fun TransactionEditorDrawer(
                 .background(MockLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
-        if (editor.isDeleteConfirming) {
-            DeleteTransactionConfirm(
+        when {
+            editor.isDeleteConfirming -> DeleteTransactionConfirm(
                 onCancel = { onEditorChange(editor.copy(isDeleteConfirming = false)) },
                 onDelete = { onDelete(editor.transaction.id) },
             )
-        } else {
-            TransactionEditorForm(
+            editor.isSplitting -> SplitTransactionForm(
+                editor = editor,
+                envelopes = envelopes,
+                profileSettings = profileSettings,
+                onEditorChange = onEditorChange,
+                onSplit = onSplit,
+            )
+            else -> TransactionEditorForm(
                 editor = editor,
                 envelopes = envelopes,
                 onEditorChange = onEditorChange,
@@ -718,6 +728,26 @@ internal fun TransactionEditorForm(
             Text("Save transaction", fontSize = 17.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Split across envelopes",
+            color = MockPrimaryAlt,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    onEditorChange(
+                        editor.copy(
+                            isSplitting = true,
+                            splitAmountText = "",
+                            splitEnvelopeId = null,
+                            hasSubmittedSplit = false,
+                        ),
+                    )
+                }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        )
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Delete transaction",
             color = MockDanger,
@@ -1038,5 +1068,100 @@ internal fun Long.toDetailMajorString(): String {
         "%d".format(Locale.US, this / 100L)
     } else {
         "%.2f".format(Locale.US, this / 100.0)
+    }
+}
+
+@Composable
+private fun SplitTransactionForm(
+    editor: TransactionEditorState,
+    envelopes: List<EnvelopeBalance>,
+    profileSettings: ProfileSettings,
+    onEditorChange: (TransactionEditorState) -> Unit,
+    onSplit: (TransactionEditorState) -> Unit,
+) {
+    val remainder = editor.splitAmountCents?.let { (editor.totalCents - it).coerceAtLeast(0L) }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Split transaction",
+            color = MockMaterialSurface,
+            fontSize = 23.sp,
+            lineHeight = 25.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "${profileSettings.formatMoney(editor.totalCents)} becomes two rows, so each envelope carries its own share.",
+            color = MockNeutral,
+            fontSize = 15.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+        DetailField("First part") {
+            DetailAmountInput(
+                value = editor.splitAmountText,
+                hasError = editor.hasSubmittedSplit && editor.splitAmountCents == null,
+                onValueChange = { value ->
+                    onEditorChange(
+                        editor.copy(
+                            splitAmountText = value.filter { it.isDigit() || it == '.' || it == ',' },
+                        ),
+                    )
+                },
+            )
+        }
+        if (editor.hasSubmittedSplit && editor.splitAmountCents != null && !editor.canSplit) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "The first part must be smaller than the total and go to a different envelope.",
+                color = MockDanger,
+                fontSize = 13.sp,
+                lineHeight = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+        DetailField("First part goes to") {
+            EnvelopePickerList(
+                envelopes = envelopes,
+                selectedId = editor.splitEnvelopeId,
+                onSelected = { onEditorChange(editor.copy(splitEnvelopeId = it)) },
+                selectedTextColor = MockPrimaryAlt,
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = remainder?.let {
+                "The remaining ${profileSettings.formatMoney(it)} stays on this envelope."
+            } ?: "The rest of the amount stays on this envelope.",
+            color = MockNeutral,
+            fontSize = 14.sp,
+            lineHeight = 19.sp,
+        )
+        Spacer(modifier = Modifier.height(19.dp))
+        Button(
+            onClick = { onSplit(editor.copy(hasSubmittedSplit = true)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MockPrimaryAlt,
+                contentColor = MockWhite,
+            ),
+        ) {
+            Text("Split transaction", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "Cancel",
+            color = MockNeutral,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clickable { onEditorChange(editor.copy(isSplitting = false)) }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        )
     }
 }

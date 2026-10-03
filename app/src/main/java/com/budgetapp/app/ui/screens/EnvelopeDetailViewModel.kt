@@ -40,7 +40,22 @@ data class TransactionEditorState(
     val date: LocalDate,
     val note: String,
     val isDeleteConfirming: Boolean = false,
-)
+    val isSplitting: Boolean = false,
+    val splitAmountText: String = "",
+    val splitEnvelopeId: Long? = null,
+    val hasSubmittedSplit: Boolean = false,
+) {
+    val totalCents: Long = abs(transaction.amountCents)
+
+    /** The first part has to leave something for the second envelope. */
+    val splitAmountCents: Long? = splitAmountText.toDetailCentsOrNull()
+
+    val canSplit: Boolean =
+        splitAmountCents != null &&
+            splitAmountCents < totalCents &&
+            splitEnvelopeId != null &&
+            splitEnvelopeId != envelopeId
+}
 
 data class DetailAddTransactionEditorState(
     val envelopeId: Long,
@@ -107,6 +122,28 @@ class EnvelopeDetailViewModel(
                 ),
             )
             onClose()
+        }
+    }
+
+    fun splitTransaction(
+        editor: TransactionEditorState,
+        onClose: () -> Unit,
+    ) {
+        if (!editor.canSplit) {
+            // The form marks itself as submitted so the reason is on screen.
+            return
+        }
+        val firstAmount = editor.splitAmountCents ?: return
+        val firstEnvelopeId = editor.splitEnvelopeId ?: return
+        viewModelScope.launch {
+            runCatching {
+                repository.splitTransaction(
+                    transaction = editor.transaction,
+                    firstEnvelopeId = firstEnvelopeId,
+                    firstAmountCents = firstAmount,
+                    secondEnvelopeId = editor.envelopeId,
+                )
+            }.onSuccess { onClose() }
         }
     }
 

@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.budgetapp.app.data.backup.EncryptedBackupCodec
 import com.budgetapp.app.data.csv.CsvParser
+import com.budgetapp.app.data.entity.TransactionEntity
 import com.budgetapp.app.data.repository.BudgetRepository
 import com.budgetapp.app.domain.CategorizationEngine
 import kotlinx.coroutines.flow.first
@@ -137,6 +138,44 @@ class BudgetRepositoryTest {
         assertEquals(0, repository.observeInbox().first().size)
         val balance = repository.observeEnvelopeBalances().first().single()
         assertEquals(1250, balance.spentCents)
+    }
+
+    @Test
+    fun splittingReplacesOneRowWithTwoThatSumToTheSameAmount() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        val household = repository.createEnvelope("Household", 20000)
+        val original = addTransaction(groceries, 4218, LocalDate.now())
+
+        repository.splitTransaction(original, household, 3000, groceries)
+
+        val rows = repository.observeTransactions().first()
+        assertEquals(2, rows.size)
+        assertEquals(4218, rows.sumOf { -it.amountCents })
+        assertEquals(3000, rows.first { it.envelopeId == household }.let { -it.amountCents })
+        assertEquals(1218, rows.first { it.envelopeId == groceries }.let { -it.amountCents })
+    }
+
+    @Test
+    fun aSplitNeedsTwoDifferentEnvelopes() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        val original = addTransaction(groceries, 1000, LocalDate.now())
+
+        val failure = runCatching { repository.splitTransaction(original, groceries, 400, groceries) }
+
+        assertTrue(failure.isFailure)
+        assertEquals(1, repository.observeTransactions().first().size)
+    }
+
+    @Test
+    fun aSplitCannotExceedTheOriginalAmount() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        val household = repository.createEnvelope("Household", 20000)
+        val original = addTransaction(groceries, 1000, LocalDate.now())
+
+        val failure = runCatching { repository.splitTransaction(original, household, 1000, groceries) }
+
+        assertTrue(failure.isFailure)
+        assertEquals(1, repository.observeTransactions().first().size)
     }
 
     // ---- envelopes -------------------------------------------------------------------------
@@ -356,14 +395,15 @@ class BudgetRepositoryTest {
             amountIndex = 2,
         )
 
-    private suspend fun addTransaction(envelopeId: Long, cents: Long, date: LocalDate) {
-        repository.createCashTransaction(
+    private suspend fun addTransaction(envelopeId: Long, cents: Long, date: LocalDate): TransactionEntity {
+        val id = repository.createCashTransaction(
             merchantName = "Test",
             amountCents = cents,
             envelopeId = envelopeId,
             postedAtMillis = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
             note = null,
         )
+        return repository.observeTransactions().first().first { it.id == id }
     }
 
     private fun expenseCsv(vararg rows: String): String =

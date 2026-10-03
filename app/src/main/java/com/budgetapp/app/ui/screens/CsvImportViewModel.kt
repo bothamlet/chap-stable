@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.budgetapp.app.data.csv.CsvInspection
 import com.budgetapp.app.data.csv.CsvParser
+import com.budgetapp.app.data.csv.normalizedCsvHeader
 import com.budgetapp.app.data.model.ImportResult
 import com.budgetapp.app.data.repository.BudgetRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,7 +59,7 @@ class CsvImportViewModel(
                 // inspect() scans every row of a file that can be 10 MB, so it stays off the main
                 // thread; the mapping screen appears when the state lands.
                 val inspection = withContext(Dispatchers.Default) { csvParser.inspect(content) }
-                val headers = inspection.headers.map { it.normalized() }
+                val headers = inspection.headers.map { it.normalizedCsvHeader() }
                 // Unrecognised columns stay unset (-1) instead of being guessed at column 0/1/2:
                 // guessing meant a file without a date header failed with a parser error about the
                 // first cell instead of asking which column holds the date.

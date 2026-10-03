@@ -26,13 +26,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,10 +72,8 @@ import com.budgetapp.app.ui.theme.MockSurfaceTintAlt
 import com.budgetapp.app.ui.theme.MockTextLight
 import com.budgetapp.app.ui.theme.MockTextLightMuted
 import com.budgetapp.app.ui.theme.MockTextMutedBlue
-import com.budgetapp.app.ui.theme.MockTextSecondaryPurple
 import com.budgetapp.app.ui.theme.MockWhite
 import com.budgetapp.app.ui.theme.MockWhiteSoft
-import java.util.Locale
 
 @Composable
 fun CategorizationRulesScreen(

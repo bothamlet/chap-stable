@@ -5,12 +5,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.budgetapp.app.data.entity.ImportBatchEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ImportBatchDao {
-    @Query("SELECT * FROM import_batches ORDER BY importedAtMillis DESC")
-    fun observeImportBatches(): Flow<List<ImportBatchEntity>>
 
     @Query("SELECT * FROM import_batches ORDER BY id ASC")
     suspend fun getImportBatches(): List<ImportBatchEntity>

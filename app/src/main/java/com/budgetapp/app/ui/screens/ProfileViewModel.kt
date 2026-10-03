@@ -1,7 +1,6 @@
 package com.budgetapp.app.ui.screens
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.repository.BudgetRepository
 

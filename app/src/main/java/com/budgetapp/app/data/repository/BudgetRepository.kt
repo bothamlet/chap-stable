@@ -96,8 +96,6 @@ class BudgetRepository(
 
     fun observeRules() = ruleDao.observeRules()
 
-    fun observeImportBatches() = importBatchDao.observeImportBatches()
-
     fun observeProfileSettings(): StateFlow<ProfileSettings> = profileSettings
 
     fun saveProfileSettings(settings: ProfileSettings) {
@@ -317,18 +315,6 @@ class BudgetRepository(
 
     suspend fun deleteRule(id: Long) {
         ruleDao.deleteById(id)
-    }
-
-    suspend fun importCsv(
-        fileName: String,
-        content: String,
-        accountId: Long,
-    ): ImportResult = database.withTransaction {
-        importCsvRows(
-            fileName = fileName,
-            accountId = accountId,
-            parsedRows = csvParser.parse(content),
-        )
     }
 
     suspend fun importMappedCsv(

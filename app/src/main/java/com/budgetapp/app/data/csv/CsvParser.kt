@@ -17,7 +17,7 @@ class CsvParser {
 
         if (rows.size <= headerRowIndex + 1) return emptyList()
 
-        val headers = inspection.headers.map { it.normalized() }
+        val headers = inspection.headers.map { it.normalizedCsvHeader() }
         val dateIndex = headers.indexOfFirst { it in dateHeaders }
         val descriptionIndex = headers.indexOfFirst { it in descriptionHeaders }
         val merchantIndex = headers.indexOfFirst { it in merchantHeaders }
@@ -282,7 +282,7 @@ class CsvParser {
     }
 }
 
-private fun String.normalized(): String =
+internal fun String.normalizedCsvHeader(): String =
     Normalizer.normalize(trim().lowercase(Locale.US), Normalizer.Form.NFD)
         .replace("\\p{M}+".toRegex(), "")
 

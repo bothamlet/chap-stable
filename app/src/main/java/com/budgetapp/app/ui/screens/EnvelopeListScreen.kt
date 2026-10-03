@@ -16,12 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,7 +63,6 @@ import com.budgetapp.app.ui.theme.MockPrimaryWash
 import com.budgetapp.app.ui.theme.MockSurface
 import com.budgetapp.app.ui.theme.MockSurfaceBarelyAlt
 import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
-import com.budgetapp.app.ui.theme.MockTextLightMuted
 import com.budgetapp.app.ui.theme.MockTextSoftPurple
 import com.budgetapp.app.ui.theme.MockWarningBright
 import com.budgetapp.app.ui.theme.MockWhite
@@ -87,8 +87,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -117,27 +115,15 @@ fun EnvelopeListScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
-    var cashEditor by remember { mutableStateOf<CashTransactionEditorState?>(null) }
 
+    // The add-transaction overlay lives in the NavHost, which owns the shared editor state for
+    // every entry point; this screen only renders the dashboard.
     DashboardScreen(
         state = state,
         onCreateEnvelope = onCreateEnvelope,
         onOpenEnvelope = onOpenEnvelope,
         onOpenInbox = onOpenInbox,
         onOpenMenu = onOpenMenu,
-        cashEditor = cashEditor,
-        onOpenCashEditor = {
-            cashEditor = CashTransactionEditorState(
-                envelopeId = state.envelopes.firstOrNull()?.id,
-            )
-        },
-        onCashEditorChange = { cashEditor = it },
-        onDismissCashEditor = { cashEditor = null },
-        onSaveCashTransaction = { editor ->
-            val submitted = editor.copy(hasSubmitted = true)
-            cashEditor = submitted
-            viewModel.addCashTransaction(submitted) { cashEditor = null }
-        },
         modifier = modifier,
     )
 }
@@ -149,11 +135,6 @@ internal fun DashboardScreen(
     onOpenEnvelope: (Long) -> Unit,
     onOpenInbox: () -> Unit,
     onOpenMenu: () -> Unit,
-    cashEditor: CashTransactionEditorState?,
-    onOpenCashEditor: () -> Unit,
-    onCashEditorChange: (CashTransactionEditorState) -> Unit,
-    onDismissCashEditor: () -> Unit,
-    onSaveCashTransaction: (CashTransactionEditorState) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -175,19 +156,8 @@ internal fun DashboardScreen(
             } else {
                 PopulatedDashboard(
                     state = state,
-                    onOpenCashEditor = onOpenCashEditor,
                     onOpenEnvelope = onOpenEnvelope,
                     onOpenInbox = onOpenInbox,
-                )
-            }
-            if (cashEditor != null) {
-                AddTransactionOverlay(
-                    editor = cashEditor,
-                    envelopes = state.envelopes,
-                    profileSettings = state.profileSettings,
-                    onEditorChange = onCashEditorChange,
-                    onDismiss = onDismissCashEditor,
-                    onSave = onSaveCashTransaction,
                 )
             }
         }
@@ -317,7 +287,6 @@ internal fun EmptyDashboard(
 @Composable
 internal fun PopulatedDashboard(
     state: DashboardState,
-    onOpenCashEditor: () -> Unit,
     onOpenEnvelope: (Long) -> Unit,
     onOpenInbox: () -> Unit,
 ) {

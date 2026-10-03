@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import com.budgetapp.app.data.entity.TransactionEntity
 import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.ProfileSettings
+import com.budgetapp.app.domain.parseAmountMinorUnits
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.theme.MockBackground
 import com.budgetapp.app.ui.theme.MockDanger
@@ -79,7 +80,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import androidx.compose.runtime.collectAsState
 
 @Composable
@@ -1055,11 +1055,7 @@ internal fun LocalDate.toDetailStartOfDayMillis(): Long {
     return atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
 
-internal fun String.toDetailCentsOrNull(): Long? {
-    val value = trim().replace(',', '.').toDoubleOrNull() ?: return null
-    if (value <= 0.0) return null
-    return (value * 100).roundToInt().toLong()
-}
+internal fun String.toDetailCentsOrNull(): Long? = parseAmountMinorUnits(this)?.takeIf { it > 0L }
 
 internal fun Long.toDetailMajorString(): String {
     return if (this % 100L == 0L) {

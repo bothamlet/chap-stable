@@ -1,14 +1,13 @@
 package com.budgetapp.app.ui.screens
 
-import kotlin.test.Ignore
+import com.budgetapp.app.domain.parseAmountMinorUnits
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 /**
- * Characterization tests for the three amount entry parsers, written to the behaviour a user
- * expects rather than the behaviour that exists. Every @Ignore here is a known defect: remove the
- * annotation when the parser is fixed.
+ * The three amount entry points (cash sheet, envelope ceiling, transaction editor) share
+ * parseAmountMinorUnits; these cases pin the behaviour a user typing a European amount expects.
  */
 class AmountInputTest {
     @Test
@@ -20,6 +19,7 @@ class AmountInputTest {
         assertEquals(50, "0.50".toCashCentsOrNull())
         assertEquals(1000, "10".toCashCentsOrNull())
         assertEquals(4200, "  42  ".toCashCentsOrNull())
+        assertEquals(123400, "1234".toCashCentsOrNull())
     }
 
     @Test
@@ -28,38 +28,27 @@ class AmountInputTest {
         assertNull("abc".toCashCentsOrNull())
         assertNull("0".toCashCentsOrNull())
         assertNull("-5".toCashCentsOrNull())
+        assertNull("5,555".toCashCentsOrNull(), "more than two decimals")
+        assertNull("1,234.56".toCashCentsOrNull(), "thousands separators are not written")
     }
 
-    @Ignore
-    @Test
-    fun thousandsSeparatorsDoNotShrinkTheAmount() {
-        // Documents a defect: "1,234" is read as 1.234 -> 123 cents instead of 123400.
-        assertEquals(123400, "1,234".toCashCentsOrNull())
-        assertEquals(123456, "1,234.56".toCashCentsOrNull())
-        assertEquals(123456, "1 234,56".toCashCentsOrNull())
-    }
-
-    @Ignore
     @Test
     fun subCentAmountsAreRejectedInsteadOfBecomingZero() {
-        // Documents a defect: "0.001" passes validation (> 0) and rounds to 0 cents, creating a
-        // €0.00 transaction.
         assertNull("0.001".toCashCentsOrNull())
+        assertNull("0,004".toCashCentsOrNull())
     }
 
-    @Ignore
     @Test
     fun absurdAmountsAreRejectedInsteadOfOverflowing() {
-        // Documents a defect: Double * 100 then Int roundToInt saturates at Int.MAX_VALUE, so
-        // "999999999999" silently becomes €21,474,836.47.
         assertNull("999999999999".toCashCentsOrNull())
+        assertNull("1000000000".toCashCentsOrNull(), "a billion euros is over the cap")
+        assertEquals(99_999_999_999L, "999999999.99".toCashCentsOrNull())
     }
 
-    @Ignore
     @Test
     fun scientificNotationIsNotSilentlyAccepted() {
-        // Documents a defect: "1e3" parses as 1000 and becomes a €1,000 transaction.
         assertNull("1e3".toCashCentsOrNull())
+        assertNull("1E3".toCashCentsOrNull())
     }
 
     @Test
@@ -67,12 +56,22 @@ class AmountInputTest {
         assertEquals(25050, "250.50".toCentsOrNull())
         assertEquals(25050, "250,50".toCentsOrNull())
         assertNull("".toCentsOrNull())
+        assertNull("1,200".toCentsOrNull(), "thousands separators are not written")
+        assertNull("0".toCentsOrNull(), "a zero ceiling is not a budget")
     }
 
-    @Ignore
     @Test
-    fun envelopeCeilingAlsoRejectsThousandsSeparators() {
-        // Documents the same defect in the envelope editor: "1,200" becomes €1.20.
-        assertEquals(120000, "1,200".toCentsOrNull())
+    fun transactionEditorUsesTheSameRules() {
+        assertEquals(500, "5".toDetailCentsOrNull())
+        assertEquals(105, "1,05".toDetailCentsOrNull())
+        assertNull("0".toDetailCentsOrNull())
+        assertNull("5,555".toDetailCentsOrNull())
+    }
+
+    @Test
+    fun parserItselfDistinguishesUnparseableFromZero() {
+        assertNull(parseAmountMinorUnits("nope"))
+        assertEquals(0, parseAmountMinorUnits("0"))
+        assertNull(parseAmountMinorUnits("0,001"), "more than two decimals is a parse error")
     }
 }

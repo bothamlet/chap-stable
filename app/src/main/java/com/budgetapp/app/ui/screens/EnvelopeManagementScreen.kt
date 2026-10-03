@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
+import com.budgetapp.app.domain.parseAmountMinorUnits
 import com.budgetapp.app.ui.components.CompactHeaderBottomPadding
 import com.budgetapp.app.ui.components.CompactHeaderHeroGap
 import com.budgetapp.app.ui.components.CompactHeaderTopPadding
@@ -94,7 +95,6 @@ import com.budgetapp.app.ui.theme.MockWhiteSoft
 import com.budgetapp.app.ui.theme.MockLavenderAlt
 import java.util.Locale
 import kotlinx.coroutines.delay
-import kotlin.math.roundToInt
 
 private val EnvelopeEditorStateSaver: Saver<EnvelopeEditorState?, List<Any?>> =
     Saver(
@@ -1109,13 +1109,7 @@ internal enum class EnvelopeManagementIcon {
     ChevronRight,
 }
 
-internal fun String.toCentsOrNull(): Long? {
-    val normalized = trim().replace(',', '.')
-    if (normalized.isBlank()) {
-        return null
-    }
-    return normalized.toDoubleOrNull()?.let { (it * 100).roundToInt().toLong() }
-}
+internal fun String.toCentsOrNull(): Long? = parseAmountMinorUnits(this)?.takeIf { it > 0L }
 
 internal fun Long.toMajorString(): String {
     val euros = this / 100.0

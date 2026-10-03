@@ -45,6 +45,7 @@ import com.budgetapp.app.data.entity.TransactionEntity
 import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
+import com.budgetapp.app.domain.parseAmountMinorUnits
 import com.budgetapp.app.domain.BudgetPeriod
 import com.budgetapp.app.domain.budgetPeriod
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
@@ -71,7 +72,6 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.max
-import kotlin.math.roundToInt
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.heightIn
@@ -1306,17 +1306,7 @@ internal fun statusText(
     }
 }
 
-internal fun String.toCashCentsOrNull(): Long? {
-    val normalized = trim().replace(',', '.')
-    if (normalized.isBlank()) {
-        return null
-    }
-    val amount = normalized.toDoubleOrNull() ?: return null
-    if (amount <= 0.0) {
-        return null
-    }
-    return (amount * 100).roundToInt().toLong()
-}
+internal fun String.toCashCentsOrNull(): Long? = parseAmountMinorUnits(this)?.takeIf { it > 0L }
 
 internal fun Long.toDashboardDate(): LocalDate {
     return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()

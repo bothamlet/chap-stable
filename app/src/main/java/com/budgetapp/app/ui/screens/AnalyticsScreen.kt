@@ -173,11 +173,6 @@ private fun AnalyticsFullContent(
                 Spacer(modifier = Modifier.height(36.dp))
             }
             item {
-                AnalyticsSectionTitle("Month comparison")
-                ComparisonPanel(state)
-                Spacer(modifier = Modifier.height(36.dp))
-            }
-            item {
                 AnalyticsSectionTitle("Spending by day")
                 HeatmapPanel(state.periodExpenses, state.profileSettings, state.period)
             }

@@ -110,7 +110,7 @@ fun ProfileMenuScreen(
                 }
                 Spacer(modifier = Modifier.height(72.dp))
                 Text(
-                    text = "Local \u00b7 Private \u00b7 Yours alone\nPreview",
+                    text = "Local \u00b7 Private \u00b7 Yours alone",
                     color = MockNeutral,
                     fontSize = 13.sp,
                     lineHeight = 21.sp,

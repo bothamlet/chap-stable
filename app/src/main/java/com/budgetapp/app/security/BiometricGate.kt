@@ -57,7 +57,7 @@ class BiometricGate(
         onUnavailable: (String) -> Unit,
     ) {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Unlock Budget")
+            .setTitle("Unlock Chap")
             .setSubtitle("Use biometrics or your device PIN")
             .setAllowedAuthenticators(allowedAuthenticators)
             .build()

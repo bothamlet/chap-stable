@@ -46,7 +46,7 @@ fun AboutScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Text("Chap", color = MockWhite, fontSize = 40.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Preview - Envelope budgeting, simplified.", color = MockPrimaryAlt, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text("Envelope budgeting, simplified.", color = MockPrimaryAlt, fontSize = 15.sp, fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(48.dp))
             Text(
                 text = "No data leaves your device.\nAll transactions are stored locally.",

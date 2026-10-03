@@ -152,7 +152,11 @@ fun EnvelopeManagementScreen(    viewModel: EnvelopeManagementViewModel,
         },
         onEditorChange = { editor = it },
         onDismissEditor = { editor = null },
-        onSave = { current -> viewModel.saveEnvelope(current) { editor = null } },
+        onSave = { current ->
+            // Keep the submitted draft so the field errors can render when the save is refused.
+            editor = current
+            viewModel.saveEnvelope(current) { editor = null }
+        },
         onDelete = { id -> viewModel.deleteEnvelope(id) { editor = null } },
         modifier = modifier,
     )
@@ -672,11 +676,15 @@ internal fun EnvelopeEditorForm(
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(19.dp))
-        DrawerField(label = "Envelope name") {
+        DrawerField(
+            label = "Envelope name",
+            error = if (editor.isNameInvalid) "Give the envelope a name." else null,
+        ) {
             EnvelopeInput(
                 value = editor.name,
                 onValueChange = { onEditorChange(editor.copy(name = it)) },
                 placeholder = "Groceries",
+                isError = editor.isNameInvalid,
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -688,13 +696,17 @@ internal fun EnvelopeEditorForm(
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
-        DrawerField(label = if (editor.type == EnvelopeType.Goal) "Goal amount" else "Budget amount") {
+        DrawerField(
+            label = if (editor.type == EnvelopeType.Goal) "Goal amount" else "Budget amount",
+            error = if (editor.isAmountInvalid) "Enter an amount like 250 or 250,50." else null,
+        ) {
             AmountInput(
                 value = editor.amountText,
                 currencySymbol = profileSettings.currencySymbol(),
                 onValueChange = { value ->
                     onEditorChange(editor.copy(amountText = value.filter { it.isDigit() || it == '.' || it == ',' }))
                 },
+                isError = editor.isAmountInvalid,
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
@@ -717,7 +729,7 @@ internal fun EnvelopeEditorForm(
         }
         Spacer(modifier = Modifier.height(19.dp))
         Button(
-            onClick = { onSave(editor) },
+            onClick = { onSave(editor.copy(hasSubmitted = true)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -839,6 +851,7 @@ internal fun EnvelopeIconPicker(
 @Composable
 internal fun DrawerField(
     label: String,
+    error: String? = null,
     content: @Composable () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -851,6 +864,16 @@ internal fun DrawerField(
         )
         Spacer(modifier = Modifier.height(7.dp))
         content()
+        if (error != null) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = error,
+                color = MockDanger,
+                fontSize = 13.sp,
+                lineHeight = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
 }
 
@@ -859,6 +882,7 @@ internal fun EnvelopeInput(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
+    isError: Boolean = false,
 ) {
     BasicTextField(
         value = value,
@@ -874,7 +898,7 @@ internal fun EnvelopeInput(
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MockWhiteSoft)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(16.dp))
+            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         decorationBox = { innerTextField ->
             Box(
@@ -900,6 +924,7 @@ internal fun AmountInput(
     value: String,
     currencySymbol: String,
     onValueChange: (String) -> Unit,
+    isError: Boolean = false,
 ) {
     Box(
         modifier = Modifier
@@ -907,7 +932,7 @@ internal fun AmountInput(
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MockWhiteSoft)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(16.dp)),
+            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp)),
     ) {
         Text(
             text = currencySymbol,

@@ -44,8 +44,11 @@ data class EnvelopeEditorState(
     val iconToken: String = "wallet",
     val type: String = EnvelopeType.Variable,
     val isDeleteConfirming: Boolean = false,
+    val hasSubmitted: Boolean = false,
 ) {
     val isEditing: Boolean = envelopeId != null
+    val isNameInvalid: Boolean = hasSubmitted && name.isBlank()
+    val isAmountInvalid: Boolean = hasSubmitted && amountText.toCentsOrNull() == null
 }
 
 class EnvelopeManagementViewModel(

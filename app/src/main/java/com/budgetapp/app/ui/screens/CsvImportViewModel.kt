@@ -34,6 +34,10 @@ data class CsvImportState(
 ) {
     val isMapping: Boolean = inspection != null
     val isMappingComplete: Boolean = dateIndex >= 0 && descriptionIndex >= 0 && amountIndex >= 0
+
+    /** Nothing in the header resembles a required column, so the file is probably not a CSV. */
+    val hasNoRecognisableColumns: Boolean =
+        dateIndex < 0 && descriptionIndex < 0 && amountIndex < 0
     val columns: List<String> = inspection?.headers.orEmpty()
     val rowCount: Int =
         if (hasHeader) {

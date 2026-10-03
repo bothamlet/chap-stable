@@ -236,16 +236,22 @@ private fun CsvMappingContent(
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     HeaderToggleCard(checked = state.hasHeader, onClick = onToggleHeader)
-                    MappingCard(
-                        state = state,
-                        onDateIndex = onDateIndex,
-                        onDescriptionIndex = onDescriptionIndex,
-                        onAmountIndex = onAmountIndex,
-                        onMerchantIndex = onMerchantIndex,
-                        onDebitCreditIndex = onDebitCreditIndex,
-                        onExternalIdIndex = onExternalIdIndex,
-                    )
-                    PreviewSection(state = state, rows = inspection.rows)
+                    // No column of any kind was recognised: this is not a CSV export, so showing a
+                    // preview of binary rubbish and a mapping form would only confuse.
+                    if (state.hasNoRecognisableColumns) {
+                        UnrecognisedFileNotice()
+                    } else {
+                        MappingCard(
+                            state = state,
+                            onDateIndex = onDateIndex,
+                            onDescriptionIndex = onDescriptionIndex,
+                            onAmountIndex = onAmountIndex,
+                            onMerchantIndex = onMerchantIndex,
+                            onDebitCreditIndex = onDebitCreditIndex,
+                            onExternalIdIndex = onExternalIdIndex,
+                        )
+                        PreviewSection(state = state, rows = inspection.rows)
+                    }
                     Text(
                         text = state.result?.let {
                             importSummary(it)
@@ -581,4 +587,30 @@ private fun importSummary(result: com.budgetapp.app.data.model.ImportResult): St
         parts += "${result.incomeRows} income rows are waiting in the inbox."
     }
     return parts.joinToString(" ")
+}
+
+@Composable
+private fun UnrecognisedFileNotice() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MockWhite)
+            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .padding(20.dp),
+    ) {
+        Text(
+            text = "This file does not look like a CSV export",
+            color = MockMaterialSurface,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "Chap could not find date, description or amount columns in it. Export your statement as CSV from your bank and try again.",
+            color = MockNeutral,
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+        )
+    }
 }

@@ -3,7 +3,6 @@ package com.budgetapp.app.di
 import android.content.Context
 import androidx.room.Room
 import com.budgetapp.app.data.BudgetDatabase
-import com.budgetapp.app.data.Seeder
 import com.budgetapp.app.data.backup.EncryptedBackupCodec
 import com.budgetapp.app.data.csv.CsvParser
 import com.budgetapp.app.data.repository.BudgetRepository
@@ -64,7 +63,6 @@ val appModule = module {
         )
     }
     single { BudgetRepository(get(), get(), get(), get(), get()) }
-    single { Seeder(get()) }
 
     viewModel { EnvelopeListViewModel(get()) }
     viewModel { EnvelopeManagementViewModel(get()) }

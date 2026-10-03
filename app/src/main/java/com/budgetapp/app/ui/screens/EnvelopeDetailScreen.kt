@@ -417,7 +417,7 @@ internal fun EmptyTransactions(
         DetailIcon(DetailIconKind.Receipt, MockPrimaryAlt, Modifier.size(38.dp))
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "No transactions yet",
+            text = "No transactions in this period",
             color = MockMaterialSurface,
             fontSize = 21.sp,
             fontWeight = FontWeight.Bold,
@@ -425,7 +425,7 @@ internal fun EmptyTransactions(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Transactions assigned to $envelopeName will appear here.",
+            text = "Nothing spent from $envelopeName in this budget period. Use the arrows on the dashboard to look at another month.",
             color = MockNeutral,
             fontSize = 15.sp,
             lineHeight = 22.sp,

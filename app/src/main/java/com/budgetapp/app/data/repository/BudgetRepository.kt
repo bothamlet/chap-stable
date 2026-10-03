@@ -26,12 +26,15 @@ import com.budgetapp.app.data.model.RuleMatchField
 import com.budgetapp.app.data.model.TransactionStatus
 import com.budgetapp.app.data.model.toEnvelopeType
 import com.budgetapp.app.domain.CategorizationEngine
+import com.budgetapp.app.domain.BudgetPeriod
+import java.time.LocalDate
 import com.budgetapp.app.domain.budgetPeriod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -63,6 +66,33 @@ class BudgetRepository(
     private val importBatchDao = database.importBatchDao()
     private val profileSettings = MutableStateFlow(readProfileSettings())
 
+    /**
+     * How many months back the user is looking, 0 being the current period. Balances and the
+     * envelope's transaction list both follow it, which is how the dashboard shows history: the
+     * rows are still in the database, they are just outside the current period.
+     */
+    private val periodOffsetMonths = MutableStateFlow(0)
+
+    fun observePeriodOffsetMonths(): StateFlow<Int> = periodOffsetMonths
+
+    /** Moves the viewed period by [months]; the future is not interesting, so it clamps at 0. */
+    fun shiftPeriod(months: Int) {
+        periodOffsetMonths.value = (periodOffsetMonths.value + months).coerceIn(MaxPeriodOffsetMonths, 0)
+    }
+
+    fun showCurrentPeriod() {
+        periodOffsetMonths.value = 0
+    }
+
+    /** The period the user is looking at, which is the current one unless they navigated back. */
+    fun viewedPeriod(): BudgetPeriod =
+        profileSettings.value.budgetPeriod(LocalDate.now().plusMonths(periodOffsetMonths.value.toLong()))
+
+    private fun periodFlow(): Flow<BudgetPeriod> =
+        combine(profileSettings, periodOffsetMonths) { settings, offset ->
+            settings.budgetPeriod(LocalDate.now().plusMonths(offset.toLong()))
+        }
+
     fun observeAccounts() = budgetDao.observeAccounts()
 
     fun observeActiveEnvelopes() = budgetDao.observeActiveEnvelopes()
@@ -73,8 +103,7 @@ class BudgetRepository(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observeEnvelopeBalances(): Flow<List<EnvelopeBalance>> =
-        profileSettings.flatMapLatest { settings ->
-            val period = settings.budgetPeriod()
+        periodFlow().flatMapLatest { period ->
             budgetDao.observeEnvelopeBalances(period.startMillis(), period.endExclusiveMillis())
         }
 
@@ -83,8 +112,7 @@ class BudgetRepository(
     /** Transactions of one envelope inside the current budget period, newest first. */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observePeriodTransactionsForEnvelope(envelopeId: Long): Flow<List<TransactionEntity>> =
-        profileSettings.flatMapLatest { settings ->
-            val period = settings.budgetPeriod()
+        periodFlow().flatMapLatest { period ->
             transactionDao.observeTransactionsForEnvelopeInPeriod(
                 envelopeId = envelopeId,
                 periodStartMillis = period.startMillis(),
@@ -702,6 +730,8 @@ class BudgetRepository(
 
     private companion object {
         const val DatabaseBackupVersion = 3
+        /** How far back the dashboard lets the user look. */
+        const val MaxPeriodOffsetMonths = -120
         const val DefaultColorToken = "accent"
         const val ProfileNameKey = "profile_name"
         const val ProfileAvatarUriKey = "profile_avatar_uri"

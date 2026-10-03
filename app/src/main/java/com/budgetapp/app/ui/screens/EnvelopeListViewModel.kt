@@ -20,6 +20,9 @@ import java.time.LocalDate
 data class DashboardState(
     val monthLabel: String = "",
     val dayLine: String = "",
+    val isCurrentPeriod: Boolean = true,
+    val canGoBack: Boolean = true,
+    val canGoForward: Boolean = false,
     val envelopes: List<EnvelopeBalance> = emptyList(),
     val transactions: List<TransactionEntity> = emptyList(),
     val inboxCount: Int = 0,
@@ -40,11 +43,16 @@ class EnvelopeListViewModel(
             repository.observeTransactions(),
             repository.observeInbox(),
             repository.observeProfileSettings(),
-        ) { envelopes, transactions, inbox, profileSettings ->
-            val period = profileSettings.budgetPeriod()
+            repository.observePeriodOffsetMonths(),
+        ) { envelopes, transactions, inbox, profileSettings, offset ->
+            val period = repository.viewedPeriod()
             DashboardState(
                 monthLabel = profileSettings.periodLabel(period),
-                dayLine = profileSettings.dayLine(period),
+                // "Day 3 of 31" only makes sense for the period the user is actually in.
+                dayLine = if (offset == 0) profileSettings.dayLine(period) else "${period.lengthInDays} days",
+                isCurrentPeriod = offset == 0,
+                canGoBack = offset > -120,
+                canGoForward = offset < 0,
                 envelopes = envelopes,
                 transactions = transactions,
                 inboxCount = inbox.size,
@@ -59,6 +67,12 @@ class EnvelopeListViewModel(
                     dayLine = "Day 10 of 30",
                 ),
         )
+
+    fun showPreviousPeriod() = repository.shiftPeriod(-1)
+
+    fun showNextPeriod() = repository.shiftPeriod(1)
+
+    fun showCurrentPeriod() = repository.showCurrentPeriod()
 
     fun addCashTransaction(
         editor: CashTransactionEditorState,

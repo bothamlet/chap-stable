@@ -236,6 +236,33 @@ class BudgetRepositoryTest {
     }
 
     @Test
+    fun shiftingTheViewedPeriodChangesWhatCounts() = runBlocking {
+        val envelope = repository.createEnvelope("Groceries", 40000)
+        addTransaction(envelope, 1200, LocalDate.now())
+        addTransaction(envelope, 3400, LocalDate.now().minusMonths(1))
+
+        assertEquals(1200, viewedSpend())
+
+        repository.shiftPeriod(-1)
+        assertEquals(3400, viewedSpend())
+
+        repository.showCurrentPeriod()
+        assertEquals(1200, viewedSpend())
+    }
+
+    @Test
+    fun theViewedPeriodCannotMoveIntoTheFuture() = runBlocking {
+        repository.shiftPeriod(3)
+        assertEquals(0, repository.observePeriodOffsetMonths().value)
+        repository.shiftPeriod(-1)
+        repository.shiftPeriod(1)
+        assertEquals(0, repository.observePeriodOffsetMonths().value)
+    }
+
+    private suspend fun viewedSpend(): Long =
+        repository.observeEnvelopeBalances().first().single().spentCents
+
+    @Test
     fun goalEnvelopesKeepAccumulatingAcrossPeriods() = runBlocking {
         val goal = repository.createEnvelope("Holiday", 200000, type = "goal")
 

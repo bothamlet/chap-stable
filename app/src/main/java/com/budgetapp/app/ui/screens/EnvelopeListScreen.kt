@@ -127,6 +127,9 @@ fun EnvelopeListScreen(
         onOpenEnvelope = onOpenEnvelope,
         onOpenInbox = onOpenInbox,
         onOpenMenu = onOpenMenu,
+        onPreviousPeriod = viewModel::showPreviousPeriod,
+        onNextPeriod = viewModel::showNextPeriod,
+        onCurrentPeriod = viewModel::showCurrentPeriod,
         modifier = modifier,
     )
 }
@@ -138,6 +141,9 @@ internal fun DashboardScreen(
     onOpenEnvelope: (Long) -> Unit,
     onOpenInbox: () -> Unit,
     onOpenMenu: () -> Unit,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
+    onCurrentPeriod: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -155,12 +161,18 @@ internal fun DashboardScreen(
                 EmptyDashboard(
                     state = state,
                     onCreateEnvelope = onCreateEnvelope,
+                    onPreviousPeriod = onPreviousPeriod,
+                    onNextPeriod = onNextPeriod,
+                    onCurrentPeriod = onCurrentPeriod,
                 )
             } else {
                 PopulatedDashboard(
                     state = state,
                     onOpenEnvelope = onOpenEnvelope,
                     onOpenInbox = onOpenInbox,
+                    onPreviousPeriod = onPreviousPeriod,
+                    onNextPeriod = onNextPeriod,
+                    onCurrentPeriod = onCurrentPeriod,
                 )
             }
         }
@@ -263,6 +275,9 @@ fun AddTransactionOverlay(
 internal fun EmptyDashboard(
     state: DashboardState,
     onCreateEnvelope: () -> Unit,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
+    onCurrentPeriod: () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -275,6 +290,12 @@ internal fun EmptyDashboard(
             HeaderBlock(
                 monthLabel = state.monthLabel,
                 dayLine = state.dayLine,
+                isCurrentPeriod = state.isCurrentPeriod,
+                canGoBack = state.canGoBack,
+                canGoForward = state.canGoForward,
+                onPreviousPeriod = onPreviousPeriod,
+                onNextPeriod = onNextPeriod,
+                onCurrentPeriod = onCurrentPeriod,
                 modifier = Modifier.padding(top = 92.dp),
             )
             EmptyContent(
@@ -292,6 +313,9 @@ internal fun PopulatedDashboard(
     state: DashboardState,
     onOpenEnvelope: (Long) -> Unit,
     onOpenInbox: () -> Unit,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
+    onCurrentPeriod: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -308,6 +332,12 @@ internal fun PopulatedDashboard(
                 HeaderBlock(
                     monthLabel = state.monthLabel,
                     dayLine = state.dayLine,
+                    isCurrentPeriod = state.isCurrentPeriod,
+                    canGoBack = state.canGoBack,
+                    canGoForward = state.canGoForward,
+                    onPreviousPeriod = onPreviousPeriod,
+                    onNextPeriod = onNextPeriod,
+                    onCurrentPeriod = onCurrentPeriod,
                 )
             }
         }
@@ -364,22 +394,79 @@ internal fun PopulatedDashboard(
 internal fun HeaderBlock(
     monthLabel: String,
     dayLine: String,
+    isCurrentPeriod: Boolean,
+    canGoBack: Boolean,
+    canGoForward: Boolean,
+    onPreviousPeriod: () -> Unit,
+    onNextPeriod: () -> Unit,
+    onCurrentPeriod: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = monthLabel.uppercase(Locale.US),
-            color = MockTextSoftPurple,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.8.sp,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = monthLabel.uppercase(Locale.US),
+                color = MockTextSoftPurple,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.8.sp,
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            PeriodArrow(
+                label = "\u2039",
+                description = "Previous period",
+                enabled = canGoBack,
+                onClick = onPreviousPeriod,
+            )
+            PeriodArrow(
+                label = "\u203a",
+                description = "Next period",
+                enabled = canGoForward,
+                onClick = onNextPeriod,
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = dayLine,
             color = MockWhite,
             fontSize = 36.sp,
             lineHeight = 39.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        if (!isCurrentPeriod) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Back to this period",
+                color = MockPrimaryGlowAlt,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clickable(onClick = onCurrentPeriod)
+                    .padding(vertical = 10.dp, horizontal = 4.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PeriodArrow(
+    label: String,
+    description: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(99.dp))
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            color = if (enabled) MockPrimaryGlowAlt else MockTextSoftPurple.copy(alpha = 0.4f),
+            fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
         )
     }

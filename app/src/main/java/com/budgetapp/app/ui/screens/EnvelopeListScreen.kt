@@ -50,6 +50,7 @@ import com.budgetapp.app.domain.BudgetPeriod
 import com.budgetapp.app.domain.budgetPeriod
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.components.StandardEmptyState
+import com.budgetapp.app.ui.components.EnvelopePickerList
 import com.budgetapp.app.ui.theme.MockBackground
 import com.budgetapp.app.ui.theme.MockBorderLightAlt
 import com.budgetapp.app.ui.theme.MockDanger
@@ -859,46 +860,11 @@ internal fun EnvelopeSelector(
     selectedId: Long?,
     onSelected: (Long) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
-            .padding(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        envelopes.take(4).forEach { envelope ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (envelope.id == selectedId) MockPrimaryWash else MockWhiteSoft)
-                    .clickable { onSelected(envelope.id) }
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Text(
-                    text = envelope.name,
-                    color = if (envelope.id == selectedId) MockPrimaryDeep else MockMaterialSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-        if (envelopes.isEmpty()) {
-            Text(
-                text = "Create an envelope first",
-                color = MockNeutral,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(12.dp),
-            )
-        }
-    }
+    EnvelopePickerList(
+        envelopes = envelopes,
+        selectedId = selectedId,
+        onSelected = onSelected,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

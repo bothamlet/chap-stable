@@ -53,6 +53,7 @@ import com.budgetapp.app.ui.components.CompactHeaderHeroGap
 import com.budgetapp.app.ui.components.CompactHeaderTopPadding
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
+import com.budgetapp.app.ui.components.EnvelopePickerList
 import com.budgetapp.app.ui.theme.MockBackground
 import com.budgetapp.app.ui.theme.MockDanger
 import com.budgetapp.app.ui.theme.MockInk
@@ -430,37 +431,12 @@ private fun RuleEditorDrawer(
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(7.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MockWhiteSoft)
-                .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
-                .padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            envelopes.take(6).forEach { envelope ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (envelope.id == selectedEnvelopeId) MockPrimaryWash else MockWhiteSoft)
-                        .clickable { selectedEnvelopeId = envelope.id }
-                        .padding(horizontal = 12.dp),
-                    contentAlignment = Alignment.CenterStart,
-                ) {
-                    Text(
-                        text = envelope.name,
-                        color = if (envelope.id == selectedEnvelopeId) MockPrimaryAlt else MockMaterialSurface,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-        }
+        EnvelopePickerList(
+            envelopes = envelopes,
+            selectedId = selectedEnvelopeId,
+            onSelected = { selectedEnvelopeId = it },
+            selectedTextColor = MockPrimaryAlt,
+        )
         Spacer(modifier = Modifier.height(18.dp))
         Button(
             onClick = { onEnvelopeSelected(selectedEnvelopeId) },

@@ -59,6 +59,7 @@ import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.domain.parseAmountMinorUnits
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
+import com.budgetapp.app.ui.components.EnvelopePickerList
 import com.budgetapp.app.ui.theme.MockBackground
 import com.budgetapp.app.ui.theme.MockDanger
 import com.budgetapp.app.ui.theme.MockInk
@@ -875,37 +876,12 @@ internal fun DetailEnvelopeSelector(
     selectedId: Long?,
     onSelected: (Long) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
-            .padding(6.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        envelopes.take(4).forEach { envelope ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (envelope.id == selectedId) MockPrimaryWash else MockWhiteSoft)
-                    .clickable { onSelected(envelope.id) }
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                Text(
-                    text = envelope.name,
-                    color = if (envelope.id == selectedId) MockPrimaryAlt else MockMaterialSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-    }
+    EnvelopePickerList(
+        envelopes = envelopes,
+        selectedId = selectedId,
+        onSelected = onSelected,
+        selectedTextColor = MockPrimaryAlt,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

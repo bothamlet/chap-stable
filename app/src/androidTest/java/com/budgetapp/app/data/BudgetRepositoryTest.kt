@@ -66,14 +66,15 @@ class BudgetRepositoryTest {
     }
 
     @Test
-    fun incomeRowsAreSilentlyDropped() = runBlocking {
-        // Documents current behaviour: a salary credit disappears from the import.
+    fun incomeRowsAreImportedAndWaitInTheInbox() = runBlocking {
         val csv = expenseCsv("2026-06-10;Coffee;-12,50", "2026-06-11;SALARY;2500,00")
         val result = importCsv(csv)
 
-        assertEquals(1, result.acceptedRows)
-        assertEquals(1, result.ignoredIncomeRows)
-        assertEquals(1, repository.observeTransactions().first().size)
+        assertEquals(2, result.acceptedRows)
+        assertEquals(1, result.incomeRows)
+        val inbox = repository.observeInbox().first()
+        val salary = inbox.single { it.description == "SALARY" }
+        assertEquals(250000, salary.amountCents)
     }
 
     @Test
@@ -180,19 +181,30 @@ class BudgetRepositoryTest {
         assertNotNull(id)
     }
 
-    @org.junit.Ignore("documents a defect: assigning an inbox row to a goal envelope counts 0")
     @Test
-    fun anIncomeRowAssignedToAGoalEnvelopeCounts() = runBlocking {
-        // Imported rows keep their sign, and goals only count positive amounts, so this documents
-        // that assigning an inbox row to a goal needs the sign to follow the envelope.
+    fun aCreditFiledIntoAGoalCountsAsSaved() = runBlocking {
         val goal = repository.createEnvelope("Holiday", 200000, type = "goal")
-        importCsv(expenseCsv("${LocalDate.now()};Coffee;-12,50"))
-        val inboxRow = repository.observeInbox().first().single()
+        importCsv(expenseCsv("${LocalDate.now()};SALARY;2500,00"))
+        val credit = repository.observeInbox().first().single()
 
-        repository.assignTransactionToEnvelope(inboxRow.id, goal)
+        repository.assignTransactionToEnvelope(credit.id, goal)
 
         assertEquals(0, repository.observeInbox().first().size)
+        assertEquals(250000, repository.observeEnvelopeBalances().first().single().spentCents)
+    }
+
+    @Test
+    fun aRefundFiledBackIntoASpendingEnvelopeStaysASpend() = runBlocking {
+        // The sign follows the envelope, so a positive row filed into a spending envelope cannot
+        // cancel out spend: it is stored as money leaving that envelope.
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        importCsv(expenseCsv("${LocalDate.now()};REFUND;12,50"))
+        val credit = repository.observeInbox().first().single()
+
+        repository.assignTransactionToEnvelope(credit.id, groceries)
+
         assertEquals(1250, repository.observeEnvelopeBalances().first().single().spentCents)
+        assertEquals(-1250, repository.observeTransactions().first().single().amountCents)
     }
 
     @Test

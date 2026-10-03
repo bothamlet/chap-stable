@@ -5,5 +5,5 @@ data class ImportResult(
     val totalRows: Int,
     val acceptedRows: Int,
     val duplicateRows: Int,
-    val ignoredIncomeRows: Int = 0,
+    val incomeRows: Int = 0,
 )

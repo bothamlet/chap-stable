@@ -18,7 +18,14 @@ data class ReviewInboxState(
     val envelopes: List<EnvelopeBalance> = emptyList(),
     val groups: List<InboxTransactionGroup> = emptyList(),
     val profileSettings: ProfileSettings = ProfileSettings(),
-)
+) {
+    private val spendingEnvelopes: List<EnvelopeBalance> = envelopes.filter { it.type in EnvelopeType.SpendingTypes }
+    private val goalEnvelopes: List<EnvelopeBalance> = envelopes.filter { it.type == EnvelopeType.Goal }
+
+    /** Spends can only be filed into spending envelopes, credits only into goals (savings). */
+    fun candidatesFor(group: InboxTransactionGroup): List<EnvelopeBalance> =
+        if (group.amountCents > 0L) goalEnvelopes else spendingEnvelopes
+}
 
 data class InboxTransactionGroup(
     val key: String,
@@ -38,7 +45,7 @@ class ReviewInboxViewModel(
             repository.observeProfileSettings(),
         ) { envelopes, inbox, profileSettings ->
             ReviewInboxState(
-                envelopes = envelopes.filter { it.type in EnvelopeType.SpendingTypes },
+                envelopes = envelopes,
                 groups = inbox.toInboxGroups(),
                 profileSettings = profileSettings,
             )

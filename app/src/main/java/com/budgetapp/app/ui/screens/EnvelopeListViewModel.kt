@@ -66,16 +66,18 @@ class EnvelopeListViewModel(
     ) {
         val amountCents = editor.amountText.toCashCentsOrNull()
         val envelopeId = editor.envelopeId
-        if (editor.merchant.trim().isBlank() || amountCents == null || envelopeId == null) {
+        if (!editor.canSave || amountCents == null) {
             return
         }
         viewModelScope.launch {
             repository.createCashTransaction(
                 merchantName = editor.merchant,
                 amountCents = amountCents,
-                envelopeId = envelopeId,
+                // Income is not spend: it waits in the inbox so it can be saved to a goal.
+                envelopeId = envelopeId.takeUnless { editor.isIncome },
                 postedAtMillis = editor.date.toStartOfDayMillis(),
                 note = editor.note,
+                isIncome = editor.isIncome,
             )
             onSaved()
         }
@@ -90,8 +92,12 @@ data class CashTransactionEditorState(
     val note: String = "",
     val isNoteOpen: Boolean = false,
     val hasSubmitted: Boolean = false,
+    val isIncome: Boolean = false,
 ) {
     val isMerchantInvalid: Boolean = hasSubmitted && merchant.trim().isBlank()
     val isAmountInvalid: Boolean = hasSubmitted && amountText.toCashCentsOrNull() == null
-    val canSave: Boolean = merchant.trim().isNotBlank() && amountText.toCashCentsOrNull() != null && envelopeId != null
+    val canSave: Boolean =
+        merchant.trim().isNotBlank() &&
+            amountText.toCashCentsOrNull() != null &&
+            (isIncome || envelopeId != null)
 }

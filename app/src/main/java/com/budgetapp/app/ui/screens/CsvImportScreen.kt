@@ -248,7 +248,7 @@ private fun CsvMappingContent(
                     PreviewSection(state = state, rows = inspection.rows)
                     Text(
                         text = state.result?.let {
-                            "Imported ${it.acceptedRows} rows. ${it.duplicateRows} duplicates skipped. ${it.ignoredIncomeRows} income rows ignored."
+                            importSummary(it)
                         }
                             ?: state.error
                             ?: "Only mapped fields will be imported.",
@@ -570,4 +570,15 @@ private fun nextColumnIndex(current: Int, columnCount: Int): Int {
         -1 -> 0
         else -> if (current >= columnCount - 1) -1 else current + 1
     }
+}
+
+private fun importSummary(result: com.budgetapp.app.data.model.ImportResult): String {
+    val parts = mutableListOf("Imported ${result.acceptedRows} rows.")
+    if (result.duplicateRows > 0) {
+        parts += "${result.duplicateRows} duplicates skipped."
+    }
+    if (result.incomeRows > 0) {
+        parts += "${result.incomeRows} income rows are waiting in the inbox."
+    }
+    return parts.joinToString(" ")
 }

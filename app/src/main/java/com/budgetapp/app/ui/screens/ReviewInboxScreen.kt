@@ -89,7 +89,7 @@ fun ReviewInboxScreen(
         ReviewInboxContent(
             state = state,
             selectedEnvelopeFor = { group ->
-                selectedEnvelopeIds[group.key] ?: state.envelopes.firstOrNull()?.id
+                selectedEnvelopeIds[group.key] ?: state.candidatesFor(group).firstOrNull()?.id
             },
             isRuleEnabled = { group -> ruleToggles[group.key] ?: true },
             onEnvelopeSelected = { group, envelopeId -> selectedEnvelopeIds = selectedEnvelopeIds + (group.key to envelopeId) },
@@ -138,11 +138,12 @@ private fun ReviewInboxContent(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.groups, key = { it.key }) { group ->
+                val candidates = state.candidatesFor(group)
                 val selectedEnvelopeId = selectedEnvelopeFor(group)
-                val selectedEnvelope = state.envelopes.firstOrNull { it.id == selectedEnvelopeId }
+                val selectedEnvelope = candidates.firstOrNull { it.id == selectedEnvelopeId }
                 InboxTransactionCard(
                     group = group,
-                    envelopes = state.envelopes,
+                    envelopes = candidates,
                     profileSettings = state.profileSettings,
                     selectedEnvelopeId = selectedEnvelopeId,
                     selectedEnvelopeName = selectedEnvelope?.name,
@@ -258,13 +259,31 @@ private fun InboxTransactionCard(
                 )
             }
             Text(
-                text = profileSettings.formatMoney(abs(group.amountCents)),
-                color = MockMaterialSurface,
+                text = if (group.amountCents > 0L) {
+                    "+${profileSettings.formatMoney(group.amountCents)}"
+                } else {
+                    profileSettings.formatMoney(abs(group.amountCents))
+                },
+                color = if (group.amountCents > 0L) MockPrimaryAlt else MockMaterialSurface,
                 fontSize = 21.sp,
                 fontWeight = FontWeight.Bold,
             )
         }
         Spacer(modifier = Modifier.height(18.dp))
+        if (envelopes.isEmpty()) {
+            Text(
+                text = if (group.amountCents > 0L) {
+                    "Create a goal envelope to save this money."
+                } else {
+                    "Create an envelope first."
+                },
+                color = MockNeutral,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            return@Column
+        }
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth(),

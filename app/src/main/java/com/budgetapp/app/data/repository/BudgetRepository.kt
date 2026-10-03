@@ -246,20 +246,27 @@ class BudgetRepository(
         transactionId: Long,
         envelopeId: Long,
     ) {
-        transactionDao.assignEnvelope(
-            transactionId = transactionId,
-            envelopeId = envelopeId,
-            status = TransactionStatus.Assigned,
-            updatedAtMillis = now(),
+        val transaction = transactionDao.getById(transactionId)
+        // The sign has to follow the target envelope: a credit filed into a goal has to count as
+        // saved (goals only sum positive amounts), and a spend keeps its negative sign.
+        val signedCents = transaction?.amountCents?.withEnvelopeSign(envelopeId) ?: return
+        transactionDao.update(
+            transaction.copy(
+                envelopeId = envelopeId,
+                amountCents = signedCents,
+                status = TransactionStatus.Assigned,
+                updatedAtMillis = now(),
+            ),
         )
     }
 
     suspend fun createCashTransaction(
         merchantName: String,
         amountCents: Long,
-        envelopeId: Long,
+        envelopeId: Long?,
         postedAtMillis: Long,
         note: String?,
+        isIncome: Boolean = false,
     ): Long = database.withTransaction {
         val account = budgetDao.getAccounts().firstOrNull()
         val accountId = account?.id ?: createAccount(
@@ -275,9 +282,13 @@ class BudgetRepository(
                 postedAtMillis = postedAtMillis,
                 description = merchantName.trim(),
                 merchantName = merchantName.trim(),
-                amountCents = amountCents.withEnvelopeSign(envelopeId),
+                amountCents = if (isIncome) {
+                    kotlin.math.abs(amountCents)
+                } else {
+                    envelopeId?.let { amountCents.withEnvelopeSign(it) } ?: -kotlin.math.abs(amountCents)
+                },
                 note = note?.trim()?.ifBlank { null },
-                status = TransactionStatus.Assigned,
+                status = if (envelopeId == null) TransactionStatus.Inbox else TransactionStatus.Assigned,
                 createdAtMillis = now,
                 updatedAtMillis = now,
             ),
@@ -353,11 +364,12 @@ class BudgetRepository(
         accountId: Long,
         parsedRows: List<com.budgetapp.app.data.model.CsvTransactionDraft>,
     ): ImportResult {
-        val expenseRows = parsedRows.filter { it.amountCents < 0L }
-        val ignoredIncomeRows = parsedRows.size - expenseRows.size
+        // Credits are imported too. They wait in the inbox with a positive amount, where they can
+        // be saved into a goal envelope — dropping them silently lost salaries and refunds.
+        val incomeRows = parsedRows.count { it.amountCents > 0L }
         val knownExternalIds = transactionDao.getExternalIds().toSet()
-        val newRows = expenseRows.filterNot { it.externalId in knownExternalIds }
-        val duplicateRows = expenseRows.size - newRows.size
+        val newRows = parsedRows.filterNot { it.externalId in knownExternalIds }
+        val duplicateRows = parsedRows.size - newRows.size
         val rules = ruleDao.getEnabledRules()
         val now = now()
 
@@ -372,7 +384,8 @@ class BudgetRepository(
         )
 
         val transactions = newRows.map { draft ->
-            val envelopeId = categorizationEngine.categorize(draft, rules)
+            // Rules are written against spend merchants, so credits stay unassigned for the inbox.
+            val envelopeId = if (draft.amountCents > 0L) null else categorizationEngine.categorize(draft, rules)
             TransactionEntity(
                 accountId = accountId,
                 envelopeId = envelopeId,
@@ -394,7 +407,7 @@ class BudgetRepository(
             totalRows = parsedRows.size,
             acceptedRows = acceptedRows,
             duplicateRows = duplicateRows + (newRows.size - acceptedRows),
-            ignoredIncomeRows = ignoredIncomeRows,
+            incomeRows = incomeRows,
         )
     }
 

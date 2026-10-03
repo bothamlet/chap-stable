@@ -32,6 +32,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE envelopeId IS NULL ORDER BY postedAtMillis DESC, id DESC")
     fun observeInbox(): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    suspend fun getById(id: Long): TransactionEntity?
+
     @Query("SELECT * FROM transactions ORDER BY id ASC")
     suspend fun getTransactions(): List<TransactionEntity>
 

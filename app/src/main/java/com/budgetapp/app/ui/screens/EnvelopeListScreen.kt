@@ -2,6 +2,8 @@ package com.budgetapp.app.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -603,7 +605,10 @@ internal fun CashTransactionDrawer(
     modifier: Modifier = Modifier,
 ) {
     val selectedEnvelope = envelopes.firstOrNull { it.id == editor.envelopeId }
-    val isGoal = selectedEnvelope?.type == EnvelopeType.Goal
+    val isGoalContribution = selectedEnvelope?.type == EnvelopeType.Goal
+    // A contribution already carries its direction, so the Expense/Income toggle only belongs on
+    // the plain spend sheet.
+    val isGoal = isGoalContribution && !editor.isIncome
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -660,12 +665,29 @@ internal fun CashTransactionDrawer(
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
-        CashField(label = "Envelope") {
-            EnvelopeSelector(
-                envelopes = envelopes,
-                selectedId = editor.envelopeId,
-                onSelected = { onEditorChange(editor.copy(envelopeId = it)) },
+        if (!isGoalContribution) {
+            CashKindToggle(
+                isIncome = editor.isIncome,
+                onSelected = { isIncome -> onEditorChange(editor.copy(isIncome = isIncome)) },
             )
+            Spacer(modifier = Modifier.height(15.dp))
+        }
+        if (editor.isIncome) {
+            Text(
+                text = "Money coming in waits in the inbox until you save it to a goal envelope.",
+                color = MockNeutral,
+                fontSize = 14.sp,
+                lineHeight = 19.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        } else {
+            CashField(label = "Envelope") {
+                EnvelopeSelector(
+                    envelopes = envelopes,
+                    selectedId = editor.envelopeId,
+                    onSelected = { onEditorChange(editor.copy(envelopeId = it)) },
+                )
+            }
         }
         Spacer(modifier = Modifier.height(15.dp))
         CashField(label = "Date") {
@@ -717,6 +739,46 @@ internal fun CashTransactionDrawer(
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
             )
+        }
+    }
+}
+
+@Composable
+private fun CashKindToggle(
+    isIncome: Boolean,
+    onSelected: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        listOf("Expense" to false, "Income" to true).forEach { (label, value) ->
+            val isSelected = value == isIncome
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(if (isSelected) MockPrimaryWash else MockWhiteSoft)
+                    .border(
+                        1.dp,
+                        if (isSelected) MockPrimaryAlt else MockSurfaceLightAlt,
+                        RoundedCornerShape(14.dp),
+                    )
+                    .selectable(
+                        selected = isSelected,
+                        role = Role.RadioButton,
+                        onClick = { onSelected(value) },
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = label,
+                    color = if (isSelected) MockPrimaryDeep else MockMaterialSurface,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }

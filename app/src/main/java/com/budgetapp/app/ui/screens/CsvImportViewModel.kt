@@ -30,6 +30,7 @@ data class CsvImportState(
     val error: String? = null,
 ) {
     val isMapping: Boolean = inspection != null
+    val isMappingComplete: Boolean = dateIndex >= 0 && descriptionIndex >= 0 && amountIndex >= 0
     val columns: List<String> = inspection?.headers.orEmpty()
     val rowCount: Int =
         if (hasHeader) {
@@ -53,7 +54,10 @@ class CsvImportViewModel(
         runCatching {
             val inspection = csvParser.inspect(content)
             val headers = inspection.headers.map { it.normalized() }
-            val dateIndex = headers.indexOfHeader("date", "posted", "transaction date", "data").coerceAtLeast(0)
+            // Unrecognised columns stay unset (-1) instead of being guessed at column 0/1/2:
+            // guessing meant a file without a date header failed with a parser error about the
+            // first cell instead of asking which column holds the date.
+            val dateIndex = headers.indexOfHeader("date", "posted", "transaction date", "data")
             val descriptionIndex =
                 headers.indexOfHeader(
                     "description",
@@ -64,7 +68,7 @@ class CsvImportViewModel(
                     "moketojo arba gavejo pavadinimas",
                     "payee",
                     "merchant",
-                ).coerceAtLeast(1.coerceAtMost((inspection.headers.size - 1).coerceAtLeast(0)))
+                )
             val amountIndex =
                 headers.indexOfHeader(
                     "amount",
@@ -72,7 +76,7 @@ class CsvImportViewModel(
                     "sum",
                     "suma",
                     "suma saskaitos valiuta",
-                ).coerceAtLeast(2.coerceAtMost((inspection.headers.size - 1).coerceAtLeast(0)))
+                )
             mutableState.value =
                 CsvImportState(
                     fileName = fileName,

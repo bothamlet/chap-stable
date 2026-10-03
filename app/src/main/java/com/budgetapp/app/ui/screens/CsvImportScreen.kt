@@ -252,16 +252,27 @@ private fun CsvMappingContent(
                 }
             }
         }
-        Box(
+        // Column, not Box: the hint above the button would otherwise be drawn underneath it.
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .background(MockBackground)
                 .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 32.dp),
         ) {
+            if (!state.isMappingComplete) {
+                Text(
+                    text = "Choose which column holds the date, description and amount.",
+                    color = MockNeutral,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                )
+            }
             Button(
                 onClick = onImport,
-                enabled = !state.isImporting && state.columns.isNotEmpty(),
+                enabled = !state.isImporting && state.columns.isNotEmpty() && state.isMappingComplete,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -361,9 +372,9 @@ private fun MappingCard(
             .background(MockWhite)
             .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp)),
     ) {
-        MappingRow("Date", state, state.dateIndex, onDateIndex)
-        MappingRow("Description", state, state.descriptionIndex, onDescriptionIndex)
-        MappingRow("Amount", state, state.amountIndex, onAmountIndex)
+        MappingRow("Date", state, state.dateIndex, onDateIndex, required = true)
+        MappingRow("Description", state, state.descriptionIndex, onDescriptionIndex, required = true)
+        MappingRow("Amount", state, state.amountIndex, onAmountIndex, required = true)
         MappingRow("Merchant", state, state.merchantIndex, onMerchantIndex)
         MappingRow("Debit/Credit", state, state.debitCreditIndex, onDebitCreditIndex)
         MappingRow("Transaction ID", state, state.externalIdIndex, onExternalIdIndex, showDivider = false)
@@ -377,6 +388,7 @@ private fun MappingRow(
     selectedIndex: Int?,
     onSelected: (Int) -> Unit,
     showDivider: Boolean = true,
+    required: Boolean = false,
 ) {
     val displayIndex = selectedIndex ?: -1
     Row(
@@ -389,7 +401,7 @@ private fun MappingRow(
     ) {
         Text(label, color = MockMaterialSurface, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
         ColumnOption(
-            text = state.columnLabel(displayIndex),
+            text = state.columnLabel(displayIndex, required),
             onClick = { onSelected(nextColumnIndex(displayIndex, state.columns.size)) },
         )
     }
@@ -533,9 +545,12 @@ private fun Context.readText(uri: Uri): String {
 
 private const val MaxCsvBytes = 10L * 1024L * 1024L
 
-private fun CsvImportState.columnLabel(index: Int): String {
+private fun CsvImportState.columnLabel(
+    index: Int,
+    required: Boolean = false,
+): String {
     if (index < 0) {
-        return "Skip"
+        return if (required) "Choose..." else "Skip"
     }
     val column = columns.getOrNull(index).orEmpty().ifBlank { "column" }
     return "Col $index  ($column)"

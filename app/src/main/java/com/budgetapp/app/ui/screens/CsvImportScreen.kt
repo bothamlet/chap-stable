@@ -29,6 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,16 +76,20 @@ fun CsvImportScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val externalActivityCoordinator = LocalTrustedExternalActivityCoordinator.current
+    val scope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         externalActivityCoordinator.end()
         if (uri != null) {
             val fileName = uri.lastPathSegment?.substringAfterLast('/').orEmpty().ifBlank { "import.csv" }
-            runCatching {
-                context.readText(uri)
-            }.onSuccess { content ->
-                viewModel.loadFile(fileName, content)
-            }.onFailure { error ->
-                viewModel.showError(error.message ?: "Could not read CSV")
+            // Up to 10 MB are read and inspected, which must not happen on the main thread.
+            scope.launch {
+                runCatching {
+                    withContext(Dispatchers.IO) { context.readText(uri) }
+                }.onSuccess { content ->
+                    viewModel.loadFile(fileName, content)
+                }.onFailure { error ->
+                    viewModel.showError(error.message ?: "Could not read CSV")
+                }
             }
         }
     }

@@ -533,7 +533,10 @@ class BudgetRepository(
         lastBackupAtMillis: Long? = getLastBackupAtMillis(),
         clearFirst: Boolean = false,
     ) {
-        profilePreferences.edit(commit = true) {
+        // apply(), not commit(true): this is reached straight from the "Save profile" click and a
+        // synchronous fsync on the main thread stalls the frame for no benefit — the in-memory
+        // StateFlow is updated by every caller straight after.
+        profilePreferences.edit {
             if (clearFirst) {
                 clear()
             }

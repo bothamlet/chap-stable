@@ -9,6 +9,8 @@ import com.budgetapp.app.data.repository.BudgetRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import java.text.Normalizer
 import java.util.Locale
@@ -51,15 +53,17 @@ class CsvImportViewModel(
         fileName: String,
         content: String,
     ) {
-        runCatching {
-            val inspection = csvParser.inspect(content)
-            val headers = inspection.headers.map { it.normalized() }
-            // Unrecognised columns stay unset (-1) instead of being guessed at column 0/1/2:
-            // guessing meant a file without a date header failed with a parser error about the
-            // first cell instead of asking which column holds the date.
-            val dateIndex = headers.indexOfHeader("date", "posted", "transaction date", "data")
-            val descriptionIndex =
-                headers.indexOfHeader(
+        viewModelScope.launch {
+            runCatching {
+                // inspect() scans every row of a file that can be 10 MB, so it stays off the main
+                // thread; the mapping screen appears when the state lands.
+                val inspection = withContext(Dispatchers.Default) { csvParser.inspect(content) }
+                val headers = inspection.headers.map { it.normalized() }
+                // Unrecognised columns stay unset (-1) instead of being guessed at column 0/1/2:
+                // guessing meant a file without a date header failed with a parser error about the
+                // first cell instead of asking which column holds the date.
+                val dateIndex = headers.indexOfHeader("date", "posted", "transaction date", "data")
+                val descriptionIndex = headers.indexOfHeader(
                     "description",
                     "details",
                     "memo",
@@ -69,16 +73,14 @@ class CsvImportViewModel(
                     "payee",
                     "merchant",
                 )
-            val amountIndex =
-                headers.indexOfHeader(
+                val amountIndex = headers.indexOfHeader(
                     "amount",
                     "value",
                     "sum",
                     "suma",
                     "suma saskaitos valiuta",
                 )
-            mutableState.value =
-                CsvImportState(
+                mutableState.value = CsvImportState(
                     fileName = fileName,
                     content = content,
                     inspection = inspection,
@@ -110,8 +112,9 @@ class CsvImportViewModel(
                         "transaction reference",
                     ).takeIf { it >= 0 },
                 )
-        }.onFailure { error ->
-            mutableState.update { it.copy(error = error.message ?: "Could not read CSV") }
+            }.onFailure { error ->
+                mutableState.update { it.copy(error = error.message ?: "Could not read CSV") }
+            }
         }
     }
 

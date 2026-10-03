@@ -374,14 +374,6 @@ internal fun PopulatedDashboard(
                         modifier = Modifier.padding(top = 24.dp),
                     )
                 }
-                if (state.goalEnvelopes.isNotEmpty()) {
-                    GoalSection(
-                        envelopes = state.goalEnvelopes,
-                        profileSettings = state.profileSettings,
-                        onOpenEnvelope = onOpenEnvelope,
-                        modifier = Modifier.padding(top = 24.dp),
-                    )
-                }
             }
         }
     }
@@ -755,29 +747,12 @@ internal fun CashTransactionDrawer(
             )
         }
         Spacer(modifier = Modifier.height(15.dp))
-        if (!isGoalContribution) {
-            CashKindToggle(
-                isIncome = editor.isIncome,
-                onSelected = { isIncome -> onEditorChange(editor.copy(isIncome = isIncome)) },
+        CashField(label = "Envelope") {
+            EnvelopeSelector(
+                envelopes = envelopes.filter { it.type in com.budgetapp.app.data.model.EnvelopeType.SpendingTypes },
+                selectedId = editor.envelopeId,
+                onSelected = { onEditorChange(editor.copy(envelopeId = it)) },
             )
-            Spacer(modifier = Modifier.height(15.dp))
-        }
-        if (editor.isIncome) {
-            Text(
-                text = "Money coming in waits in the inbox until you save it to a goal envelope.",
-                color = MockNeutral,
-                fontSize = 14.sp,
-                lineHeight = 19.sp,
-                fontWeight = FontWeight.Medium,
-            )
-        } else {
-            CashField(label = "Envelope") {
-                EnvelopeSelector(
-                    envelopes = envelopes,
-                    selectedId = editor.envelopeId,
-                    onSelected = { onEditorChange(editor.copy(envelopeId = it)) },
-                )
-            }
         }
         Spacer(modifier = Modifier.height(15.dp))
         CashField(label = "Date") {
@@ -833,45 +808,6 @@ internal fun CashTransactionDrawer(
     }
 }
 
-@Composable
-private fun CashKindToggle(
-    isIncome: Boolean,
-    onSelected: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        listOf("Expense" to false, "Income" to true).forEach { (label, value) ->
-            val isSelected = value == isIncome
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(if (isSelected) MockPrimaryWash else MockWhiteSoft)
-                    .border(
-                        1.dp,
-                        if (isSelected) MockPrimaryAlt else MockSurfaceLightAlt,
-                        RoundedCornerShape(14.dp),
-                    )
-                    .selectable(
-                        selected = isSelected,
-                        role = Role.RadioButton,
-                        onClick = { onSelected(value) },
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = label,
-                    color = if (isSelected) MockPrimaryDeep else MockMaterialSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-        }
-    }
-}
 
 @Composable
 internal fun CashField(

@@ -291,7 +291,7 @@ internal fun FullEnvelopeManagement(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Set aside money for variable spending, bills, and goals.",
+                text = "Set aside money for variable spending and bills.",
                 color = MockTextLightMuted,
                 fontSize = 16.sp,
                 lineHeight = 22.sp,
@@ -327,16 +327,6 @@ internal fun FullEnvelopeManagement(
                     EnvelopeSection(
                         title = "Fixed",
                         envelopes = state.fixed,
-                        profileSettings = state.profileSettings,
-                        onEdit = onEdit,
-                    )
-                }
-            }
-            if (state.goals.isNotEmpty()) {
-                item {
-                    EnvelopeSection(
-                        title = "Goals",
-                        envelopes = state.goals,
                         profileSettings = state.profileSettings,
                         onEdit = onEdit,
                     )
@@ -998,12 +988,6 @@ internal fun SegmentedTypeControl(
             text = "Fixed",
             selected = selectedType == EnvelopeType.Fixed,
             onClick = { onSelected(EnvelopeType.Fixed) },
-            modifier = Modifier.weight(1f),
-        )
-        EnvelopeSegment(
-            text = "Goal",
-            selected = selectedType == EnvelopeType.Goal,
-            onClick = { onSelected(EnvelopeType.Goal) },
             modifier = Modifier.weight(1f),
         )
     }

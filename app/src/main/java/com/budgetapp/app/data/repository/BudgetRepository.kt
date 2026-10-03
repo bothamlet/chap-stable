@@ -32,6 +32,7 @@ import java.time.LocalDate
 import com.budgetapp.app.domain.budgetPeriod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -132,7 +133,7 @@ class BudgetRepository(
             )
         }
 
-    fun observeInbox() = transactionDao.observeInbox()
+    fun observeInbox() = transactionDao.observeInbox().map { rows -> rows.filter { it.amountCents < 0L } }
 
     fun observeRules() = ruleDao.observeRules()
 
@@ -316,6 +317,7 @@ class BudgetRepository(
         note: String?,
         isIncome: Boolean = false,
     ): Long = database.withTransaction {
+        require(!isIncome) { "Income is not supported in this version." }
         val account = budgetDao.getAccounts().firstOrNull()
         val accountId = account?.id ?: createAccount(
             name = "Cash",
@@ -466,12 +468,12 @@ class BudgetRepository(
         accountId: Long,
         parsedRows: List<com.budgetapp.app.data.model.CsvTransactionDraft>,
     ): ImportResult {
-        // Credits are imported too. They wait in the inbox with a positive amount, where they can
-        // be saved into a goal envelope — dropping them silently lost salaries and refunds.
+        // This version budgets spending only; credits are counted as ignored, never saved.
+        val incomeRows = parsedRows.count { it.amountCents > 0L }
+        val spendingRows = parsedRows.filter { it.amountCents < 0L }
         val knownExternalIds = transactionDao.getExternalIds().toSet()
-        val newRows = parsedRows.filterNot { it.externalId in knownExternalIds }
-        val incomeRows = newRows.count { it.amountCents > 0L }
-        val duplicateRows = parsedRows.size - newRows.size
+        val newRows = spendingRows.filterNot { it.externalId in knownExternalIds }
+        val duplicateRows = spendingRows.size - newRows.size
         val rules = ruleDao.getEnabledRules()
         val now = now()
 
@@ -486,7 +488,7 @@ class BudgetRepository(
         )
 
         val transactions = newRows.map { draft ->
-            // Rules are written against spend merchants, so credits stay unassigned for the inbox.
+            // Only spending rows reach categorization in this version.
             val envelopeId = if (draft.amountCents > 0L) null else categorizationEngine.categorize(draft, rules)
             TransactionEntity(
                 accountId = accountId,

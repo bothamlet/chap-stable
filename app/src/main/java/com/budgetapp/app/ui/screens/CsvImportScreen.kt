@@ -585,7 +585,7 @@ private fun importSummary(result: com.budgetapp.app.data.model.ImportResult): St
         parts += "${result.duplicateRows} duplicates skipped."
     }
     if (result.incomeRows > 0) {
-        parts += "${result.incomeRows} income rows are waiting in the inbox."
+        parts += "${result.incomeRows} income rows ignored."
     }
     return parts.joinToString(" ")
 }

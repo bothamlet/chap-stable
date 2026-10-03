@@ -59,7 +59,7 @@ class EnvelopeListViewModel(
                 isCurrentPeriod = offset == 0,
                 canGoBack = offset > -120,
                 canGoForward = offset < 0,
-                envelopes = envelopes,
+                envelopes = envelopes.filter { it.type in EnvelopeType.SpendingTypes },
                 transactions = transactions,
                 inboxCount = inbox.size,
                 profileSettings = profileSettings,
@@ -89,11 +89,10 @@ class EnvelopeListViewModel(
             repository.createCashTransaction(
                 merchantName = editor.merchant,
                 amountCents = amountCents,
-                // Income is not spend: it waits in the inbox so it can be saved to a goal.
-                envelopeId = envelopeId.takeUnless { editor.isIncome },
+                envelopeId = envelopeId,
                 postedAtMillis = editor.date.toStartOfDayMillis(),
                 note = editor.note,
-                isIncome = editor.isIncome,
+                isIncome = false,
             )
         }
     }
@@ -114,5 +113,5 @@ data class CashTransactionEditorState(
     val canSave: Boolean =
         merchant.trim().isNotBlank() &&
             amountText.toCashCentsOrNull() != null &&
-            (isIncome || envelopeId != null)
+            (!isIncome && envelopeId != null)
 }

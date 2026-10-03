@@ -67,7 +67,7 @@ class EnvelopeManagementViewModel(
             val byId = balances.associateBy { it.id }
             EnvelopeManagementState(
                 envelopes =
-                    entities.map { entity ->
+                    entities.filter { it.type.toEnvelopeType() in EnvelopeType.SpendingTypes }.map { entity ->
                         val balance = byId[entity.id]
                         EnvelopeRow(
                             id = entity.id,
@@ -93,7 +93,7 @@ class EnvelopeManagementViewModel(
     ) {
         val name = editor.name.trim()
         val amountCents = editor.amountText.toCentsOrNull()
-        if (name.isBlank() || amountCents == null) {
+        if (name.isBlank() || amountCents == null || editor.type !in EnvelopeType.SpendingTypes) {
             return
         }
 

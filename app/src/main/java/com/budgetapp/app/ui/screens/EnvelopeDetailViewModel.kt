@@ -93,8 +93,8 @@ class EnvelopeDetailViewModel(
             repository.observeProfileSettings(),
         ) { id, envelopes, transactions, profileSettings ->
             EnvelopeDetailState(
-                envelope = envelopes.firstOrNull { it.id == id },
-                envelopes = envelopes,
+                envelope = envelopes.firstOrNull { it.id == id && it.type in EnvelopeType.SpendingTypes },
+                envelopes = envelopes.filter { it.type in EnvelopeType.SpendingTypes },
                 transactions = transactions,
                 profileSettings = profileSettings,
             )

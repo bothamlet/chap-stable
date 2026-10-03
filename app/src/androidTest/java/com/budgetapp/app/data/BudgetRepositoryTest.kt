@@ -67,15 +67,15 @@ class BudgetRepositoryTest {
     }
 
     @Test
-    fun incomeRowsAreImportedAndWaitInTheInbox() = runBlocking {
+    fun incomeRowsAreIgnoredWithoutEnteringTheInbox() = runBlocking {
         val csv = expenseCsv("2026-06-10;Coffee;-12,50", "2026-06-11;SALARY;2500,00")
         val result = importCsv(csv)
 
-        assertEquals(2, result.acceptedRows)
+        assertEquals(1, result.acceptedRows)
         assertEquals(1, result.incomeRows)
         val inbox = repository.observeInbox().first()
-        val salary = inbox.single { it.description == "SALARY" }
-        assertEquals(250000, salary.amountCents)
+        assertEquals("Coffee", inbox.single().description)
+        assertEquals(1, repository.observeTransactions().first().size)
     }
 
     @Test
@@ -221,29 +221,22 @@ class BudgetRepositoryTest {
     }
 
     @Test
-    fun aCreditFiledIntoAGoalCountsAsSaved() = runBlocking {
-        val goal = repository.createEnvelope("Holiday", 200000, type = "goal")
-        importCsv(expenseCsv("${LocalDate.now()};SALARY;2500,00"))
-        val credit = repository.observeInbox().first().single()
-
-        repository.assignTransactionToEnvelope(credit.id, goal)
-
-        assertEquals(0, repository.observeInbox().first().size)
-        assertEquals(250000, repository.observeEnvelopeBalances().first().single().spentCents)
+    fun manualIncomeIsRejectedWithoutCreatingData() = runBlocking {
+        val result = runCatching {
+            repository.createCashTransaction("Salary", 250000, null, 1, null, isIncome = true)
+        }
+        assertTrue(result.isFailure)
+        assertTrue(repository.observeTransactions().first().isEmpty())
+        assertTrue(repository.observeAccounts().first().isEmpty())
     }
 
     @Test
-    fun aRefundFiledBackIntoASpendingEnvelopeStaysASpend() = runBlocking {
-        // The sign follows the envelope, so a positive row filed into a spending envelope cannot
-        // cancel out spend: it is stored as money leaving that envelope.
-        val groceries = repository.createEnvelope("Groceries", 40000)
-        importCsv(expenseCsv("${LocalDate.now()};REFUND;12,50"))
-        val credit = repository.observeInbox().first().single()
-
-        repository.assignTransactionToEnvelope(credit.id, groceries)
-
-        assertEquals(1250, repository.observeEnvelopeBalances().first().single().spentCents)
-        assertEquals(-1250, repository.observeTransactions().first().single().amountCents)
+    fun legacyIncomeIsHiddenFromTheInboxWithoutDeletingIt() = runBlocking {
+        importCsv(expenseCsv("${LocalDate.now()};Legacy;-12,50"))
+        val row = repository.observeTransactions().first().single()
+        database.transactionDao().update(row.copy(amountCents = 1250))
+        assertTrue(repository.observeInbox().first().isEmpty())
+        assertEquals(1250, repository.observeTransactions().first().single().amountCents)
     }
 
     @Test
@@ -460,10 +453,10 @@ class BudgetRepositoryTest {
     }
 
     @Test
-    fun reimportedIncomeIsNotReportedAsNewInboxIncome() = runBlocking {
+    fun reimportedIncomeIsStillReportedAsIgnored() = runBlocking {
         val csv = expenseCsv("${LocalDate.now()};Salary;100,00")
         importCsv(csv)
-        assertEquals(0, importCsv(csv).incomeRows)
+        assertEquals(1, importCsv(csv).incomeRows)
     }
 
     @Test

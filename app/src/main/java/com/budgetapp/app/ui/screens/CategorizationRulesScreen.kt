@@ -2,6 +2,8 @@ package com.budgetapp.app.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
@@ -86,8 +89,10 @@ fun CategorizationRulesScreen(
     onModalVisibleChange: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
-    var editing by remember { mutableStateOf<RuleRow?>(null) }
-    LaunchedEffect(editing != null) {
+    val mutation by viewModel.mutationStatus.collectAsState()
+    MutationErrorDialog(mutation) { viewModel.mutationStatus.value = MutationStatus() }
+    var editing by viewModel.editingRule
+    SideEffect {
         onModalVisibleChange(editing != null)
     }
 
@@ -377,9 +382,9 @@ private fun RuleEditorDrawer(
 ) {
     if (row == null) return
 
-    var selectedEnvelopeId by remember(row.rule.id) { mutableLongStateOf(row.rule.envelopeId) }
+    var selectedEnvelopeId by rememberSaveable(row.rule.id) { mutableLongStateOf(row.rule.envelopeId) }
     var pattern by rememberSaveable(row.rule.id) { mutableStateOf(row.rule.pattern) }
-    var isDeleteConfirming by remember(row.rule.id) { mutableStateOf(false) }
+    var isDeleteConfirming by rememberSaveable(row.rule.id) { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -389,6 +394,7 @@ private fun RuleEditorDrawer(
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MockWhite)
             .border(1.dp, MockSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

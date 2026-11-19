@@ -2,6 +2,8 @@ package com.budgetapp.app.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -33,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -58,6 +62,8 @@ import com.budgetapp.app.data.entity.TransactionEntity
 import com.budgetapp.app.data.model.EnvelopeBalance
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.domain.parseAmountMinorUnits
+import com.budgetapp.app.domain.toDatePickerMillis
+import com.budgetapp.app.domain.toDatePickerDate
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.components.EnvelopePickerList
 import com.budgetapp.app.ui.theme.MockBackground
@@ -96,10 +102,12 @@ fun EnvelopeDetailScreen(
     }
 
     val state by viewModel.state.collectAsState()
-    var editor by remember { mutableStateOf<TransactionEditorState?>(null) }
-    var addEditor by remember { mutableStateOf<DetailAddTransactionEditorState?>(null) }
+    val mutation by viewModel.mutationStatus.collectAsState()
+    MutationErrorDialog(mutation) { viewModel.mutationStatus.value = MutationStatus() }
+    var editor by viewModel.transactionEditor
+    var addEditor by viewModel.addTransactionEditor
     var addDrawerHeightPx by remember { mutableFloatStateOf(900f) }
-    LaunchedEffect(editor != null, addEditor != null) {
+    SideEffect {
         onModalVisibleChange(editor != null || addEditor != null)
     }
     val openAddTransaction = {
@@ -139,6 +147,7 @@ fun EnvelopeDetailScreen(
                 editor = addEditor,
                 envelopeName = state.envelope?.name ?: "Envelope",
                 isGoal = state.isGoal,
+                profileSettings = state.profileSettings,
                 onEditorChange = { addEditor = it },
                 onSave = { current ->
                     val submitted = current.copy(hasSubmitted = true)
@@ -517,6 +526,7 @@ internal fun TransactionEditorDrawer(
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(MockWhite)
             .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -542,6 +552,7 @@ internal fun TransactionEditorDrawer(
             else -> TransactionEditorForm(
                 editor = editor,
                 envelopes = envelopes,
+                profileSettings = profileSettings,
                 onEditorChange = onEditorChange,
                 onSave = onSave,
             )
@@ -554,6 +565,7 @@ internal fun DetailAddTransactionDrawer(
     editor: DetailAddTransactionEditorState?,
     envelopeName: String,
     isGoal: Boolean,
+    profileSettings: ProfileSettings = ProfileSettings(),
     onEditorChange: (DetailAddTransactionEditorState) -> Unit,
     onSave: (DetailAddTransactionEditorState) -> Unit,
     modifier: Modifier = Modifier,
@@ -568,6 +580,7 @@ internal fun DetailAddTransactionDrawer(
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MockWhite)
             .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -603,6 +616,7 @@ internal fun DetailAddTransactionDrawer(
         DetailField("Amount") {
             DetailAmountInput(
                 value = editor.amountText,
+                profileSettings = profileSettings,
                 onValueChange = { value ->
                     onEditorChange(editor.copy(amountText = value.filter { it.isDigit() || it == '.' || it == ',' }))
                 },
@@ -620,6 +634,7 @@ internal fun DetailAddTransactionDrawer(
         DetailField("Date") {
             DetailDateControl(
                 date = editor.date,
+                profileSettings = profileSettings,
                 onDateChange = { onEditorChange(editor.copy(date = it)) },
             )
         }
@@ -669,6 +684,7 @@ internal fun DetailAddTransactionDrawer(
 internal fun TransactionEditorForm(
     editor: TransactionEditorState,
     envelopes: List<EnvelopeBalance>,
+    profileSettings: ProfileSettings = ProfileSettings(),
     onEditorChange: (TransactionEditorState) -> Unit,
     onSave: (TransactionEditorState) -> Unit,
 ) {
@@ -701,6 +717,7 @@ internal fun TransactionEditorForm(
         DetailField("Edit amount") {
             DetailAmountInput(
                 value = editor.amountText,
+                profileSettings = profileSettings,
                 onValueChange = { value ->
                     onEditorChange(editor.copy(amountText = value.filter { it.isDigit() || it == '.' || it == ',' }))
                 },
@@ -710,6 +727,7 @@ internal fun TransactionEditorForm(
         DetailField("Edit date") {
             DetailDateControl(
                 date = editor.date,
+                profileSettings = profileSettings,
                 onDateChange = { onEditorChange(editor.copy(date = it)) },
             )
         }
@@ -821,23 +839,24 @@ internal fun DetailAmountInput(
     value: String,
     onValueChange: (String) -> Unit,
     hasError: Boolean = false,
+    profileSettings: ProfileSettings = ProfileSettings(),
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MockWhiteSoft)
-            .border(1.dp, if (hasError) MockDanger.copy(alpha = 0.62f) else MockSurfaceLightAlt, RoundedCornerShape(16.dp)),
+            .border(1.dp, if (hasError) MockDanger.copy(alpha = 0.62f) else MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "\u20ac",
+            text = profileSettings.currencySymbol(),
             color = MockNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp),
+            modifier = Modifier.padding(end = 8.dp),
         )
         BasicTextField(
             value = value,
@@ -850,8 +869,8 @@ internal fun DetailAmountInput(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 33.dp, end = 16.dp),
+                .weight(1f)
+                .fillMaxHeight(),
             decorationBox = { innerTextField ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) { innerTextField() }
             },
@@ -919,10 +938,11 @@ internal fun DetailEnvelopeSelector(
 internal fun DetailDateControl(
     date: LocalDate,
     onDateChange: (LocalDate) -> Unit,
+    profileSettings: ProfileSettings = ProfileSettings(),
 ) {
     var isPickerOpen by remember { mutableStateOf(false) }
     val pickerState = androidx.compose.material3.rememberDatePickerState(
-        initialSelectedDateMillis = date.toDetailStartOfDayMillis(),
+        initialSelectedDateMillis = date.toDatePickerMillis(),
     )
 
     Box(
@@ -936,7 +956,7 @@ internal fun DetailDateControl(
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(date.toString(), color = MockMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(profileSettings.formatDate(date), color = MockMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         Text(
             text = "Pick",
             color = MockPrimaryAlt,
@@ -952,7 +972,7 @@ internal fun DetailDateControl(
                 TextButton(
                     onClick = {
                         pickerState.selectedDateMillis?.let { millis ->
-                            onDateChange(millis.toDetailLocalDate())
+                            onDateChange(millis.toDatePickerDate())
                         }
                         isPickerOpen = false
                     },
@@ -1054,11 +1074,11 @@ internal enum class DetailIconKind {
 }
 
 internal fun Long.toDetailLocalDate(): LocalDate {
-    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+    return Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
 }
 
 internal fun LocalDate.toDetailStartOfDayMillis(): Long {
-    return atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    return atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
 }
 
 internal fun String.toDetailCentsOrNull(): Long? = parseAmountMinorUnits(this)?.takeIf { it > 0L }
@@ -1100,6 +1120,7 @@ private fun SplitTransactionForm(
         DetailField("First part") {
             DetailAmountInput(
                 value = editor.splitAmountText,
+                profileSettings = profileSettings,
                 hasError = editor.hasSubmittedSplit && editor.splitAmountCents == null,
                 onValueChange = { value ->
                     onEditorChange(
@@ -1123,7 +1144,9 @@ private fun SplitTransactionForm(
         Spacer(modifier = Modifier.height(15.dp))
         DetailField("First part goes to") {
             EnvelopePickerList(
-                envelopes = envelopes,
+                envelopes = envelopes.filter {
+                    (it.type == com.budgetapp.app.data.model.EnvelopeType.Goal) == (editor.transaction.amountCents > 0L)
+                },
                 selectedId = editor.splitEnvelopeId,
                 onSelected = { onEditorChange(editor.copy(splitEnvelopeId = it)) },
                 selectedTextColor = MockPrimaryAlt,

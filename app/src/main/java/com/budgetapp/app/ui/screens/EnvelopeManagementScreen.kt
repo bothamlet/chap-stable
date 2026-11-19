@@ -7,6 +7,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
@@ -38,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -123,6 +127,8 @@ fun EnvelopeManagementScreen(    viewModel: EnvelopeManagementViewModel,
     onModalVisibleChange: (Boolean) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
+    val mutation by viewModel.mutationStatus.collectAsState()
+    MutationErrorDialog(mutation) { viewModel.mutationStatus.value = MutationStatus() }
     var editor by rememberSaveable(stateSaver = EnvelopeEditorStateSaver) { mutableStateOf<EnvelopeEditorState?>(null) }
     var handledCreateRequestKey by rememberSaveable { mutableIntStateOf(createRequestKey) }
 
@@ -132,7 +138,7 @@ fun EnvelopeManagementScreen(    viewModel: EnvelopeManagementViewModel,
             editor = EnvelopeEditorState()
         }
     }
-    LaunchedEffect(editor != null) {
+    SideEffect {
         onModalVisibleChange(editor != null)
     }
 
@@ -626,6 +632,7 @@ internal fun EnvelopeEditorDrawer(
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .background(MockWhite)
             .border(1.dp, MockSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -926,22 +933,22 @@ internal fun AmountInput(
     onValueChange: (String) -> Unit,
     isError: Boolean = false,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MockWhiteSoft)
-            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp)),
+            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = currencySymbol,
             color = MockNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp),
+            modifier = Modifier.padding(end = 8.dp),
         )
         BasicTextField(
             value = value,
@@ -954,8 +961,8 @@ internal fun AmountInput(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 33.dp, end = 16.dp),
+                .weight(1f)
+                .fillMaxHeight(),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),

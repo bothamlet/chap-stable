@@ -49,6 +49,7 @@ val appModule = module {
             .addMigrations(
                 BudgetDatabase.Migration2To3,
                 BudgetDatabase.Migration3To4,
+                BudgetDatabase.Migration4To5,
             )
             .build()
     }

@@ -10,6 +10,7 @@ package com.budgetapp.app.domain
  */
 fun parseAmountMinorUnits(input: String): Long? {
     val text = input.trim()
+    if (text.none { it.isDigit() }) return null
     val match = AmountPattern.matchEntire(text) ?: return null
     val whole = match.groupValues[1].ifEmpty { "0" }.toLong()
     val fraction = match.groupValues[3].padEnd(2, '0')

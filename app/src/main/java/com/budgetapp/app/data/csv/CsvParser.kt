@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter
 import java.text.Normalizer
 import java.security.MessageDigest
 import java.util.Locale
+import java.time.format.ResolverStyle
+import com.budgetapp.app.domain.MaxAmountCents
 
 class CsvParser {
     fun parse(content: String): List<CsvTransactionDraft> {
@@ -44,12 +46,13 @@ class CsvParser {
 
     fun inspect(content: String): CsvInspection {
         val delimiter = chooseDelimiter(content)
-        val rows = content
-            .lineSequence()
-            .filter { it.isNotBlank() }
-            .map { parseLine(it, delimiter) }
-            .toList()
-        val headerRowIndex = rows.indices.maxByOrNull { rows[it].size } ?: 0
+        val rows = parseRecords(content.removePrefix("\uFEFF"), delimiter)
+        val knownHeaders = dateHeaders + descriptionHeaders + merchantHeaders + amountHeaders +
+            debitCreditHeaders + externalIdHeaders
+        val headerRowIndex = rows.indices.maxWithOrNull(
+            compareBy<Int> { index -> rows[index].count { it.normalizedCsvHeader() in knownHeaders } }
+                .thenBy { rows[it].size },
+        ) ?: 0
         val headers = rows.getOrNull(headerRowIndex).orEmpty()
         return CsvInspection(
             delimiter = delimiter,
@@ -71,14 +74,19 @@ class CsvParser {
         externalIdIndex: Int? = null,
     ): List<CsvTransactionDraft> {
         val rows = inspect(content).rows
+        require(listOf(dateIndex, descriptionIndex, amountIndex).all { it >= 0 }) { "Choose all required columns." }
+        require(setOf(dateIndex, descriptionIndex, amountIndex).size == 3) { "Date, description and amount need different columns." }
+        require(!hasHeader || headerRowIndex in rows.indices) { "Choose a valid header row." }
         val dataRows = if (hasHeader) rows.drop(headerRowIndex + 1) else rows
         val sourceIdOccurrences = mutableMapOf<String, Int>()
 
-        return dataRows.mapIndexedNotNull { index, row ->
+        return dataRows.mapIndexed { index, row ->
             val date = row.getOrNull(dateIndex)?.trim().orEmpty()
             val description = row.getOrNull(descriptionIndex)?.trim().orEmpty()
             val amount = row.getOrNull(amountIndex)?.trim().orEmpty()
-            if (date.isBlank() || description.isBlank() || amount.isBlank()) return@mapIndexedNotNull null
+            require(date.isNotBlank() && description.isNotBlank() && amount.isNotBlank()) {
+                "CSV row ${index + if (hasHeader) headerRowIndex + 2 else 1} is missing a date, description or amount. Nothing was imported."
+            }
 
             val merchant = merchantIndex?.let { row.getOrNull(it) }?.trim()?.ifBlank { null }
             val postedAtMillis = parseDate(date)
@@ -90,16 +98,16 @@ class CsvParser {
                 ?.let { row.getOrNull(it) }
                 ?.trim()
                 ?.ifBlank { null }
-            val sourceIdentityKey =
-                sourceExternalId?.let {
-                    listOf(it.trim().lowercase(Locale.US), postedAtMillis, amountCents).joinToString("|")
-                }
+            val sourceIdentityKey = listOf(
+                sourceExternalId?.trim()?.lowercase(Locale.US).orEmpty(),
+                postedAtMillis, amountCents, normalizedRow(row),
+            ).joinToString("|")
             val sourceOccurrence =
-                sourceIdentityKey?.let { key ->
+                sourceIdentityKey.let { key ->
                     sourceIdOccurrences.getOrDefault(key, 0).also {
                         sourceIdOccurrences[key] = it + 1
                     }
-                } ?: 0
+                }
             CsvTransactionDraft(
                 postedAtMillis = postedAtMillis,
                 description = description,
@@ -110,7 +118,6 @@ class CsvParser {
                         sourceExternalId = sourceExternalId,
                         sourceOccurrence = sourceOccurrence,
                         row = row,
-                        rowIndex = index,
                         postedAtMillis = postedAtMillis,
                         description = description,
                         amountCents = amountCents,
@@ -119,16 +126,23 @@ class CsvParser {
         }
     }
 
-    private fun parseLine(line: String, delimiter: Char): List<String> {
-        val values = mutableListOf<String>()
+    private fun parseRecords(content: String, delimiter: Char): List<List<String>> {
+        val rows = mutableListOf<List<String>>()
+        var values = mutableListOf<String>()
         val current = StringBuilder()
         var inQuotes = false
         var index = 0
 
-        while (index < line.length) {
-            val char = line[index]
+        fun finishRow() {
+            values += current.toString()
+            current.clear()
+            if (values.any { it.isNotBlank() }) rows += values.toList()
+            values = mutableListOf()
+        }
+        while (index < content.length) {
+            val char = content[index]
             when {
-                char == '"' && inQuotes && line.getOrNull(index + 1) == '"' -> {
+                char == '"' && inQuotes && content.getOrNull(index + 1) == '"' -> {
                     current.append('"')
                     index++
                 }
@@ -137,17 +151,37 @@ class CsvParser {
                     values += current.toString()
                     current.clear()
                 }
+                (char == '\n' || char == '\r') && !inQuotes -> {
+                    finishRow()
+                    if (char == '\r' && content.getOrNull(index + 1) == '\n') index++
+                }
                 else -> current.append(char)
             }
             index++
         }
-        values += current.toString()
-        return values.dropLastWhile { it.isBlank() }
+        require(!inQuotes) { "CSV contains an unclosed quoted field." }
+        finishRow()
+        return rows
     }
 
     private fun chooseDelimiter(content: String): Char {
-        val sample = content.lineSequence().firstOrNull { it.isNotBlank() }.orEmpty()
-        return if (sample.count { it == ';' } > sample.count { it == ',' }) ';' else ','
+        // Count separators outside quoted cells over several lines: bank files often begin
+        // with a one-cell title, and merchant names may contain commas.
+        val counts = mutableMapOf(',' to 0, ';' to 0, '\t' to 0)
+        var inQuotes = false
+        var lines = 0
+        var index = 0
+        while (index < content.length && lines < 20) {
+            val char = content[index]
+            if (char == '"') {
+                if (inQuotes && content.getOrNull(index + 1) == '"') index++ else inQuotes = !inQuotes
+            } else if (!inQuotes) {
+                if (char in counts) counts[char] = counts.getValue(char) + 1
+                if (char == '\n') lines++
+            }
+            index++
+        }
+        return counts.maxBy { it.value }.key
     }
 
     private fun parseDate(value: String): Long {
@@ -156,7 +190,7 @@ class CsvParser {
         }
         if (dateTime != null) {
             return dateTime
-                .atZone(ZoneId.systemDefault())
+                .atZone(java.time.ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli()
         }
@@ -166,7 +200,7 @@ class CsvParser {
         } ?: error("Unsupported CSV date: $value")
 
         return date
-            .atStartOfDay(ZoneId.systemDefault())
+            .atStartOfDay(java.time.ZoneOffset.UTC)
             .toInstant()
             .toEpochMilli()
     }
@@ -183,7 +217,8 @@ class CsvParser {
             .replace(" ", "")
             .trim()
         val normalized = normalizeAmount(stripped)
-        val cents = (normalized.toBigDecimal() * 100.toBigDecimal()).toLong()
+        val cents = (normalized.toBigDecimal() * 100.toBigDecimal()).longValueExact()
+        require(cents in -MaxAmountCents..MaxAmountCents) { "CSV amount is too large: $value" }
         val sign = when (debitCredit?.lowercase(Locale.US)) {
             "d", "debetas", "debit" -> -1L
             "k", "kreditas", "credit" -> 1L
@@ -199,16 +234,25 @@ class CsvParser {
      * group is a thousands separator. Getting this wrong multiplies or divides the amount by 1000.
      */
     private fun normalizeAmount(value: String): String {
-        val digits = value.filter { it.isDigit() || it == '-' }
+        require(value.matches(Regex("[+-]?[0-9]+(?:[.,][0-9]+)*"))) { "Invalid CSV amount: $value" }
+        val digits = value.filter { it.isDigit() || it == '-' || it == '+' }
         val separatorIndex = maxOf(value.lastIndexOf(','), value.lastIndexOf('.'))
         if (separatorIndex == -1) {
             return digits
         }
         val fraction = value.substring(separatorIndex + 1).filter { it.isDigit() }
         if (fraction.length !in 1..2) {
+            require(value.matches(Regex("[+-]?[1-9][0-9]{0,2}(?:,[0-9]{3})+|[+-]?[1-9][0-9]{0,2}(?:\\.[0-9]{3})+"))) {
+                "Invalid CSV amount or decimal precision: $value"
+            }
             return digits
         }
-        val whole = value.substring(0, separatorIndex).filter { it.isDigit() || it == '-' }
+        val wholeText = value.substring(0, separatorIndex)
+        require(wholeText.matches(Regex("[+-]?[0-9]+|[+-]?[1-9][0-9]{0,2}(?:,[0-9]{3})+|[+-]?[1-9][0-9]{0,2}(?:\\.[0-9]{3})+"))) { "Invalid CSV amount grouping: $value" }
+        if (wholeText.contains(',') || wholeText.contains('.')) {
+            require(!wholeText.contains(value[separatorIndex])) { "Invalid CSV amount grouping: $value" }
+        }
+        val whole = wholeText.filter { it.isDigit() || it == '-' || it == '+' }
         return "$whole.${fraction.padEnd(2, '0')}"
     }
 
@@ -216,21 +260,15 @@ class CsvParser {
         sourceExternalId: String?,
         sourceOccurrence: Int,
         row: List<String>,
-        rowIndex: Int,
         postedAtMillis: Long,
         description: String,
         amountCents: Long,
     ): String {
         val normalizedSourceId = sourceExternalId?.trim()?.lowercase(Locale.US)
-        if (normalizedSourceId != null && sourceOccurrence == 0) {
-            return sha256(
-                listOf("source", normalizedSourceId, postedAtMillis, amountCents).joinToString("|"),
-            )
-        }
         if (normalizedSourceId != null) {
             return sha256(
                 listOf(
-                    "source-repeat-v2",
+                    "source-v3",
                     normalizedSourceId,
                     postedAtMillis,
                     amountCents,
@@ -240,7 +278,7 @@ class CsvParser {
             )
         }
         return sha256(
-            listOf("row", rowIndex, postedAtMillis, description.trim().lowercase(Locale.US), amountCents)
+            listOf("row-v3", postedAtMillis, description.trim().lowercase(Locale.US), amountCents, normalizedRow(row), sourceOccurrence)
                 .joinToString("|"),
         )
     }
@@ -265,19 +303,19 @@ class CsvParser {
         val externalIdHeaders = setOf("dok nr.", "dok nr", "nuoroda", "reference", "transaction id", "transaction reference")
         val dateFormatters = listOf(
             DateTimeFormatter.ISO_LOCAL_DATE,
-            DateTimeFormatter.ofPattern("M/d/yyyy", Locale.US),
-            DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.US),
-            DateTimeFormatter.ofPattern("d.M.yyyy", Locale.US),
-            DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.US),
+            DateTimeFormatter.ofPattern("M/d/uuuu", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("MM/dd/uuuu", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("d.M.uuuu", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("dd.MM.uuuu", Locale.US).withResolverStyle(ResolverStyle.STRICT),
         )
         val dateTimeFormatters = listOf(
             DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.US),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.US),
-            DateTimeFormatter.ofPattern("d.M.yyyy HH:mm", Locale.US),
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm", Locale.US),
-            DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss", Locale.US),
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", Locale.US),
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("d.M.uuuu HH:mm", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("dd.MM.uuuu HH:mm", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("d.M.uuuu HH:mm:ss", Locale.US).withResolverStyle(ResolverStyle.STRICT),
+            DateTimeFormatter.ofPattern("dd.MM.uuuu HH:mm:ss", Locale.US).withResolverStyle(ResolverStyle.STRICT),
         )
     }
 }

@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +87,7 @@ fun BackupRestoreScreen(
         // Restoring overwrites everything, so the file is only read after the user confirms.
         uri?.let { sourceUri -> pendingRestoreUri = sourceUri }
     }
-    LaunchedEffect(isDeleteConfirming, pendingRestoreUri) {
+    SideEffect {
         onModalVisibleChange(isDeleteConfirming || pendingRestoreUri != null)
     }
     LaunchedEffect(state.error) {

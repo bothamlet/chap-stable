@@ -25,7 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.ViewModel
 import com.budgetapp.app.navigation.BudgetNavHost
 import com.budgetapp.app.security.BiometricGate
 import com.budgetapp.app.security.AppLockCoordinator
@@ -38,18 +40,19 @@ import com.budgetapp.app.ui.theme.MockWhite
 
 class MainActivity : FragmentActivity() {
     private lateinit var biometricGate: BiometricGate
-    private var isUnlocked by mutableStateOf(false)
+    private val unlockState: AppUnlockState by viewModels()
+    private var isUnlocked: Boolean
+        get() = unlockState.isUnlocked
+        set(value) { unlockState.isUnlocked = value }
     private var isAuthenticating = false
     private var hasRequestedInitialUnlock = false
     private var lockNotice by mutableStateOf<String?>(null)
+    private var canContinueWithoutLock by mutableStateOf(false)
     private val appLockCoordinator = AppLockCoordinator()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Restored so a rotation (or process death) does not drop the user back to the lock screen
-        // mid-task.
-        isUnlocked = savedInstanceState?.getBoolean(StateIsUnlocked) ?: false
-        hasRequestedInitialUnlock = savedInstanceState?.getBoolean(StateHasRequestedUnlock) ?: false
+        // The ViewModel survives rotation; a new process must authenticate again.
         if (!BuildConfig.ALLOW_SCREEN_CAPTURE) {
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_SECURE,
@@ -57,7 +60,7 @@ class MainActivity : FragmentActivity() {
             )
         }
 
-        biometricGate = BiometricGate(this)
+        biometricGate = BiometricGate(this, appLockCoordinator)
 
         setContent {
             BudgetTheme {
@@ -70,6 +73,7 @@ class MainActivity : FragmentActivity() {
                         LockedScreen(
                             onUnlock = ::unlock,
                             notice = lockNotice,
+                            canContinueWithoutLock = canContinueWithoutLock,
                             onOpenSecuritySettings = ::openSecuritySettings,
                             onContinueWithoutLock = {
                                 lockNotice = null
@@ -90,12 +94,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(StateIsUnlocked, isUnlocked)
-        outState.putBoolean(StateHasRequestedUnlock, hasRequestedInitialUnlock)
-    }
-
     override fun onStop() {
         super.onStop()
         if (appLockCoordinator.shouldLockOnStop(isChangingConfigurations)) {
@@ -106,6 +104,8 @@ class MainActivity : FragmentActivity() {
 
     private fun unlock() {
         if (isAuthenticating) return
+        lockNotice = null
+        canContinueWithoutLock = false
         isAuthenticating = true
         biometricGate.authenticate(
             onUnlocked = {
@@ -116,10 +116,11 @@ class MainActivity : FragmentActivity() {
                 isAuthenticating = false
                 isUnlocked = false
             },
-            onUnavailable = { message ->
+            onUnavailable = { message, mayContinue ->
                 isAuthenticating = false
                 isUnlocked = false
                 lockNotice = message
+                canContinueWithoutLock = mayContinue
             },
         )
     }
@@ -129,16 +130,17 @@ class MainActivity : FragmentActivity() {
             .onFailure { lockNotice = "Could not open security settings." }
     }
 
-    private companion object {
-        const val StateIsUnlocked = "state_is_unlocked"
-        const val StateHasRequestedUnlock = "state_has_requested_unlock"
-    }
+}
+
+class AppUnlockState : ViewModel() {
+    var isUnlocked by mutableStateOf(false)
 }
 
 @Composable
 private fun LockedScreen(
     onUnlock: () -> Unit,
     notice: String?,
+    canContinueWithoutLock: Boolean,
     onOpenSecuritySettings: () -> Unit,
     onContinueWithoutLock: () -> Unit,
 ) {
@@ -175,6 +177,13 @@ private fun LockedScreen(
             Text(if (notice == null) "Unlock" else "Open security settings", fontWeight = FontWeight.Bold)
         }
         if (notice != null) {
+            Text(
+                text = "Try unlocking again",
+                color = MockPrimaryAlt,
+                modifier = Modifier.clickable(onClick = onUnlock).padding(12.dp),
+            )
+        }
+        if (canContinueWithoutLock) {
             Text(
                 text = "Continue without the lock",
                 color = MockPrimaryAlt,

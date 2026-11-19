@@ -20,13 +20,14 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 data class AnalyticsState(
     val envelopes: List<EnvelopeBalance> = emptyList(),
     val transactions: List<TransactionEntity> = emptyList(),
     val profileSettings: ProfileSettings = ProfileSettings(),
+    val period: BudgetPeriod = profileSettings.budgetPeriod(),
 ) {
-    val period: BudgetPeriod = profileSettings.budgetPeriod()
     val spendingEnvelopes: List<EnvelopeBalance> = envelopes.filter { it.type in EnvelopeType.SpendingTypes }
     private val spendingEnvelopeIds: Set<Long> = spendingEnvelopes.map { it.id }.toSet()
     val budgetCents: Long = spendingEnvelopes.sumOf { it.ceilingCents }
@@ -60,8 +61,9 @@ class AnalyticsViewModel(
             repository.observeEnvelopeBalances(),
             repository.observeTransactions(),
             repository.observeProfileSettings(),
-        ) { envelopes, transactions, profileSettings ->
-            AnalyticsState(envelopes = envelopes, transactions = transactions, profileSettings = profileSettings)
+            repository.observeViewedPeriod(),
+        ) { envelopes, transactions, profileSettings, period ->
+            AnalyticsState(envelopes = envelopes, transactions = transactions, profileSettings = profileSettings, period = period)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -69,7 +71,7 @@ class AnalyticsViewModel(
         )
 }
 
-private fun Long.toAnalyticsDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+private fun Long.toAnalyticsDate(): LocalDate = Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
 
 private fun forecast(
     spentCents: Long,
@@ -78,7 +80,7 @@ private fun forecast(
     if (period.lengthInDays <= 0) {
         spentCents
     } else {
-        (spentCents.toDouble() / dayOfPeriod(period) * period.lengthInDays).roundToInt().toLong()
+        (spentCents.toDouble() / dayOfPeriod(period) * period.lengthInDays).roundToLong()
     }
 
 private fun dayOfPeriod(period: BudgetPeriod): Int =

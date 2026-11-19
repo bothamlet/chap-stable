@@ -40,6 +40,7 @@ data class TransactionEntity(
     val accountId: Long,
     val envelopeId: Long?,
     val importBatchId: Long?,
+    // Calendar date/time encoded in UTC so travel cannot move a transaction into another month.
     val postedAtMillis: Long,
     val description: String,
     val merchantName: String?,

@@ -37,6 +37,8 @@ data class RuleRow(
 class CategorizationRulesViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    val editingRule = androidx.compose.runtime.mutableStateOf<RuleRow?>(null)
+    val mutationStatus = MutableStateFlow(MutationStatus())
     private val query = MutableStateFlow("")
 
     val state: StateFlow<CategorizationRulesState> =
@@ -48,7 +50,7 @@ class CategorizationRulesViewModel(
             val spendingEnvelopes = envelopes.filter { it.type in EnvelopeType.SpendingTypes }
             CategorizationRulesState(
                 rules =
-                    rules.filter { it.isEnabled }.map { rule ->
+                    rules.filter { rule -> rule.isEnabled && spendingEnvelopes.any { it.id == rule.envelopeId } }.map { rule ->
                         RuleRow(
                             rule = rule,
                             envelopeName = spendingEnvelopes.firstOrNull { it.id == rule.envelopeId }?.name ?: "Unknown",
@@ -77,9 +79,8 @@ class CategorizationRulesViewModel(
         if (cleaned.isBlank()) {
             return
         }
-        viewModelScope.launch {
+        performMutation(mutationStatus, onDone) {
             repository.updateRule(rule.copy(pattern = cleaned, envelopeId = envelopeId))
-            onDone()
         }
     }
 
@@ -87,9 +88,8 @@ class CategorizationRulesViewModel(
         ruleId: Long,
         onDone: () -> Unit,
     ) {
-        viewModelScope.launch {
+        performMutation(mutationStatus, onDone) {
             repository.deleteRule(ruleId)
-            onDone()
         }
     }
 }

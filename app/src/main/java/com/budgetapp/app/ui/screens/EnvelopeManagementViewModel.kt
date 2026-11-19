@@ -54,6 +54,7 @@ data class EnvelopeEditorState(
 class EnvelopeManagementViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    val mutationStatus = MutableStateFlow(MutationStatus())
     private val errorMessage = MutableStateFlow<String?>(null)
 
     val state: StateFlow<EnvelopeManagementState> =
@@ -96,7 +97,7 @@ class EnvelopeManagementViewModel(
             return
         }
 
-        viewModelScope.launch {
+        performMutation(mutationStatus) {
             errorMessage.value = null
             try {
                 if (editor.envelopeId == null) {
@@ -134,7 +135,7 @@ class EnvelopeManagementViewModel(
         envelopeId: Long,
         onClose: () -> Unit,
     ) {
-        viewModelScope.launch {
+        performMutation(mutationStatus) {
             repository.archiveEnvelope(envelopeId)
             onClose()
         }

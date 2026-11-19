@@ -14,7 +14,7 @@ interface CategorizationRuleDao {
     @Query("SELECT * FROM categorization_rules ORDER BY priority DESC, createdAtMillis ASC")
     fun observeRules(): Flow<List<CategorizationRuleEntity>>
 
-    @Query("SELECT * FROM categorization_rules WHERE isEnabled = 1 ORDER BY priority DESC, createdAtMillis ASC")
+    @Query("SELECT categorization_rules.* FROM categorization_rules INNER JOIN envelopes ON envelopes.id = categorization_rules.envelopeId WHERE categorization_rules.isEnabled = 1 AND envelopes.isArchived = 0 AND envelopes.type != 'goal' ORDER BY categorization_rules.priority DESC, categorization_rules.createdAtMillis ASC")
     suspend fun getEnabledRules(): List<CategorizationRuleEntity>
 
     @Query("SELECT * FROM categorization_rules ORDER BY id ASC")

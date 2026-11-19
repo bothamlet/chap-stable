@@ -18,8 +18,8 @@ interface TransactionDao {
         """
         SELECT * FROM transactions
         WHERE envelopeId = :envelopeId
-            AND postedAtMillis >= :periodStartMillis
-            AND postedAtMillis < :periodEndMillis
+            AND (EXISTS (SELECT 1 FROM envelopes WHERE id = :envelopeId AND type = 'goal')
+                OR (postedAtMillis >= :periodStartMillis AND postedAtMillis < :periodEndMillis))
         ORDER BY postedAtMillis DESC, id DESC
         """,
     )

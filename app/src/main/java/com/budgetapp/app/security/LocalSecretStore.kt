@@ -22,8 +22,8 @@ class LocalSecretStore(
 
         val secretBytes = ByteArray(DatabasePassphraseBytes).also(SecureRandom()::nextBytes)
         val passphrase = Base64.getEncoder().encodeToString(secretBytes)
-        preferences.edit(commit = true) {
-            putString(DatabasePassphraseKey, encrypt(passphrase))
+        check(preferences.edit().putString(DatabasePassphraseKey, encrypt(passphrase)).commit()) {
+            "Could not save the local database key."
         }
         return passphrase
     }

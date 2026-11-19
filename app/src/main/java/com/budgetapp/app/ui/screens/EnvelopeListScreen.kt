@@ -1,6 +1,8 @@
 package com.budgetapp.app.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.selection.selectable
@@ -49,6 +51,8 @@ import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.domain.parseAmountMinorUnits
 import com.budgetapp.app.domain.BudgetPeriod
+import com.budgetapp.app.domain.toDatePickerMillis
+import com.budgetapp.app.domain.toDatePickerDate
 import com.budgetapp.app.domain.budgetPeriod
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.components.StandardEmptyState
@@ -285,7 +289,9 @@ internal fun EmptyDashboard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 132.dp),
         ) {
             HeaderBlock(
                 monthLabel = state.monthLabel,
@@ -302,7 +308,7 @@ internal fun EmptyDashboard(
                 onCreateEnvelope = onCreateEnvelope,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 112.dp),
+                    .padding(top = 32.dp),
             )
         }
     }
@@ -351,6 +357,7 @@ internal fun PopulatedDashboard(
                     envelopes = state.spendingEnvelopes,
                     transactions = state.transactions,
                     profileSettings = state.profileSettings,
+                    period = state.period,
                 )
                 if (state.inboxCount > 0) {
                     InboxPill(
@@ -410,6 +417,9 @@ internal fun HeaderBlock(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.8.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
             )
             Spacer(modifier = Modifier.width(6.dp))
             PeriodArrow(
@@ -463,12 +473,13 @@ private fun PeriodArrow(
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            color = if (enabled) MockPrimaryGlowAlt else MockTextSoftPurple.copy(alpha = 0.4f),
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-        )
+        Canvas(Modifier.size(width = 12.dp, height = 22.dp)) {
+            val color = if (enabled) MockPrimaryGlowAlt else MockTextSoftPurple.copy(alpha = 0.4f)
+            val outerX = if (label == "\u2039") size.width else 0f
+            val innerX = size.width - outerX
+            drawLine(color, Offset(outerX, 0f), Offset(innerX, size.height / 2f), 2.dp.toPx(), StrokeCap.Round)
+            drawLine(color, Offset(innerX, size.height / 2f), Offset(outerX, size.height), 2.dp.toPx(), StrokeCap.Round)
+        }
     }
 }
 
@@ -498,12 +509,13 @@ internal fun SummaryCard(
     envelopes: List<EnvelopeBalance>,
     transactions: List<TransactionEntity>,
     profileSettings: ProfileSettings,
+    period: BudgetPeriod,
     modifier: Modifier = Modifier,
 ) {
     val budget = envelopes.sumOf { it.ceilingCents }
     val spent = envelopes.sumOf { it.spentCents }
     val remaining = budget - spent
-    val period = profileSettings.budgetPeriod()
+    val spendingEnvelopeIds = envelopes.map { it.id }.toSet()
 
     Column(
         modifier = modifier
@@ -547,7 +559,7 @@ internal fun SummaryCard(
             }
         }
         BurnRateChart(
-            transactions = transactions,
+            transactions = transactions.filter { it.envelopeId in spendingEnvelopeIds },
             budgetCents = budget,
             period = period,
             modifier = Modifier
@@ -704,6 +716,7 @@ internal fun CashTransactionDrawer(
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .background(MockWhite)
             .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
     ) {
         Box(
@@ -953,22 +966,22 @@ internal fun CashAmountInput(
     onValueChange: (String) -> Unit,
     isError: Boolean,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(MockWhiteSoft)
-            .border(1.dp, if (isError) MockDanger else MockSurfaceLightAlt, RoundedCornerShape(16.dp)),
+            .border(1.dp, if (isError) MockDanger else MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = currencySymbol,
             color = MockNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp),
+            modifier = Modifier.padding(end = 8.dp),
         )
         BasicTextField(
             value = value,
@@ -981,8 +994,8 @@ internal fun CashAmountInput(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             singleLine = true,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 33.dp, end = 16.dp),
+                .weight(1f)
+                .fillMaxHeight(),
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -1025,7 +1038,7 @@ internal fun CashDateControl(
 ) {
     var isPickerOpen by remember { mutableStateOf(false) }
     val pickerState = androidx.compose.material3.rememberDatePickerState(
-        initialSelectedDateMillis = date.toStartOfDayMillis(),
+        initialSelectedDateMillis = date.toDatePickerMillis(),
     )
 
     Box(
@@ -1060,7 +1073,7 @@ internal fun CashDateControl(
                 TextButton(
                     onClick = {
                         pickerState.selectedDateMillis?.let { millis ->
-                            onDateChange(millis.toLocalDate())
+                            onDateChange(millis.toDatePickerDate())
                         }
                         isPickerOpen = false
                     },
@@ -1424,11 +1437,11 @@ internal fun statusText(
 internal fun String.toCashCentsOrNull(): Long? = parseAmountMinorUnits(this)?.takeIf { it > 0L }
 
 internal fun Long.toDashboardDate(): LocalDate {
-    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+    return Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
 }
 
 internal fun Long.toLocalDate(): LocalDate {
-    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+    return Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
 }
 
 internal fun chartTickLabels(period: BudgetPeriod): List<String> {
@@ -1438,5 +1451,5 @@ internal fun chartTickLabels(period: BudgetPeriod): List<String> {
 }
 
 internal fun LocalDate.toStartOfDayMillis(): Long {
-    return atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    return atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
 }

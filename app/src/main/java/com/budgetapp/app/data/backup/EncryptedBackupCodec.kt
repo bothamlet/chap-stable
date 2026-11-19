@@ -29,10 +29,13 @@ class EncryptedBackupCodec {
             iv = base64Encode(cipher.iv),
             ciphertext = base64Encode(cipher.doFinal(plaintext)),
         )
-        return json.encodeToString(encryptedFile).toByteArray(Charsets.UTF_8)
+        val bytes = json.encodeToString(encryptedFile).toByteArray(Charsets.UTF_8)
+        require(bytes.size <= MaxEncryptedBackupBytes) { "This budget exceeds the 25 MB backup limit." }
+        return bytes
     }
 
     fun decrypt(bytes: ByteArray): BudgetBackupPayload {
+        require(bytes.size <= MaxEncryptedBackupBytes) { "Backup file is too large." }
         val encryptedFile = runCatching {
             json.decodeFromString<EncryptedBackupFile>(bytes.toString(Charsets.UTF_8))
         }.getOrElse {
@@ -100,6 +103,8 @@ class EncryptedBackupCodec {
         const val EncryptedFileVersion = 1
     }
 }
+
+const val MaxEncryptedBackupBytes = 25 * 1024 * 1024
 
 @Serializable
 private data class EncryptedBackupFile(

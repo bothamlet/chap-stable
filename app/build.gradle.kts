@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.budgetapp.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.budgetapp.app"
@@ -69,14 +69,14 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.navigation:navigation-compose:2.8.5")
-    implementation("androidx.room:room-ktx:2.6.1")
-    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.8.5")
+    implementation("androidx.room:room-runtime:2.8.5")
     implementation("io.insert-koin:koin-android:3.5.3")
     implementation("io.insert-koin:koin-androidx-compose:3.5.3")
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    implementation("net.zetetic:sqlcipher-android:4.19.1")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    ksp("androidx.room:room-compiler:2.6.1")
+    ksp("androidx.room:room-compiler:2.8.5")
 
     testImplementation(kotlin("test"))
 

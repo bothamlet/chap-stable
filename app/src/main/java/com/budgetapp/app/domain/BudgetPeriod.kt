@@ -17,12 +17,12 @@ data class BudgetPeriod(
 ) {
     val lengthInDays: Int = (end.toEpochDay() - start.toEpochDay() + 1).toInt().coerceAtLeast(1)
 
-    /** First instant of the period, inclusive, in the device time zone. */
-    fun startMillis(zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): Long =
+    /** Inclusive calendar boundary; transaction dates use UTC independently of device zone. */
+    fun startMillis(zone: java.time.ZoneId = java.time.ZoneOffset.UTC): Long =
         start.atStartOfDay(zone).toInstant().toEpochMilli()
 
-    /** First instant after the period, exclusive, in the device time zone. */
-    fun endExclusiveMillis(zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): Long =
+    /** Exclusive calendar boundary, with an optional explicit zone for other consumers. */
+    fun endExclusiveMillis(zone: java.time.ZoneId = java.time.ZoneOffset.UTC): Long =
         end.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
 }
 

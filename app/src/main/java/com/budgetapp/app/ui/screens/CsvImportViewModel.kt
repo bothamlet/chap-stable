@@ -33,7 +33,8 @@ data class CsvImportState(
     val error: String? = null,
 ) {
     val isMapping: Boolean = inspection != null
-    val isMappingComplete: Boolean = dateIndex >= 0 && descriptionIndex >= 0 && amountIndex >= 0
+    val isMappingComplete: Boolean = dateIndex >= 0 && descriptionIndex >= 0 && amountIndex >= 0 &&
+        setOf(dateIndex, descriptionIndex, amountIndex).size == 3
 
     /** Nothing in the header resembles a required column, so the file is probably not a CSV. */
     val hasNoRecognisableColumns: Boolean =
@@ -157,9 +158,10 @@ class CsvImportViewModel(
 
     fun import() {
         val current = mutableState.value
+        if (current.isImporting || !current.isMappingComplete) return
         val fileName = current.fileName ?: return
+        mutableState.update { it.copy(isImporting = true, error = null, result = null) }
         viewModelScope.launch {
-            mutableState.update { it.copy(isImporting = true, error = null, result = null) }
             runCatching {
                 repository.importMappedCsv(
                     fileName = fileName,

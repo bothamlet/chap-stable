@@ -8,6 +8,7 @@ import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.repository.BudgetRepository
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -38,6 +39,7 @@ data class InboxTransactionGroup(
 class ReviewInboxViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    val mutationStatus = MutableStateFlow(MutationStatus())
     val state: StateFlow<ReviewInboxState> =
         combine(
             repository.observeEnvelopeBalances(),
@@ -60,14 +62,13 @@ class ReviewInboxViewModel(
         envelopeId: Long,
         createRule: Boolean,
     ) {
-        viewModelScope.launch {
-            group.transactionIds.forEach { transactionId ->
-                repository.assignTransactionToEnvelope(transactionId, envelopeId)
-            }
+        performMutation(mutationStatus) {
+            require(state.value.candidatesFor(group).any { it.id == envelopeId }) { "Choose an available envelope." }
+            repository.assignTransactionsToEnvelope(group.transactionIds, envelopeId)
             val pattern = group.title.toInboxRulePattern()
             // A blank pattern would match every future row (contains("") is always true), so a
             // merchant name with no word characters simply creates no rule.
-            if (createRule && pattern.isNotBlank()) {
+            if (createRule && group.amountCents < 0L && pattern.isNotBlank()) {
                 runCatching {
                     repository.createRule(
                         pattern = pattern,
@@ -79,10 +80,12 @@ class ReviewInboxViewModel(
     }
 }
 
-private fun List<TransactionEntity>.toInboxGroups(): List<InboxTransactionGroup> =
+internal fun List<TransactionEntity>.toInboxGroups(): List<InboxTransactionGroup> =
     groupBy { transaction ->
         val merchant = transaction.merchantName ?: transaction.description
-        merchant.trim().uppercase(Locale.US)
+        // A merchant's refund must never be grouped with its expenses: candidate envelopes
+        // and assignment signs depend on the direction of each transaction.
+        merchant.trim().uppercase(Locale.US) + if (transaction.amountCents > 0L) "|credit" else "|debit"
     }.map { (key, transactions) ->
         val newest = transactions.maxBy { it.postedAtMillis }
         InboxTransactionGroup(

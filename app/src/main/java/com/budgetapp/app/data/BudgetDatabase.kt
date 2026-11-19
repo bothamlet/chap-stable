@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.migration.Migration
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.budgetapp.app.domain.toCalendarTransactionMillis
 import com.budgetapp.app.data.dao.BudgetDao
 import com.budgetapp.app.data.dao.CategorizationRuleDao
 import com.budgetapp.app.data.dao.ImportBatchDao
@@ -22,7 +23,7 @@ import com.budgetapp.app.data.entity.TransactionEntity
         CategorizationRuleEntity::class,
         ImportBatchEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class BudgetDatabase : RoomDatabase() {
@@ -35,6 +36,19 @@ abstract class BudgetDatabase : RoomDatabase() {
     abstract fun importBatchDao(): ImportBatchDao
 
     companion object {
+        val Migration4To5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.query("SELECT id, postedAtMillis FROM transactions ORDER BY id").use { cursor ->
+                    while (cursor.moveToNext()) {
+                        db.execSQL(
+                            "UPDATE transactions SET postedAtMillis = ? WHERE id = ?",
+                            arrayOf(cursor.getLong(1).toCalendarTransactionMillis(), cursor.getLong(0)),
+                        )
+                    }
+                }
+            }
+        }
+
         val Migration2To3 =
             object : Migration(2, 3) {
                 override fun migrate(db: SupportSQLiteDatabase) {

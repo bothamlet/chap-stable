@@ -385,6 +385,97 @@ class BudgetRepositoryTest {
 
     // ---- helpers ---------------------------------------------------------------------------
 
+    @Test
+    fun repeatingASplitFromAStaleEditorCannotDuplicateMoney() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        val household = repository.createEnvelope("Household", 20000)
+        val original = addTransaction(groceries, 1000, LocalDate.now())
+        repository.splitTransaction(original, household, 400, groceries)
+        assertTrue(runCatching { repository.splitTransaction(original, household, 400, groceries) }.isFailure)
+        assertEquals(2, repository.observeTransactions().first().size)
+        assertEquals(-1000, repository.observeTransactions().first().sumOf { it.amountCents })
+    }
+
+    @Test
+    fun splittingCannotTurnAnExpenseIntoSavings() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        val goal = repository.createEnvelope("Savings", 20000, type = "goal")
+        val original = addTransaction(groceries, 1000, LocalDate.now())
+        assertTrue(runCatching { repository.splitTransaction(original, goal, 400, groceries) }.isFailure)
+        assertEquals(listOf(original), repository.observeTransactions().first())
+    }
+
+    @Test
+    fun goalHistoryIncludesEveryDepositInItsCumulativeBalance() = runBlocking {
+        val goal = repository.createEnvelope("Holiday", 200000, type = "goal")
+        addTransaction(goal, 1000, LocalDate.now().minusMonths(2))
+        addTransaction(goal, 2000, LocalDate.now())
+        assertEquals(2, repository.observePeriodTransactionsForEnvelope(goal).first().size)
+    }
+
+    @Test
+    fun archivedRulesDoNotHideNewImports() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        repository.createRule("coffee", groceries)
+        repository.archiveEnvelope(groceries)
+        importCsv(expenseCsv("${LocalDate.now()};Coffee;-12,50"))
+        assertEquals(1, repository.observeInbox().first().size)
+    }
+
+    @Test
+    fun reorderingAnImportedStatementDoesNotDuplicateIt() = runBlocking {
+        val coffee = "${LocalDate.now()};Coffee;-12,50"
+        val books = "${LocalDate.now()};Books;-24,99"
+        importCsv(expenseCsv(coffee, books))
+        val result = importCsv(expenseCsv(books, coffee))
+        assertEquals(0, result.acceptedRows)
+        assertEquals(2, result.duplicateRows)
+    }
+
+    @Test
+    fun missingRequiredCsvCellsRollBackTheEntireImport() = runBlocking {
+        assertTrue(runCatching { importCsv(expenseCsv("${LocalDate.now()};Coffee;-12,50", "${LocalDate.now()};;-24,99")) }.isFailure)
+        assertTrue(repository.observeTransactions().first().isEmpty())
+        assertTrue(repository.observeAccounts().first().isEmpty())
+    }
+
+    @Test
+    fun wipingResetsTheViewedPeriod() = runBlocking {
+        repository.shiftPeriod(-2)
+        repository.deleteAllLocalData()
+        assertEquals(0, repository.observePeriodOffsetMonths().value)
+    }
+
+    @Test
+    fun caseSensitiveNamesAndRulesCanRestoreTheirOwnBackup() = runBlocking {
+        val first = repository.createEnvelope("Rent", 10000)
+        val second = repository.createEnvelope("rent", 20000)
+        repository.createRule("Coffee", first)
+        repository.createRule("coffee", second)
+        val bytes = repository.createEncryptedBackup().bytes
+        repository.deleteAllLocalData()
+        val restored = repository.restoreEncryptedBackup(bytes)
+        assertEquals(2, restored.envelopeCount)
+        assertEquals(2, restored.ruleCount)
+    }
+
+    @Test
+    fun reimportedIncomeIsNotReportedAsNewInboxIncome() = runBlocking {
+        val csv = expenseCsv("${LocalDate.now()};Salary;100,00")
+        importCsv(csv)
+        assertEquals(0, importCsv(csv).incomeRows)
+    }
+
+    @Test
+    fun assigningToAnArchivedEnvelopeFailsWithoutChangingTheTransaction() = runBlocking {
+        val groceries = repository.createEnvelope("Groceries", 40000)
+        repository.archiveEnvelope(groceries)
+        importCsv(expenseCsv("${LocalDate.now()};Coffee;-12,50"))
+        val row = repository.observeInbox().first().single()
+        assertTrue(runCatching { repository.assignTransactionToEnvelope(row.id, groceries) }.isFailure)
+        assertEquals(row, repository.observeInbox().first().single())
+    }
+
     private suspend fun importCsv(csv: String) =
         repository.importMappedCsv(
             fileName = "test.csv",
@@ -400,7 +491,7 @@ class BudgetRepositoryTest {
             merchantName = "Test",
             amountCents = cents,
             envelopeId = envelopeId,
-            postedAtMillis = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            postedAtMillis = date.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
             note = null,
         )
         return repository.observeTransactions().first().first { it.id == id }

@@ -3,16 +3,95 @@ package com.budgetapp.app.data.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertFails
 
 class CsvParserTest {
     private val parser = CsvParser()
+
+    @Test
+    fun transactionDatesAndDuplicateIdsSurviveADeviceTimeZoneChange() {
+        val originalZone = java.util.TimeZone.getDefault()
+        val csv = "date;description;amount\n2026-03-01;Coffee;-12,50"
+        try {
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Europe/Minsk"))
+            val first = parser.parse(csv).single()
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("America/New_York"))
+            assertEquals(first, parser.parse(csv).single())
+        } finally {
+            java.util.TimeZone.setDefault(originalZone)
+        }
+    }
+
+    @Test
+    fun quotedNewlinesAndTrailingEmptyCellsArePreserved() {
+        val csv = "date;description;amount;merchant\r\n2026-06-10;\"Coffee\nlarge\";-12,50;\r\n"
+        val inspection = parser.inspect(csv)
+        assertEquals(2, inspection.rows.size)
+        assertEquals(4, inspection.rows.last().size)
+        assertEquals("Coffee\nlarge", parser.parse(csv).single().description)
+    }
+
+    @Test
+    fun bomAndSingleCellPreambleDoNotHideTheHeader() {
+        val csv = "\uFEFFStatement\ndate;description;amount\n2026-06-10;Coffee;-12,50"
+        assertEquals(';', parser.inspect(csv).delimiter)
+        assertEquals(-1250, parser.parse(csv).single().amountCents)
+    }
+
+    @Test
+    fun missingRequiredValuesFailInsteadOfSilentlyDroppingRows() {
+        assertFails { parser.parse("date;description;amount\n2026-06-10;;-12,50") }
+    }
+
+    @Test
+    fun brokenQuotesFailInsteadOfChangingColumns() {
+        assertFails { parser.inspect("date;description;amount\n2026-06-10;\"Coffee;-12,50") }
+    }
+
+    @Test
+    fun impossibleDatesAreRejectedInsteadOfAdjusted() {
+        assertFails { parser.parse("date;description;amount\n31.02.2026;Coffee;-12,50") }
+    }
+
+    @Test
+    fun malformedAmountsCannotBeConvertedIntoPlausibleMoney() {
+        listOf("1e3", "12abc34", "0.001", "1,23,45", "999999999999999999999", "1000000000").forEach {
+            assertFails(it) { amountOf(it) }
+        }
+    }
+
+    @Test
+    fun rowIdentityWithoutBankIdsSurvivesReorderingAndOverlappingStatements() {
+        val header = "date;description;amount"
+        val coffee = "2026-06-10;Coffee;-12,50"
+        val books = "2026-06-11;Books;-24,99"
+        val first = parser.parse(listOf(header, coffee, books).joinToString("\n")).associateBy { it.description }
+        val reordered = parser.parse(listOf(header, books, coffee).joinToString("\n")).associateBy { it.description }
+        val overlap = parser.parse(listOf(header, books).joinToString("\n")).single()
+        assertEquals(first, reordered)
+        assertEquals(first.getValue("Books").externalId, overlap.externalId)
+    }
+
+    @Test
+    fun identicalLegitimateRowsAreStillDistinctWithinAStatement() {
+        val rows = parser.parse("date;description;amount\n2026-06-10;Coffee;-12,50\n2026-06-10;Coffee;-12,50")
+        assertNotEquals(rows[0].externalId, rows[1].externalId)
+    }
+
+    @Test
+    fun repeatedReferencesRemainStableWhenTheirSeparateTimeRowsMove() {
+        val csv = repeatedReferenceWithSeparateTimeCsv()
+        val reversed = (listOf(csv.lines().first()) + csv.lines().drop(1).reversed()).joinToString("\n")
+        val first = parser.parse(csv).map { it.externalId }.toSet()
+        assertEquals(first, parser.parse(reversed).map { it.externalId }.toSet())
+    }
 
     @Test
     fun inspectUsesLongestRowAsHeader() {
         val inspection = parser.inspect(bankCsv())
 
         assertEquals(1, inspection.headerRowIndex)
-        assertEquals(5, inspection.headers.size)
+        assertEquals(6, inspection.headers.size, "the trailing blank column is preserved")
         assertEquals("DOK NR.", inspection.headers.first())
     }
 

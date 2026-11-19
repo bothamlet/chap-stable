@@ -8,9 +8,11 @@ import com.budgetapp.app.data.model.EnvelopeType
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.data.repository.BudgetRepository
 import com.budgetapp.app.domain.budgetPeriod
+import com.budgetapp.app.domain.BudgetPeriod
 import com.budgetapp.app.domain.dayLine
 import com.budgetapp.app.domain.periodLabel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 data class DashboardState(
+    val period: BudgetPeriod = ProfileSettings().budgetPeriod(),
     val monthLabel: String = "",
     val dayLine: String = "",
     val isCurrentPeriod: Boolean = true,
@@ -37,16 +40,19 @@ data class DashboardState(
 class EnvelopeListViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    val cashEditor = androidx.compose.runtime.mutableStateOf<CashTransactionEditorState?>(null)
+    val mutationStatus = MutableStateFlow(MutationStatus())
     val state: StateFlow<DashboardState> =
         combine(
             repository.observeEnvelopeBalances(),
             repository.observeTransactions(),
             repository.observeInbox(),
             repository.observeProfileSettings(),
-            repository.observePeriodOffsetMonths(),
-        ) { envelopes, transactions, inbox, profileSettings, offset ->
-            val period = repository.viewedPeriod()
+            repository.observeViewedPeriod(),
+        ) { envelopes, transactions, inbox, profileSettings, period ->
+            val offset = repository.observePeriodOffsetMonths().value
             DashboardState(
+                period = period,
                 monthLabel = profileSettings.periodLabel(period),
                 // "Day 3 of 31" only makes sense for the period the user is actually in.
                 dayLine = if (offset == 0) profileSettings.dayLine(period) else "${period.lengthInDays} days",
@@ -61,11 +67,7 @@ class EnvelopeListViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue =
-                DashboardState(
-                    monthLabel = "June 2026",
-                    dayLine = "Day 10 of 30",
-                ),
+            initialValue = DashboardState(),
         )
 
     fun showPreviousPeriod() = repository.shiftPeriod(-1)
@@ -83,7 +85,7 @@ class EnvelopeListViewModel(
         if (!editor.canSave || amountCents == null) {
             return
         }
-        viewModelScope.launch {
+        performMutation(mutationStatus, onSaved) {
             repository.createCashTransaction(
                 merchantName = editor.merchant,
                 amountCents = amountCents,
@@ -93,7 +95,6 @@ class EnvelopeListViewModel(
                 note = editor.note,
                 isIncome = editor.isIncome,
             )
-            onSaved()
         }
     }
 }

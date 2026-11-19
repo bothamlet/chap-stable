@@ -2,8 +2,8 @@ package com.budgetapp.app.security
 
 import android.content.Context
 import android.database.DatabaseUtils
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SQLiteDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.io.File
 
 object SqlCipherDatabaseSupport {
@@ -11,32 +11,39 @@ object SqlCipherDatabaseSupport {
         context: Context,
         databaseName: String,
         passphrase: String,
-    ): SupportFactory {
-        SQLiteDatabase.loadLibs(context)
+    ): SupportOpenHelperFactory {
+        System.loadLibrary("sqlcipher")
         migratePlaintextDatabaseIfNeeded(context.getDatabasePath(databaseName), passphrase)
-        return SupportFactory(SQLiteDatabase.getBytes(passphrase.toCharArray()))
+        return SupportOpenHelperFactory(passphrase.toByteArray(Charsets.UTF_8))
     }
 
     private fun migratePlaintextDatabaseIfNeeded(
         databaseFile: File,
         passphrase: String,
     ) {
+        val encryptedFile = File(databaseFile.parentFile, "${databaseFile.name}.encrypted")
+        val plaintextBackup = File(databaseFile.parentFile, "${databaseFile.name}.plaintext")
+        // A process can die between the two renames. Recover the source before Room opens
+        // a new empty database and strands the user's existing budget.
+        if (!databaseFile.exists() && plaintextBackup.exists()) {
+            check(plaintextBackup.renameTo(databaseFile)) { "Could not recover database during encryption." }
+        }
         if (!databaseFile.exists() || !databaseFile.isPlaintextSqlite()) return
 
         databaseFile.parentFile?.mkdirs()
-        val encryptedFile = File(databaseFile.parentFile, "${databaseFile.name}.encrypted")
-        val plaintextBackup = File(databaseFile.parentFile, "${databaseFile.name}.plaintext")
         encryptedFile.delete()
         plaintextBackup.delete()
 
-        val database = SQLiteDatabase.openOrCreateDatabase(databaseFile, "", null)
+        val database = SQLiteDatabase.openOrCreateDatabase(databaseFile, "", null, null)
         try {
-            database.rawExecSQL("PRAGMA wal_checkpoint(FULL)")
-            database.rawExecSQL(
+            database.rawQuery("PRAGMA wal_checkpoint(FULL)", emptyArray<String>()).use { it.moveToFirst() }
+            database.execSQL(
                 "ATTACH DATABASE ${databaseString(encryptedFile.absolutePath)} AS encrypted KEY ${databaseString(passphrase)}",
             )
-            database.rawExecSQL("SELECT sqlcipher_export('encrypted')")
-            database.rawExecSQL("DETACH DATABASE encrypted")
+            database.rawQuery("SELECT sqlcipher_export('encrypted')", emptyArray<String>()).use { it.moveToFirst() }
+            // sqlcipher_export copies tables, but not the version Room uses for migrations.
+            database.execSQL("PRAGMA encrypted.user_version = ${database.version}")
+            database.execSQL("DETACH DATABASE encrypted")
         } finally {
             database.close()
         }

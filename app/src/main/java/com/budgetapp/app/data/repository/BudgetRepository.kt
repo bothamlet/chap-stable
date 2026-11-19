@@ -27,6 +27,7 @@ import com.budgetapp.app.data.model.TransactionStatus
 import com.budgetapp.app.data.model.toEnvelopeType
 import com.budgetapp.app.domain.CategorizationEngine
 import com.budgetapp.app.domain.BudgetPeriod
+import com.budgetapp.app.domain.toCalendarTransactionMillis
 import java.time.LocalDate
 import com.budgetapp.app.domain.budgetPeriod
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +36,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -77,7 +81,8 @@ class BudgetRepository(
 
     /** Moves the viewed period by [months]; the future is not interesting, so it clamps at 0. */
     fun shiftPeriod(months: Int) {
-        periodOffsetMonths.value = (periodOffsetMonths.value + months).coerceIn(MaxPeriodOffsetMonths, 0)
+        periodOffsetMonths.value = (periodOffsetMonths.value.toLong() + months)
+            .coerceIn(MaxPeriodOffsetMonths.toLong(), 0L).toInt()
     }
 
     fun showCurrentPeriod() {
@@ -88,9 +93,16 @@ class BudgetRepository(
     fun viewedPeriod(): BudgetPeriod =
         profileSettings.value.budgetPeriod(LocalDate.now().plusMonths(periodOffsetMonths.value.toLong()))
 
-    private fun periodFlow(): Flow<BudgetPeriod> =
-        combine(profileSettings, periodOffsetMonths) { settings, offset ->
-            settings.budgetPeriod(LocalDate.now().plusMonths(offset.toLong()))
+    private val calendarDays: Flow<LocalDate> = flow {
+        while (true) {
+            emit(LocalDate.now())
+            delay(60_000)
+        }
+    }.distinctUntilChanged()
+
+    fun observeViewedPeriod(): Flow<BudgetPeriod> =
+        combine(profileSettings, periodOffsetMonths, calendarDays) { settings, offset, today ->
+            settings.budgetPeriod(today.plusMonths(offset.toLong()))
         }
 
     fun observeAccounts() = budgetDao.observeAccounts()
@@ -103,7 +115,7 @@ class BudgetRepository(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observeEnvelopeBalances(): Flow<List<EnvelopeBalance>> =
-        periodFlow().flatMapLatest { period ->
+        observeViewedPeriod().flatMapLatest { period ->
             budgetDao.observeEnvelopeBalances(period.startMillis(), period.endExclusiveMillis())
         }
 
@@ -112,7 +124,7 @@ class BudgetRepository(
     /** Transactions of one envelope inside the current budget period, newest first. */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun observePeriodTransactionsForEnvelope(envelopeId: Long): Flow<List<TransactionEntity>> =
-        periodFlow().flatMapLatest { period ->
+        observeViewedPeriod().flatMapLatest { period ->
             transactionDao.observeTransactionsForEnvelopeInPeriod(
                 envelopeId = envelopeId,
                 periodStartMillis = period.startMillis(),
@@ -154,6 +166,7 @@ class BudgetRepository(
             // wiping to start over.
         }
         profileSettings.value = ProfileSettings()
+        showCurrentPeriod()
     }
 
     suspend fun createEncryptedBackup(): BackupExport =
@@ -192,6 +205,7 @@ class BudgetRepository(
                 clearFirst = true,
             )
             profileSettings.value = restoredProfile
+            showCurrentPeriod()
             BackupRestoreResult(
                 exportedAtMillis = payload.exportedAtMillis,
                 accountCount = payload.accounts.size,
@@ -288,6 +302,12 @@ class BudgetRepository(
         )
     }
 
+    suspend fun assignTransactionsToEnvelope(transactionIds: List<Long>, envelopeId: Long) {
+        database.withTransaction {
+            transactionIds.forEach { assignTransactionToEnvelope(it, envelopeId) }
+        }
+    }
+
     suspend fun createCashTransaction(
         merchantName: String,
         amountCents: Long,
@@ -344,26 +364,36 @@ class BudgetRepository(
         val remainder = total - firstAmountCents
         val now = now()
         database.withTransaction {
-            transactionDao.deleteById(transaction.id)
-            transactionDao.insert(
+            val current = transactionDao.getById(transaction.id)
+            require(current == transaction) { "This transaction has changed. Reopen it before splitting." }
+            val activeEnvelopes = budgetDao.getActiveEnvelopes()
+            val isCredit = transaction.amountCents > 0L
+            val targets = listOfNotNull(firstEnvelopeId, secondEnvelopeId)
+            require(targets.all { id ->
+                val target = activeEnvelopes.firstOrNull { it.id == id }
+                target != null && (target.type.toEnvelopeType() == EnvelopeType.Goal) == isCredit
+            }) { "Split expenses between spending envelopes and savings between goal envelopes." }
+            transactionDao.update(
                 transaction.copy(
-                    id = 0,
                     envelopeId = firstEnvelopeId,
                     amountCents = firstAmountCents.withEnvelopeSign(firstEnvelopeId),
+                    status = TransactionStatus.Assigned,
                     updatedAtMillis = now,
                 ),
             )
-            transactionDao.insert(
+            val insertedId = transactionDao.insert(
                 transaction.copy(
                     id = 0,
                     envelopeId = secondEnvelopeId,
                     amountCents = secondEnvelopeId
                         ?.let { remainder.withEnvelopeSign(it) }
-                        ?: -remainder,
+                        ?: if (isCredit) remainder else -remainder,
                     externalId = null,
+                    status = if (secondEnvelopeId == null) TransactionStatus.Inbox else TransactionStatus.Assigned,
                     updatedAtMillis = now,
                 ),
             )
+            check(insertedId > 0L) { "Could not save both parts of the transaction." }
         }
     }
 
@@ -438,9 +468,9 @@ class BudgetRepository(
     ): ImportResult {
         // Credits are imported too. They wait in the inbox with a positive amount, where they can
         // be saved into a goal envelope — dropping them silently lost salaries and refunds.
-        val incomeRows = parsedRows.count { it.amountCents > 0L }
         val knownExternalIds = transactionDao.getExternalIds().toSet()
         val newRows = parsedRows.filterNot { it.externalId in knownExternalIds }
+        val incomeRows = newRows.count { it.amountCents > 0L }
         val duplicateRows = parsedRows.size - newRows.size
         val rules = ruleDao.getEnabledRules()
         val now = now()
@@ -494,11 +524,9 @@ class BudgetRepository(
     private fun now(): Long = System.currentTimeMillis()
 
     private suspend fun Long.withEnvelopeSign(envelopeId: Long): Long {
-        val envelopeType = budgetDao.getAllEnvelopes()
-            .firstOrNull { it.id == envelopeId }
-            ?.type
-            ?.toEnvelopeType()
-            ?: EnvelopeType.Variable
+        val envelope = budgetDao.getActiveEnvelopes().firstOrNull { it.id == envelopeId }
+        requireNotNull(envelope) { "This envelope is no longer available." }
+        val envelopeType = envelope.type.toEnvelopeType()
         return if (envelopeType == EnvelopeType.Goal) {
             kotlin.math.abs(this)
         } else {
@@ -517,7 +545,10 @@ class BudgetRepository(
         budgetDao.insertEnvelopes(payload.envelopes.map { it.toEntity() })
         importBatchDao.insertAll(payload.importBatches.map { it.toEntity() })
         ruleDao.insertAll(payload.rules.map { it.toEntity() })
-        val insertedTransactions = transactionDao.insertAll(payload.transactions.map { it.toEntity() })
+        val insertedTransactions = transactionDao.insertAll(payload.transactions.map {
+            val row = it.toEntity()
+            if (payload.databaseVersion < 5) row.copy(postedAtMillis = row.postedAtMillis.toCalendarTransactionMillis()) else row
+        })
         check(insertedTransactions.count { it != -1L } == payload.transactions.size) {
             "Could not restore every transaction."
         }
@@ -540,10 +571,12 @@ class BudgetRepository(
         validateIds("rules", payload.rules.map { it.id })
         validateIds("transactions", payload.transactions.map { it.id })
 
-        validateUniqueValues("envelope names", payload.envelopes.map { it.name.normalizedKey() })
+        // These checks must use the same case-sensitive equality as SQLite's unique indexes.
+        // Otherwise a valid exported database containing "Rent" and "rent" cannot restore.
+        validateUniqueValues("envelope names", payload.envelopes.map { it.name })
         validateUniqueValues(
             "rules",
-            payload.rules.map { "${it.pattern.normalizedKey()}:${it.matchField.normalizedKey()}" },
+            payload.rules.map { "${it.pattern}\u0000${it.matchField}" },
         )
         validateUniqueValues("external transaction IDs", payload.transactions.mapNotNull { it.externalId })
 
@@ -773,7 +806,7 @@ class BudgetRepository(
         trim().lowercase(Locale.US)
 
     private companion object {
-        const val DatabaseBackupVersion = 3
+        const val DatabaseBackupVersion = 5
         /** How far back the dashboard lets the user look. */
         const val MaxPeriodOffsetMonths = -120
         const val DefaultColorToken = "accent"

@@ -179,7 +179,7 @@ private fun AnalyticsFullContent(
             }
             item {
                 AnalyticsSectionTitle("Spending by day")
-                HeatmapPanel(state.periodExpenses, state.profileSettings)
+                HeatmapPanel(state.periodExpenses, state.profileSettings, state.period)
             }
         }
     }
@@ -510,8 +510,7 @@ private fun ComparisonPanel(state: AnalyticsState) {
 }
 
 @Composable
-private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings: ProfileSettings) {
-    val period = profileSettings.budgetPeriod()
+private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings: ProfileSettings, period: BudgetPeriod) {
     val amounts = transactions.groupBy { (it.postedAtMillis.toAnalyticsDate().toEpochDay() - period.start.toEpochDay() + 1).toInt() }.mapValues { (_, txs) -> txs.sumOf { -it.amountCents } }
     val maxAmount = amounts.values.maxOrNull()?.coerceAtLeast(1L) ?: 1L
     val weekdays = orderedWeekdays(profileSettings.firstDay())
@@ -597,7 +596,7 @@ private data class MonthSpend(
 )
 
 private fun AnalyticsState.monthComparison(): List<MonthSpend> {
-    val currentPeriod = profileSettings.budgetPeriod()
+    val currentPeriod = period
     val byPeriodStart = assignedExpenses.groupBy { profileSettings.budgetPeriod(it.postedAtMillis.toAnalyticsDate()).start }
     return (5 downTo 0).map { offset ->
         val startMonth = YearMonth.from(currentPeriod.start).minusMonths(offset.toLong())
@@ -615,7 +614,7 @@ private fun AnalyticsState.monthComparison(): List<MonthSpend> {
 }
 
 private fun Long.toAnalyticsDate(): LocalDate {
-    return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+    return Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
 }
 
 private fun forecast(spentCents: Long, period: BudgetPeriod): Long {

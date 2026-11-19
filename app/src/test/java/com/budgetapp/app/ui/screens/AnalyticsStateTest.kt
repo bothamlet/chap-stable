@@ -10,6 +10,8 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import com.budgetapp.app.domain.budgetPeriod
 
 class AnalyticsStateTest {
     private val groceries = EnvelopeBalance(
@@ -22,6 +24,24 @@ class AnalyticsStateTest {
         sortOrder = 0,
         spentCents = 5000,
     )
+
+    @Test
+    fun selectedHistoricalPeriodDrivesAllHighlights() {
+        val period = ProfileSettings().budgetPeriod(LocalDate.now().minusMonths(1))
+        val old = expense(id = 1, daysAgo = 0, cents = 1200).copy(
+            postedAtMillis = period.start.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
+        )
+        val state = AnalyticsState(envelopes = listOf(groceries), transactions = listOf(old, expense(2, 0, 500)), period = period)
+        assertEquals(listOf(old), state.periodExpenses)
+        assertEquals(1200, state.spentCents)
+        assertEquals(1200, state.forecastCents)
+    }
+
+    @Test
+    fun forecastDoesNotSaturateAtIntMaximum() {
+        val state = AnalyticsState(envelopes = listOf(groceries), transactions = listOf(expense(1, 0, 3_000_000_000L)))
+        assertTrue(state.forecastCents >= 3_000_000_000L)
+    }
 
     @Test
     fun mostActiveDayIgnoresSpendingFromEarlierPeriods() {
@@ -50,7 +70,7 @@ class AnalyticsStateTest {
             accountId = 1,
             envelopeId = groceries.id,
             importBatchId = null,
-            postedAtMillis = day.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            postedAtMillis = day.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
             description = "Test",
             merchantName = "Test",
             amountCents = -cents,

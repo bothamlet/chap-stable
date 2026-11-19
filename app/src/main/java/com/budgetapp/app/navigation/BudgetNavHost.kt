@@ -51,20 +51,20 @@ fun BudgetNavHost() {
     val navController = rememberNavController()
     val dashboardViewModel: EnvelopeListViewModel = koinViewModel()
     val dashboardState by dashboardViewModel.state.collectAsState()
-    var cashEditor by remember { mutableStateOf<CashTransactionEditorState?>(null) }
+    val mutation by dashboardViewModel.mutationStatus.collectAsState()
+    com.budgetapp.app.ui.screens.MutationErrorDialog(mutation) {
+        dashboardViewModel.mutationStatus.value = com.budgetapp.app.ui.screens.MutationStatus()
+    }
+    var cashEditor by dashboardViewModel.cashEditor
     var envelopeCreateRequest by remember { mutableIntStateOf(0) }
-    var screenModalVisible by remember { mutableStateOf(false) }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val route = backStackEntry?.destination?.route.orEmpty()
+    var screenModalVisible by remember(backStackEntry?.id) { mutableStateOf(false) }
     val activeDestination = when {
         route.contains("EnvelopeList") -> MainBottomNavDestination.Home
         route.contains("ProfileMenu") -> MainBottomNavDestination.Menu
         else -> MainBottomNavDestination.Other
     }
-    LaunchedEffect(route) {
-        screenModalVisible = false
-    }
-
     fun openAddTransaction() {
         cashEditor = CashTransactionEditorState(
             envelopeId = dashboardState.envelopes.firstOrNull()?.id,

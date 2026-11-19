@@ -70,6 +70,9 @@ class AmountInputTest {
 
     @Test
     fun parserItselfDistinguishesUnparseableFromZero() {
+        assertNull(parseAmountMinorUnits(""))
+        assertNull(parseAmountMinorUnits("."))
+        assertNull(parseAmountMinorUnits(","))
         assertNull(parseAmountMinorUnits("nope"))
         assertEquals(0, parseAmountMinorUnits("0"))
         assertNull(parseAmountMinorUnits("0,001"), "more than two decimals is a parse error")

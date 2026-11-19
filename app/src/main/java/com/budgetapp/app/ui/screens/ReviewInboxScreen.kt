@@ -80,6 +80,8 @@ fun ReviewInboxScreen(
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsState()
+    val mutation by viewModel.mutationStatus.collectAsState()
+    MutationErrorDialog(mutation) { viewModel.mutationStatus.value = MutationStatus() }
     var selectedEnvelopeIds by rememberSaveable { mutableStateOf(emptyMap<String, Long>()) }
     var ruleToggles by rememberSaveable { mutableStateOf(emptyMap<String, Boolean>()) }
 
@@ -485,24 +487,8 @@ private enum class InboxIconKind {
     Star,
 }
 
-private fun List<TransactionEntity>.toInboxGroups(): List<InboxTransactionGroup> {
-    return groupBy { transaction ->
-        val merchant = transaction.merchantName ?: transaction.description
-        merchant.trim().uppercase(Locale.US)
-    }.map { (key, transactions) ->
-        val newest = transactions.maxBy { it.postedAtMillis }
-        InboxTransactionGroup(
-            key = key,
-            title = newest.merchantName ?: newest.description,
-            transactionIds = transactions.map { it.id },
-            amountCents = transactions.sumOf { it.amountCents },
-            postedAtMillis = newest.postedAtMillis,
-        )
-    }.sortedByDescending { it.postedAtMillis }
-}
-
 private fun Long.toInboxDateLabel(profileSettings: ProfileSettings): String {
-    val date = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+    val date = Instant.ofEpochMilli(this).atZone(java.time.ZoneOffset.UTC).toLocalDate()
     return if (date == LocalDate.now()) {
         "Today"
     } else {

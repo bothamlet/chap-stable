@@ -75,6 +75,9 @@ data class DetailAddTransactionEditorState(
 class EnvelopeDetailViewModel(
     private val repository: BudgetRepository,
 ) : ViewModel() {
+    val transactionEditor = androidx.compose.runtime.mutableStateOf<TransactionEditorState?>(null)
+    val addTransactionEditor = androidx.compose.runtime.mutableStateOf<DetailAddTransactionEditorState?>(null)
+    val mutationStatus = MutableStateFlow(MutationStatus())
     private val envelopeId = MutableStateFlow<Long?>(null)
 
     private val periodTransactions: Flow<List<TransactionEntity>> =
@@ -112,16 +115,17 @@ class EnvelopeDetailViewModel(
         val cents = editor.amountText.toDetailCentsOrNull() ?: return
         val selectedEnvelope = state.value.envelopes.firstOrNull { it.id == editor.envelopeId }
         val signedCents = if (selectedEnvelope?.type == EnvelopeType.Goal) abs(cents) else -abs(cents)
-        viewModelScope.launch {
+        performMutation(mutationStatus, onClose) {
             repository.updateTransaction(
                 editor.transaction.copy(
                     envelopeId = editor.envelopeId,
                     amountCents = signedCents,
                     note = editor.note.trim().ifBlank { null },
-                    postedAtMillis = editor.date.toDetailStartOfDayMillis(),
+                    postedAtMillis = if (editor.date == editor.transaction.postedAtMillis.toDetailLocalDate()) {
+                        editor.transaction.postedAtMillis
+                    } else editor.date.toDetailStartOfDayMillis(),
                 ),
             )
-            onClose()
         }
     }
 
@@ -135,15 +139,13 @@ class EnvelopeDetailViewModel(
         }
         val firstAmount = editor.splitAmountCents ?: return
         val firstEnvelopeId = editor.splitEnvelopeId ?: return
-        viewModelScope.launch {
-            runCatching {
-                repository.splitTransaction(
-                    transaction = editor.transaction,
-                    firstEnvelopeId = firstEnvelopeId,
-                    firstAmountCents = firstAmount,
-                    secondEnvelopeId = editor.envelopeId,
-                )
-            }.onSuccess { onClose() }
+        performMutation(mutationStatus, onClose) {
+            repository.splitTransaction(
+                transaction = editor.transaction,
+                firstEnvelopeId = firstEnvelopeId,
+                firstAmountCents = firstAmount,
+                secondEnvelopeId = editor.envelopeId,
+            )
         }
     }
 
@@ -151,9 +153,8 @@ class EnvelopeDetailViewModel(
         transactionId: Long,
         onClose: () -> Unit,
     ) {
-        viewModelScope.launch {
+        performMutation(mutationStatus, onClose) {
             repository.deleteTransaction(transactionId)
-            onClose()
         }
     }
 
@@ -165,7 +166,7 @@ class EnvelopeDetailViewModel(
         val merchant = editor.merchant.trim()
         if (merchant.isBlank()) return
 
-        viewModelScope.launch {
+        performMutation(mutationStatus, onClose) {
             repository.createCashTransaction(
                 merchantName = merchant,
                 amountCents = cents,
@@ -173,7 +174,6 @@ class EnvelopeDetailViewModel(
                 postedAtMillis = editor.date.toDetailStartOfDayMillis(),
                 note = editor.note.trim(),
             )
-            onClose()
         }
     }
 }

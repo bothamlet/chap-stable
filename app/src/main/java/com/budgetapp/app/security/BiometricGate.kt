@@ -1,6 +1,10 @@
 package com.budgetapp.app.security
 
 import android.os.Build
+import android.app.Activity
+import android.app.KeyguardManager
+import android.content.Context
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
@@ -9,14 +13,45 @@ import com.budgetapp.app.BuildConfig
 
 class BiometricGate(
     private val activity: FragmentActivity,
+    private val externalActivities: TrustedExternalActivityCoordinator,
 ) {
+    private var legacyOnUnlocked: (() -> Unit)? = null
+    private var legacyOnLocked: (() -> Unit)? = null
+    private val credentialLauncher = activity.registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        externalActivities.end()
+        if (result.resultCode == Activity.RESULT_OK) legacyOnUnlocked?.invoke() else legacyOnLocked?.invoke()
+        legacyOnUnlocked = null
+        legacyOnLocked = null
+    }
+
     fun authenticate(
         onUnlocked: () -> Unit,
         onLocked: () -> Unit,
-        onUnavailable: (String) -> Unit,
+        onUnavailable: (String, Boolean) -> Unit,
     ) {
         if (canBypassForEmulator()) {
             onUnlocked()
+            return
+        }
+
+        val keyguard = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        if (!keyguard.isDeviceSecure) {
+            onUnavailable("No screen lock is set up on this device.", true)
+            return
+        }
+        // Strong biometrics combined with device credentials are unsupported on API 28/29.
+        // The system credential dialog works across every legacy version we support.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            val intent = keyguard.createConfirmDeviceCredentialIntent("Unlock Chap", "Use your device PIN or password")
+            if (intent == null) {
+                onUnavailable("Could not open the device unlock screen.", false)
+                return
+            }
+            legacyOnUnlocked = onUnlocked
+            legacyOnLocked = onLocked
+            externalActivities.launchTrustedExternalActivity { credentialLauncher.launch(intent) }
             return
         }
 
@@ -34,7 +69,7 @@ class BiometricGate(
             )
             // Nothing to authenticate against: say so instead of leaving the user on a lock
             // screen whose only button re-runs the same failing check.
-            else -> onUnavailable(managerUnavailableMessage(status))
+            else -> onUnavailable(managerUnavailableMessage(status), false)
         }
     }
 
@@ -54,7 +89,7 @@ class BiometricGate(
         allowedAuthenticators: Int,
         onUnlocked: () -> Unit,
         onLocked: () -> Unit,
-        onUnavailable: (String) -> Unit,
+        onUnavailable: (String, Boolean) -> Unit,
     ) {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Unlock Chap")
@@ -72,9 +107,9 @@ class BiometricGate(
                 ) {
                     when (errorCode) {
                         BiometricPrompt.ERROR_NO_BIOMETRICS ->
-                            onUnavailable("No fingerprint or face is enrolled on this device.")
+                            onUnavailable("No fingerprint or face is enrolled on this device.", false)
                         BiometricPrompt.ERROR_HW_NOT_PRESENT ->
-                            onUnavailable("This device has no biometric sensor.")
+                            onUnavailable("This device has no biometric sensor.", false)
                         else -> onLocked()
                     }
                 }

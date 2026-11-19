@@ -27,9 +27,7 @@ android {
 
     buildTypes {
         debug {
-            // isDebuggable is left at its default (true): the debug variant is what Layout
-            // Inspector, the debugger and Profileable builds attach to, and the release variant is
-            // where the build flags below matter.
+            // Emulators may not have credentials enrolled; release builds never bypass authentication.
             buildConfigField("boolean", "ALLOW_EMULATOR_BIOMETRIC_BYPASS", "true")
             buildConfigField("boolean", "ALLOW_SCREEN_CAPTURE", "true")
         }

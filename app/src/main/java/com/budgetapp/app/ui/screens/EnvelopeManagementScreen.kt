@@ -79,24 +79,24 @@ import com.budgetapp.app.ui.components.EnvelopeIconCatalog
 import com.budgetapp.app.ui.components.suggestEnvelopeIconToken
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockInk
-import com.budgetapp.app.ui.theme.MockLavenderTint
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryDeep
-import com.budgetapp.app.ui.theme.MockPrimaryGlow
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceBarely
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextMutedBlue
-import com.budgetapp.app.ui.theme.MockWhite
-import com.budgetapp.app.ui.theme.MockWhiteSoft
-import com.budgetapp.app.ui.theme.MockLavenderAlt
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapInk
+import com.budgetapp.app.ui.theme.ChapLavenderTint
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryDeep
+import com.budgetapp.app.ui.theme.ChapPrimaryGlow
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceBarely
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextMutedBlue
+import com.budgetapp.app.ui.theme.ChapWhite
+import com.budgetapp.app.ui.theme.ChapWhiteSoft
+import com.budgetapp.app.ui.theme.ChapLavenderAlt
 import java.util.Locale
 import kotlinx.coroutines.delay
 
@@ -183,7 +183,7 @@ internal fun EnvelopeManagementContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(if (state.envelopes.isEmpty()) MockSurface else MockBackground),
+            .background(if (state.envelopes.isEmpty()) ChapSurface else ChapBackground),
     ) {
         if (state.envelopes.isEmpty()) {
             EmptyEnvelopeManagement(
@@ -203,7 +203,7 @@ internal fun EnvelopeManagementContent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MockInk.copy(alpha = 0.46f))
+                    .background(ChapInk.copy(alpha = 0.46f))
                     .clickable(onClick = onDismissEditor)
                     .semantics { contentDescription = "Dismiss editor" },
             )
@@ -247,13 +247,13 @@ internal fun EmptyEnvelopeManagement(
             StandardEmptyState(
                 title = "No envelopes yet",
                 copy = "Create envelopes to plan where your money goes.",
-                copyColor = MockLavenderAlt,
+                copyColor = ChapLavenderAlt,
                 actionText = "Create envelope",
                 onAction = onCreate,
                 icon = {
                     EnvelopeIcon(
                         icon = EnvelopeManagementIcon.Envelope,
-                        tint = MockPrimaryGlow,
+                        tint = ChapPrimaryGlow,
                         modifier = Modifier.size(36.dp),
                     )
                 },
@@ -273,7 +273,7 @@ internal fun FullEnvelopeManagement(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MockSurface)
+                .background(ChapSurface)
                 .padding(start = 24.dp, end = 24.dp, top = CompactHeaderTopPadding, bottom = CompactHeaderBottomPadding),
         ) {
         EnvelopeNavRow(
@@ -284,7 +284,7 @@ internal fun FullEnvelopeManagement(
             Spacer(modifier = Modifier.height(CompactHeaderHeroGap))
             Text(
                 text = "Plan your spending",
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 34.sp,
                 lineHeight = 35.sp,
                 fontWeight = FontWeight.Bold,
@@ -292,7 +292,7 @@ internal fun FullEnvelopeManagement(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Set aside money for variable spending and bills.",
-                color = MockTextLightMuted,
+                color = ChapTextLightMuted,
                 fontSize = 16.sp,
                 lineHeight = 22.sp,
                 modifier = Modifier.fillMaxWidth(0.9f),
@@ -303,7 +303,7 @@ internal fun FullEnvelopeManagement(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .background(MockBackground),
+                .background(ChapBackground),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 24.dp,
                 end = 24.dp,
@@ -354,7 +354,7 @@ internal fun EnvelopeNavRow(
         ) {
             Text(
                 text = "Envelopes",
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -364,14 +364,14 @@ internal fun EnvelopeNavRow(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(MockPrimaryAlt.copy(alpha = 0.12f))
+                    .background(ChapPrimaryAlt.copy(alpha = 0.12f))
                     .clickable(onClick = onCreate)
                     .semantics { contentDescription = "Create envelope" },
                 contentAlignment = Alignment.Center,
             ) {
                 EnvelopeIcon(
                     icon = EnvelopeManagementIcon.Plus,
-                    tint = MockPrimaryAlt,
+                    tint = ChapPrimaryAlt,
                     modifier = Modifier.size(21.dp),
                 )
             }
@@ -411,7 +411,7 @@ internal fun EnvelopeSection(
         ) {
             Text(
                 text = title.uppercase(Locale.US),
-                color = MockTextMutedBlue,
+                color = ChapTextMutedBlue,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.17.sp,
@@ -422,7 +422,7 @@ internal fun EnvelopeSection(
                 } else {
                     "${profileSettings.formatMoney(envelopes.sumOf { it.ceilingCents })} planned"
                 },
-                color = if (envelopes.any { it.remainingCents < 0L }) MockDanger else MockNeutral,
+                color = if (envelopes.any { it.remainingCents < 0L }) ChapDanger else ChapNeutral,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -450,8 +450,8 @@ internal fun EnvelopeManagementCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 15.dp),
     ) {
@@ -467,12 +467,12 @@ internal fun EnvelopeManagementCard(
             ) {
                 EnvelopeCategoryIcon(
                     token = envelope.source.iconToken,
-                    tint = MockPrimaryAlt,
+                    tint = ChapPrimaryAlt,
                     modifier = Modifier.size(22.dp),
                 )
                 Text(
                     text = envelope.name,
-                    color = MockMaterialSurface,
+                    color = ChapMaterialSurface,
                     fontSize = 17.sp,
                     lineHeight = 19.sp,
                     fontWeight = FontWeight.Bold,
@@ -483,7 +483,7 @@ internal fun EnvelopeManagementCard(
             }
             Text(
                 text = profileSettings.formatMoney(envelope.ceilingCents),
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -494,14 +494,14 @@ internal fun EnvelopeManagementCard(
                 .fillMaxWidth()
                 .height(7.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockSurfaceBarely),
+                .background(ChapSurfaceBarely),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(envelope.progress)
                     .height(7.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(MockPrimaryAlt),
+                    .background(ChapPrimaryAlt),
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -520,7 +520,7 @@ internal fun EnvelopeManagementCard(
                 } else {
                     "${profileSettings.formatMoney(envelope.spentCents)} spent \u00b7 ${profileSettings.remainingLabel(envelope.remainingCents)}"
                 },
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -529,7 +529,7 @@ internal fun EnvelopeManagementCard(
             )
             EnvelopeIcon(
                 icon = EnvelopeManagementIcon.ChevronRight,
-                tint = MockTextLightMuted,
+                tint = ChapTextLightMuted,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -620,8 +620,8 @@ internal fun EnvelopeEditorDrawer(
             }
             .graphicsLayer { translationY = drawerOffset + dragOffset }
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -630,7 +630,7 @@ internal fun EnvelopeEditorDrawer(
             modifier = Modifier
                 .size(width = 44.dp, height = 5.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockLavenderTint),
+                .background(ChapLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
         if (editor.isDeleteConfirming) {
@@ -667,7 +667,7 @@ internal fun EnvelopeEditorForm(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = if (editor.isEditing) "Edit envelope" else "Create envelope",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -717,7 +717,7 @@ internal fun EnvelopeEditorForm(
             Spacer(modifier = Modifier.height(14.dp))
             Text(
                 text = errorMessage,
-                color = MockDanger,
+                color = ChapDanger,
                 fontSize = 14.sp,
                 lineHeight = 19.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -732,8 +732,8 @@ internal fun EnvelopeEditorForm(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text(
@@ -752,7 +752,7 @@ internal fun EnvelopeEditorForm(
             ) {
                 Text(
                     text = "Delete envelope",
-                    color = MockDanger,
+                    color = ChapDanger,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -796,18 +796,18 @@ internal fun EnvelopeIconPicker(
                     .clip(RoundedCornerShape(14.dp))
                     .background(
                         when {
-                            selected -> MockPrimaryWash
-                            suggested -> MockPrimaryWash.copy(alpha = 0.42f)
-                            else -> MockWhiteSoft
+                            selected -> ChapPrimaryWash
+                            suggested -> ChapPrimaryWash.copy(alpha = 0.42f)
+                            else -> ChapWhiteSoft
                         },
                     )
                     .border(
                         width = if (selected || suggested) 2.dp else 1.dp,
                         color =
                             when {
-                                selected -> MockPrimaryAlt
-                                suggested -> MockPrimaryGlow
-                                else -> MockSurfacePale
+                                selected -> ChapPrimaryAlt
+                                suggested -> ChapPrimaryGlow
+                                else -> ChapSurfacePale
                             },
                         shape = RoundedCornerShape(14.dp),
                     )
@@ -827,7 +827,7 @@ internal fun EnvelopeIconPicker(
             ) {
                 EnvelopeCategoryIcon(
                     token = option.token,
-                    tint = if (selected) MockPrimaryAlt else if (suggested) MockPrimaryGlow else MockNeutral,
+                    tint = if (selected) ChapPrimaryAlt else if (suggested) ChapPrimaryGlow else ChapNeutral,
                     modifier = Modifier.size(24.dp),
                 )
                 if (suggested) {
@@ -837,7 +837,7 @@ internal fun EnvelopeIconPicker(
                             .padding(5.dp)
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(MockPrimaryGlow),
+                            .background(ChapPrimaryGlow),
                     )
                 }
             }
@@ -854,7 +854,7 @@ internal fun DrawerField(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label.uppercase(Locale.US),
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.96.sp,
@@ -865,7 +865,7 @@ internal fun DrawerField(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = error,
-                color = MockDanger,
+                color = ChapDanger,
                 fontSize = 13.sp,
                 lineHeight = 17.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -885,7 +885,7 @@ internal fun EnvelopeInput(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
         ),
@@ -894,8 +894,8 @@ internal fun EnvelopeInput(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, if (isError) ChapDanger else ChapSurfacePale, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         decorationBox = { innerTextField ->
             Box(
@@ -905,7 +905,7 @@ internal fun EnvelopeInput(
                 if (value.isBlank()) {
                     Text(
                         text = placeholder,
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -928,14 +928,14 @@ internal fun AmountInput(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, if (isError) MockDanger else MockSurfacePale, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, if (isError) ChapDanger else ChapSurfacePale, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = currencySymbol,
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(end = 8.dp),
@@ -944,7 +944,7 @@ internal fun AmountInput(
             value = value,
             onValueChange = onValueChange,
             textStyle = TextStyle(
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
@@ -974,7 +974,7 @@ internal fun SegmentedTypeControl(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MockSurfaceBarely)
+            .background(ChapSurfaceBarely)
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -1004,13 +1004,13 @@ internal fun EnvelopeSegment(
         modifier = modifier
             .height(46.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) MockWhite else MockSurfaceBarely)
+            .background(if (selected) ChapWhite else ChapSurfaceBarely)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
-            color = if (selected) MockPrimaryDeep else MockNeutral,
+            color = if (selected) ChapPrimaryDeep else ChapNeutral,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -1029,7 +1029,7 @@ internal fun DeleteConfirmation(
     ) {
         Text(
             text = "Delete $name?",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -1038,7 +1038,7 @@ internal fun DeleteConfirmation(
         Spacer(modifier = Modifier.height(9.dp))
         Text(
             text = "This envelope will be removed from your budget.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 16.sp,
             lineHeight = 22.sp,
             fontWeight = FontWeight.Medium,
@@ -1056,8 +1056,8 @@ internal fun DeleteConfirmation(
                     .height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MockSurfaceBarely,
-                    contentColor = MockMaterialSurface,
+                    containerColor = ChapSurfaceBarely,
+                    contentColor = ChapMaterialSurface,
                 ),
             ) {
                 Text("Cancel", fontWeight = FontWeight.Bold)
@@ -1069,8 +1069,8 @@ internal fun DeleteConfirmation(
                     .height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MockMaterialSurface,
-                    contentColor = MockWhite,
+                    containerColor = ChapMaterialSurface,
+                    contentColor = ChapWhite,
                 ),
             ) {
                 Text("Delete", fontWeight = FontWeight.Bold)

@@ -26,9 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 
 @Composable
 fun StandardEmptyState(
@@ -38,7 +38,7 @@ fun StandardEmptyState(
     modifier: Modifier = Modifier,
     actionText: String? = null,
     onAction: (() -> Unit)? = null,
-    copyColor: Color = MockTextLightMuted,
+    copyColor: Color = ChapTextLightMuted,
 ) {
     Column(
         modifier = modifier.widthIn(max = 330.dp),
@@ -48,7 +48,7 @@ fun StandardEmptyState(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = title,
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 26.sp,
             lineHeight = 30.sp,
             fontWeight = FontWeight.Bold,
@@ -73,8 +73,8 @@ fun StandardEmptyState(
                     .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MockPrimaryAlt,
-                    contentColor = MockWhite,
+                    containerColor = ChapPrimaryAlt,
+                    contentColor = ChapWhite,
                 ),
             ) {
                 Text(

@@ -58,28 +58,28 @@ import com.budgetapp.app.ui.components.CompactHeaderTopPadding
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
 import com.budgetapp.app.ui.components.EnvelopePickerList
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockInk
-import com.budgetapp.app.ui.theme.MockLavenderAlt
-import com.budgetapp.app.ui.theme.MockLavenderTint
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryGlow
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceBarely
-import com.budgetapp.app.ui.theme.MockSurfaceLight
-import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockSurfaceTintAlt
-import com.budgetapp.app.ui.theme.MockTextLight
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextMutedBlue
-import com.budgetapp.app.ui.theme.MockWhite
-import com.budgetapp.app.ui.theme.MockWhiteSoft
-import com.budgetapp.app.ui.theme.MockTextTertiary
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapInk
+import com.budgetapp.app.ui.theme.ChapLavenderAlt
+import com.budgetapp.app.ui.theme.ChapLavenderTint
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryGlow
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceBarely
+import com.budgetapp.app.ui.theme.ChapSurfaceLight
+import com.budgetapp.app.ui.theme.ChapSurfaceLightAlt
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapSurfaceTintAlt
+import com.budgetapp.app.ui.theme.ChapTextLight
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextMutedBlue
+import com.budgetapp.app.ui.theme.ChapWhite
+import com.budgetapp.app.ui.theme.ChapWhiteSoft
+import com.budgetapp.app.ui.theme.ChapTextTertiary
 
 @Composable
 fun CategorizationRulesScreen(
@@ -99,7 +99,7 @@ fun CategorizationRulesScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(if (state.rules.isEmpty()) MockSurface else MockBackground),
+            .background(if (state.rules.isEmpty()) ChapSurface else ChapBackground),
     ) {
         if (state.rules.isEmpty()) {
             RulesEmptyContent(onBack = onBack)
@@ -116,7 +116,7 @@ fun CategorizationRulesScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MockInk.copy(alpha = 0.46f))
+                    .background(ChapInk.copy(alpha = 0.46f))
                     .clickable { editing = null }
                     .semantics { contentDescription = "Dismiss rule editor" },
             )
@@ -153,7 +153,7 @@ private fun RulesEmptyContent(
         ) {
             Text(
                 text = "Spending Rules",
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -166,9 +166,9 @@ private fun RulesEmptyContent(
             StandardEmptyState(
                 title = "No rules yet",
                 copy = "Rules are created automatically when you categorize transactions.",
-                copyColor = MockLavenderAlt,
+                copyColor = ChapLavenderAlt,
                 icon = {
-                    RulesIcon(RulesIconKind.Sparkles, Modifier.size(36.dp), MockPrimaryGlow)
+                    RulesIcon(RulesIconKind.Sparkles, Modifier.size(36.dp), ChapPrimaryGlow)
                 },
             )
         }
@@ -185,12 +185,12 @@ private fun RulesFullContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MockSurface)
+                .background(ChapSurface)
                 .padding(start = 24.dp, end = 24.dp, top = CompactHeaderTopPadding, bottom = CompactHeaderBottomPadding),
         ) {
             Row(
@@ -200,7 +200,7 @@ private fun RulesFullContent(
             ) {
                 Text(
                     text = "Spending Rules",
-                    color = MockWhite,
+                    color = ChapWhite,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -208,7 +208,7 @@ private fun RulesFullContent(
             Spacer(modifier = Modifier.height(CompactHeaderHeroGap))
             Text(
                 text = "Automate your sorting",
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 33.sp,
                 lineHeight = 34.sp,
                 fontWeight = FontWeight.Bold,
@@ -216,7 +216,7 @@ private fun RulesFullContent(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Assign merchants to envelopes so new transactions land where they belong.",
-                color = MockTextLightMuted,
+                color = ChapTextLightMuted,
                 fontSize = 16.sp,
                 lineHeight = 22.sp,
             )
@@ -240,14 +240,14 @@ private fun RulesFullContent(
                 ) {
                     Text(
                         text = "ACTIVE RULES",
-                        color = MockTextMutedBlue,
+                        color = ChapTextMutedBlue,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.17.sp,
                     )
                     Text(
                         text = "${state.filteredRules.size} ${if (state.filteredRules.size == 1) "rule" else "rules"}",
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -272,19 +272,19 @@ private fun SearchBar(
             .fillMaxWidth()
             .height(52.dp)
             .clip(RoundedCornerShape(99.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(99.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(99.dp))
             .padding(horizontal = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RulesIcon(RulesIconKind.Search, Modifier.size(21.dp), MockNeutral)
+        RulesIcon(RulesIconKind.Search, Modifier.size(21.dp), ChapNeutral)
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
             textStyle = TextStyle(
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
             ),
@@ -294,7 +294,7 @@ private fun SearchBar(
                     if (value.isBlank()) {
                         Text(
                             text = "Search merchants...",
-                            color = MockNeutral,
+                            color = ChapNeutral,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
                         )
@@ -315,8 +315,8 @@ private fun RuleCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 15.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -324,7 +324,7 @@ private fun RuleCard(
     ) {
         Text(
             text = row.rule.pattern,
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 17.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Bold,
@@ -335,7 +335,7 @@ private fun RuleCard(
         EnvelopePill(row.envelopeName)
         Text(
             text = "\u203a",
-            color = MockTextLight,
+            color = ChapTextLight,
             fontSize = 25.sp,
             fontWeight = FontWeight.SemiBold,
         )
@@ -349,8 +349,8 @@ private fun EnvelopePill(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
-            .background(MockSurfaceTintAlt)
-            .border(1.dp, MockSurfaceLight, RoundedCornerShape(99.dp))
+            .background(ChapSurfaceTintAlt)
+            .border(1.dp, ChapSurfaceLight, RoundedCornerShape(99.dp))
             .padding(horizontal = 11.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -359,11 +359,11 @@ private fun EnvelopePill(
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(MockPrimaryAlt),
+                .background(ChapPrimaryAlt),
         )
         Text(
             text = name,
-            color = MockTextMutedBlue,
+            color = ChapTextMutedBlue,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -392,8 +392,8 @@ private fun RuleEditorDrawer(
             .imePadding()
             .navigationBarsPadding()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -402,7 +402,7 @@ private fun RuleEditorDrawer(
             modifier = Modifier
                 .size(width = 44.dp, height = 5.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockLavenderTint),
+                .background(ChapLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
         if (isDeleteConfirming) {
@@ -415,7 +415,7 @@ private fun RuleEditorDrawer(
         }
         Text(
             text = "Edit rule",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -424,7 +424,7 @@ private fun RuleEditorDrawer(
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Match any transaction whose merchant or description contains this text.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 15.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
@@ -433,7 +433,7 @@ private fun RuleEditorDrawer(
         Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = "MATCH TEXT",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.96.sp,
@@ -445,8 +445,8 @@ private fun RuleEditorDrawer(
                 .fillMaxWidth()
                 .height(52.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MockWhiteSoft)
-                .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+                .background(ChapWhiteSoft)
+                .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
                 .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart,
         ) {
@@ -455,7 +455,7 @@ private fun RuleEditorDrawer(
                 onValueChange = { pattern = it },
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = MockMaterialSurface,
+                    color = ChapMaterialSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                 ),
@@ -465,7 +465,7 @@ private fun RuleEditorDrawer(
                         if (pattern.isBlank()) {
                             Text(
                                 text = row.rule.pattern,
-                                color = MockTextTertiary,
+                                color = ChapTextTertiary,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                             )
@@ -478,7 +478,7 @@ private fun RuleEditorDrawer(
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = "ENVELOPE",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.96.sp,
@@ -489,7 +489,7 @@ private fun RuleEditorDrawer(
             envelopes = envelopes,
             selectedId = selectedEnvelopeId,
             onSelected = { selectedEnvelopeId = it },
-            selectedTextColor = MockPrimaryAlt,
+            selectedTextColor = ChapPrimaryAlt,
         )
         Spacer(modifier = Modifier.height(18.dp))
         Button(
@@ -499,8 +499,8 @@ private fun RuleEditorDrawer(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text("Save changes", fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -508,7 +508,7 @@ private fun RuleEditorDrawer(
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "Delete rule",
-            color = MockDanger,
+            color = ChapDanger,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -526,7 +526,7 @@ private fun RuleDeleteConfirmation(
 ) {
     Text(
         text = "Delete rule?",
-        color = MockMaterialSurface,
+        color = ChapMaterialSurface,
         fontSize = 23.sp,
         lineHeight = 25.sp,
         fontWeight = FontWeight.Bold,
@@ -536,7 +536,7 @@ private fun RuleDeleteConfirmation(
     Spacer(modifier = Modifier.height(9.dp))
     Text(
         text = "$pattern will no longer be categorized automatically.",
-        color = MockNeutral,
+        color = ChapNeutral,
         fontSize = 16.sp,
         lineHeight = 22.sp,
         fontWeight = FontWeight.Medium,
@@ -555,8 +555,8 @@ private fun RuleDeleteConfirmation(
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockSurfaceBarely,
-                contentColor = MockMaterialSurface,
+                containerColor = ChapSurfaceBarely,
+                contentColor = ChapMaterialSurface,
             ),
         ) {
             Text("Cancel", fontWeight = FontWeight.Bold)
@@ -568,8 +568,8 @@ private fun RuleDeleteConfirmation(
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockMaterialSurface,
-                contentColor = MockWhite,
+                containerColor = ChapMaterialSurface,
+                contentColor = ChapWhite,
             ),
         ) {
             Text("Delete", fontWeight = FontWeight.Bold)

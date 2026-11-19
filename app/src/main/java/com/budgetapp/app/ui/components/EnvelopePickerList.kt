@@ -25,12 +25,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.data.model.EnvelopeBalance
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryDeep
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
-import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryDeep
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurfaceLightAlt
+import com.budgetapp.app.ui.theme.ChapWhiteSoft
 
 private val MaxVisibleRows = 4
 private val RowHeight = 42.dp
@@ -47,22 +47,22 @@ fun EnvelopePickerList(
     selectedId: Long?,
     onSelected: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    selectedTextColor: Color = MockPrimaryDeep,
-    unselectedTextColor: Color = MockMaterialSurface,
+    selectedTextColor: Color = ChapPrimaryDeep,
+    unselectedTextColor: Color = ChapMaterialSurface,
     emptyText: String = "Create an envelope first",
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .padding(6.dp),
     ) {
         if (envelopes.isEmpty()) {
             Text(
                 text = emptyText,
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(12.dp),
@@ -85,7 +85,7 @@ fun EnvelopePickerList(
                         .fillMaxWidth()
                         .height(RowHeight)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) MockPrimaryWash else MockWhiteSoft)
+                        .background(if (isSelected) ChapPrimaryWash else ChapWhiteSoft)
                         // selectable, not clickable: TalkBack (and any UI test) can then tell which
                         // envelope is currently chosen instead of guessing from the background.
                         .selectable(

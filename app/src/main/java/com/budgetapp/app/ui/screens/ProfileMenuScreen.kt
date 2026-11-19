@@ -31,17 +31,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.ui.components.ProfileAvatar
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryDeep
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockTextLight
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryDeep
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapTextLight
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 
 @Composable
 fun ProfileMenuScreen(
@@ -63,12 +63,12 @@ fun ProfileMenuScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MockSurface)
+                .background(ChapSurface)
                 .padding(start = 32.dp, end = 32.dp, top = 92.dp, bottom = 48.dp),
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -78,15 +78,15 @@ fun ProfileMenuScreen(
                     size = 56.dp,
                 )
                 Column {
-                    Text(settings.name, color = MockWhite, fontSize = 32.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
-                    Text("Personal account", color = MockTextLightMuted, fontSize = 15.sp)
+                    Text(settings.name, color = ChapWhite, fontSize = 32.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
+                    Text("Personal account", color = ChapTextLightMuted, fontSize = 15.sp)
                 }
             }
         }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MockBackground),
+                .background(ChapBackground),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 24.dp, bottom = 164.dp),
         ) {
             item {
@@ -111,7 +111,7 @@ fun ProfileMenuScreen(
                 Spacer(modifier = Modifier.height(72.dp))
                 Text(
                     text = "Local \u00b7 Private \u00b7 Yours alone",
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 13.sp,
                     lineHeight = 21.sp,
                     fontWeight = FontWeight.Medium,
@@ -140,7 +140,7 @@ private fun MenuDivider() {
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 12.dp)
             .height(1.dp)
-            .background(MockSurfacePale),
+            .background(ChapSurfacePale),
     )
 }
 
@@ -160,10 +160,10 @@ private fun MenuRow(
         horizontalArrangement = Arrangement.spacedBy(18.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        MenuIcon(icon, Modifier.size(22.dp), if (enabled) MockPrimaryAlt else MockTextLight)
+        MenuIcon(icon, Modifier.size(22.dp), if (enabled) ChapPrimaryAlt else ChapTextLight)
         Text(
             text = title,
-            color = if (enabled) MockMaterialSurface else MockNeutral,
+            color = if (enabled) ChapMaterialSurface else ChapNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(1f),
@@ -172,13 +172,13 @@ private fun MenuRow(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MockPrimaryWash)
+                    .background(ChapPrimaryWash)
                     .padding(horizontal = 10.dp, vertical = 4.dp),
             ) {
-                Text(badge.uppercase(), color = MockPrimaryDeep, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(badge.uppercase(), color = ChapPrimaryDeep, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
-        Text("\u203a", color = MockTextLight, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        Text("\u203a", color = ChapTextLight, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 

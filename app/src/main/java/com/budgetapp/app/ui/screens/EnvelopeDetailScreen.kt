@@ -66,22 +66,22 @@ import com.budgetapp.app.domain.toDatePickerMillis
 import com.budgetapp.app.domain.toDatePickerDate
 import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.components.EnvelopePickerList
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockInk
-import com.budgetapp.app.ui.theme.MockLavenderTint
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryGlowAlt
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceBarely
-import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextSoftPurple
-import com.budgetapp.app.ui.theme.MockWhite
-import com.budgetapp.app.ui.theme.MockWhiteSoft
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapInk
+import com.budgetapp.app.ui.theme.ChapLavenderTint
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryGlowAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceBarely
+import com.budgetapp.app.ui.theme.ChapSurfaceLightAlt
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextSoftPurple
+import com.budgetapp.app.ui.theme.ChapWhite
+import com.budgetapp.app.ui.theme.ChapWhiteSoft
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -118,7 +118,7 @@ fun EnvelopeDetailScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         EnvelopeDetailContent(
             state = state,
@@ -139,7 +139,7 @@ fun EnvelopeDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MockInk.copy(alpha = 0.46f))
+                    .background(ChapInk.copy(alpha = 0.46f))
                     .clickable { addEditor = null }
                     .semantics { contentDescription = "Dismiss add transaction" },
             )
@@ -183,7 +183,7 @@ fun EnvelopeDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MockInk.copy(alpha = 0.46f))
+                    .background(ChapInk.copy(alpha = 0.46f))
                     .clickable { editor = null }
                     .semantics { contentDescription = "Dismiss transaction editor" },
             )
@@ -230,7 +230,7 @@ internal fun EnvelopeDetailContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MockSurface)
+                .background(ChapSurface)
                 .padding(start = 24.dp, end = 24.dp, top = 76.dp, bottom = 35.dp),
         ) {
             DetailNavRow(
@@ -246,12 +246,12 @@ internal fun EnvelopeDetailContent(
             ) {
                 EnvelopeCategoryIcon(
                     token = envelope?.iconToken.orEmpty(),
-                    tint = MockPrimaryGlowAlt,
+                    tint = ChapPrimaryGlowAlt,
                     modifier = Modifier.size(21.dp),
                 )
                 Text(
                     text = "${envelope?.type?.replaceFirstChar { it.titlecase(Locale.US) } ?: "Variable"} envelope",
-                    color = MockTextSoftPurple,
+                    color = ChapTextSoftPurple,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.68.sp,
@@ -267,9 +267,9 @@ internal fun EnvelopeDetailContent(
                     else -> state.profileSettings.remainingLabel(state.remainingCents)
                 },
                 color = when {
-                    state.remainingCents < 0L -> MockDanger
-                    state.spentCents == 0L -> MockTextLightMuted
-                    else -> MockPrimaryGlowAlt
+                    state.remainingCents < 0L -> ChapDanger
+                    state.spentCents == 0L -> ChapTextLightMuted
+                    else -> ChapPrimaryGlowAlt
                 },
                 fontSize = 41.sp,
                 lineHeight = 42.sp,
@@ -282,7 +282,7 @@ internal fun EnvelopeDetailContent(
                 } else {
                     "${state.profileSettings.formatMoney(state.spentCents)} / ${state.profileSettings.formatMoney(state.ceilingCents)}"
                 },
-                color = MockTextLightMuted.copy(alpha = 0.58f),
+                color = ChapTextLightMuted.copy(alpha = 0.58f),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -292,14 +292,14 @@ internal fun EnvelopeDetailContent(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(MockWhite.copy(alpha = 0.10f)),
+                    .background(ChapWhite.copy(alpha = 0.10f)),
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(state.progress)
                         .height(8.dp)
                         .clip(RoundedCornerShape(99.dp))
-                        .background(if (state.spentCents == 0L) MockTextLightMuted else MockPrimaryGlowAlt),
+                        .background(if (state.spentCents == 0L) ChapTextLightMuted else ChapPrimaryGlowAlt),
                 )
             }
         }
@@ -308,7 +308,7 @@ internal fun EnvelopeDetailContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .background(MockBackground),
+                .background(ChapBackground),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 start = 24.dp,
                 end = 24.dp,
@@ -324,14 +324,14 @@ internal fun EnvelopeDetailContent(
                 ) {
                     Text(
                         text = "TRANSACTIONS",
-                        color = MockMaterialSurface,
+                        color = ChapMaterialSurface,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.12.sp,
                     )
                     Text(
                         text = "${state.transactions.size} ${if (state.transactions.size == 1) "item" else "items"}",
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -351,7 +351,7 @@ internal fun EnvelopeDetailContent(
                     item {
                         Text(
                             text = state.profileSettings.formatTransactionDate(date),
-                            color = MockNeutral,
+                            color = ChapNeutral,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.96.sp,
@@ -393,7 +393,7 @@ internal fun DetailNavRow(
         ) {
             Text(
                 text = title,
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -405,12 +405,12 @@ internal fun DetailNavRow(
                 modifier = Modifier
                     .size(42.dp)
                     .clip(CircleShape)
-                    .background(MockPrimaryAlt.copy(alpha = 0.12f))
+                    .background(ChapPrimaryAlt.copy(alpha = 0.12f))
                     .clickable(onClick = onAddTransaction)
                     .semantics { contentDescription = "Add transaction" },
                 contentAlignment = Alignment.Center,
             ) {
-                DetailIcon(DetailIconKind.Plus, MockPrimaryAlt, Modifier.size(21.dp))
+                DetailIcon(DetailIconKind.Plus, ChapPrimaryAlt, Modifier.size(21.dp))
             }
         }
     }
@@ -429,11 +429,11 @@ internal fun EmptyTransactions(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        DetailIcon(DetailIconKind.Receipt, MockPrimaryAlt, Modifier.size(38.dp))
+        DetailIcon(DetailIconKind.Receipt, ChapPrimaryAlt, Modifier.size(38.dp))
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = "No transactions in this period",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 21.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -441,7 +441,7 @@ internal fun EmptyTransactions(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = "Nothing spent from $envelopeName in this budget period. Use the arrows on the dashboard to look at another month.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 15.sp,
             lineHeight = 22.sp,
             textAlign = TextAlign.Center,
@@ -454,8 +454,8 @@ internal fun EmptyTransactions(
                 .height(54.dp),
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text("Add transaction", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
@@ -473,8 +473,8 @@ internal fun TransactionCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -483,7 +483,7 @@ internal fun TransactionCard(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = transaction.merchantName ?: transaction.description,
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 16.sp,
                 lineHeight = 19.sp,
                 fontWeight = FontWeight.Bold,
@@ -493,7 +493,7 @@ internal fun TransactionCard(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${if (transaction.externalId == null) "Manual" else "Automatic"}${transaction.note?.let { " \u00b7 $it" } ?: ""}",
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
@@ -502,7 +502,7 @@ internal fun TransactionCard(
         }
         Text(
             text = profileSettings.formatMoney(abs(transaction.amountCents)),
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -528,8 +528,8 @@ internal fun TransactionEditorDrawer(
             .imePadding()
             .navigationBarsPadding()
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -538,7 +538,7 @@ internal fun TransactionEditorDrawer(
             modifier = Modifier
                 .size(width = 44.dp, height = 5.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockLavenderTint),
+                .background(ChapLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
         when {
@@ -582,8 +582,8 @@ internal fun DetailAddTransactionDrawer(
             .imePadding()
             .navigationBarsPadding()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
             .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -592,12 +592,12 @@ internal fun DetailAddTransactionDrawer(
             modifier = Modifier
                 .size(width = 44.dp, height = 5.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockLavenderTint),
+                .background(ChapLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = if (isGoal) "Add contribution" else "Add transaction",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -646,7 +646,7 @@ internal fun DetailAddTransactionDrawer(
         if (!editor.isNoteOpen) {
             Text(
                 text = "+ Add note",
-                color = MockPrimaryAlt,
+                color = ChapPrimaryAlt,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -673,10 +673,10 @@ internal fun DetailAddTransactionDrawer(
             shape = RoundedCornerShape(16.dp),
             enabled = editor.canSave,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
-                disabledContainerColor = MockLavenderTint,
-                disabledContentColor = MockNeutral,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
+                disabledContainerColor = ChapLavenderTint,
+                disabledContentColor = ChapNeutral,
             ),
         ) {
             Text(if (isGoal) "Add contribution" else "Add transaction", fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -695,7 +695,7 @@ internal fun TransactionEditorForm(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Edit transaction",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -743,8 +743,8 @@ internal fun TransactionEditorForm(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text("Save transaction", fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -752,7 +752,7 @@ internal fun TransactionEditorForm(
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "Split across envelopes",
-            color = MockPrimaryAlt,
+            color = ChapPrimaryAlt,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -772,7 +772,7 @@ internal fun TransactionEditorForm(
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Delete transaction",
-            color = MockDanger,
+            color = ChapDanger,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -791,7 +791,7 @@ internal fun DetailField(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label.uppercase(Locale.US),
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.96.sp,
@@ -813,7 +813,7 @@ internal fun DetailTextInput(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
         ),
@@ -821,8 +821,8 @@ internal fun DetailTextInput(
             .fillMaxWidth()
             .height(height)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, if (hasError) MockDanger.copy(alpha = 0.62f) else MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, if (hasError) ChapDanger.copy(alpha = 0.62f) else ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         decorationBox = { innerTextField ->
             Box(
@@ -830,7 +830,7 @@ internal fun DetailTextInput(
                 contentAlignment = Alignment.CenterStart,
             ) {
                 if (value.isBlank()) {
-                    Text(placeholder, color = MockNeutral, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                    Text(placeholder, color = ChapNeutral, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                 }
                 innerTextField()
             }
@@ -850,14 +850,14 @@ internal fun DetailAmountInput(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, if (hasError) MockDanger.copy(alpha = 0.62f) else MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, if (hasError) ChapDanger.copy(alpha = 0.62f) else ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = profileSettings.currencySymbol(),
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(end = 8.dp),
@@ -866,7 +866,7 @@ internal fun DetailAmountInput(
             value = value,
             onValueChange = onValueChange,
             textStyle = TextStyle(
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
@@ -891,14 +891,14 @@ internal fun DetailLockedValue(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
             text = value,
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -913,7 +913,7 @@ internal fun DetailFieldError(
 ) {
     Text(
         text = text,
-        color = MockDanger,
+        color = ChapDanger,
         fontSize = 13.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.Bold,
@@ -933,7 +933,7 @@ internal fun DetailEnvelopeSelector(
         envelopes = envelopes,
         selectedId = selectedId,
         onSelected = onSelected,
-        selectedTextColor = MockPrimaryAlt,
+        selectedTextColor = ChapPrimaryAlt,
     )
 }
 
@@ -954,16 +954,16 @@ internal fun DetailDateControl(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .clickable { isPickerOpen = true }
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(profileSettings.formatDate(date), color = MockMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(profileSettings.formatDate(date), color = ChapMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         Text(
             text = "Pick",
-            color = MockPrimaryAlt,
+            color = ChapPrimaryAlt,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterEnd),
@@ -1004,11 +1004,11 @@ internal fun DeleteTransactionConfirm(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Delete transaction?", color = MockMaterialSurface, fontSize = 23.sp, lineHeight = 25.sp, fontWeight = FontWeight.Bold)
+        Text("Delete transaction?", color = ChapMaterialSurface, fontSize = 23.sp, lineHeight = 25.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(9.dp))
         Text(
             text = "This transaction will be removed from the envelope.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 16.sp,
             lineHeight = 22.sp,
             fontWeight = FontWeight.Medium,
@@ -1020,7 +1020,7 @@ internal fun DeleteTransactionConfirm(
                 onClick = onCancel,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MockSurfaceBarely, contentColor = MockMaterialSurface),
+                colors = ButtonDefaults.buttonColors(containerColor = ChapSurfaceBarely, contentColor = ChapMaterialSurface),
             ) {
                 Text("Cancel", fontWeight = FontWeight.Bold)
             }
@@ -1028,7 +1028,7 @@ internal fun DeleteTransactionConfirm(
                 onClick = onDelete,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MockMaterialSurface, contentColor = MockWhite),
+                colors = ButtonDefaults.buttonColors(containerColor = ChapMaterialSurface, contentColor = ChapWhite),
             ) {
                 Text("Delete", fontWeight = FontWeight.Bold)
             }
@@ -1107,7 +1107,7 @@ private fun SplitTransactionForm(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Split transaction",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -1115,7 +1115,7 @@ private fun SplitTransactionForm(
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "${profileSettings.formatMoney(editor.totalCents)} becomes two rows, so each envelope carries its own share.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 15.sp,
             lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
@@ -1139,7 +1139,7 @@ private fun SplitTransactionForm(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "The first part must be smaller than the total and go to a different envelope.",
-                color = MockDanger,
+                color = ChapDanger,
                 fontSize = 13.sp,
                 lineHeight = 17.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -1153,7 +1153,7 @@ private fun SplitTransactionForm(
                 },
                 selectedId = editor.splitEnvelopeId,
                 onSelected = { onEditorChange(editor.copy(splitEnvelopeId = it)) },
-                selectedTextColor = MockPrimaryAlt,
+                selectedTextColor = ChapPrimaryAlt,
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -1161,7 +1161,7 @@ private fun SplitTransactionForm(
             text = remainder?.let {
                 "The remaining ${profileSettings.formatMoney(it)} stays on this envelope."
             } ?: "The rest of the amount stays on this envelope.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 14.sp,
             lineHeight = 19.sp,
         )
@@ -1173,8 +1173,8 @@ private fun SplitTransactionForm(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text("Split transaction", fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -1182,7 +1182,7 @@ private fun SplitTransactionForm(
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "Cancel",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier

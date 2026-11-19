@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 
 val CompactHeaderTopPadding = 64.dp
 val CompactHeaderBottomPadding = 24.dp
@@ -28,14 +28,14 @@ fun StandardLightHeader(title: String, heading: String, copy: String, onBack: ()
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MockSurface)
+            .background(ChapSurface)
             .padding(start = 24.dp, end = 24.dp, top = CompactHeaderTopPadding, bottom = CompactHeaderBottomPadding),
     ) {
-        Text(title, color = MockWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = ChapWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(CompactHeaderHeroGap))
-        Text(heading, color = MockWhite, fontSize = 33.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
+        Text(heading, color = ChapWhite, fontSize = 33.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(copy, color = MockTextLightMuted, fontSize = 16.sp, lineHeight = 22.sp)
+        Text(copy, color = ChapTextLightMuted, fontSize = 16.sp, lineHeight = 22.sp)
     }
 }
 
@@ -48,6 +48,6 @@ fun SimpleDarkHeader(title: String, onBack: () -> Unit) {
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, color = MockWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = ChapWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
     }
 }

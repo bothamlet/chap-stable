@@ -237,7 +237,7 @@ class BudgetRepository(
         name: String,
         ceilingCents: Long,
         // The colour token survives from the ported data layer and the backup format, but the
-        // mocks render every envelope in the accent colour and no screen reads it, so new
+        // UI renders every envelope in the accent colour and no screen reads it, so new
         // envelopes get the default instead of whatever the editor happened to hold.
         colorToken: String = DefaultColorToken,
         type: String = EnvelopeType.Variable,

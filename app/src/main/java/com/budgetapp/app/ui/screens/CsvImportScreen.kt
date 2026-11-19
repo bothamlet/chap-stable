@@ -54,17 +54,17 @@ import com.budgetapp.app.security.launchTrustedExternalActivity
 import com.budgetapp.app.ui.components.CompactHeaderBottomPadding
 import com.budgetapp.app.ui.components.CompactHeaderHeroGap
 import com.budgetapp.app.ui.components.CompactHeaderTopPadding
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockFillMuted
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceNearWhiteAlt
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockTextLight
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapFillMuted
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceNearWhiteAlt
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapTextLight
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 import java.io.ByteArrayOutputStream
 
 @Composable
@@ -145,7 +145,7 @@ private fun CsvLandingContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MockSurface),
+            .background(ChapSurface),
     ) {
         CsvDarkNav(title = "Import CSV", onBack = onBack)
         Box(
@@ -161,14 +161,14 @@ private fun CsvLandingContent(
                     actionText = "Choose file",
                     onAction = onChooseFile,
                     icon = {
-                        CsvIcon(CsvIconKind.FileUpload, Modifier.size(36.dp), MockPrimaryAlt)
+                        CsvIcon(CsvIconKind.FileUpload, Modifier.size(36.dp), ChapPrimaryAlt)
                     },
                 )
                 if (error != null) {
                     Spacer(modifier = Modifier.height(14.dp))
                     Text(
                         text = error,
-                        color = MockTextLightMuted,
+                        color = ChapTextLightMuted,
                         fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                     )
@@ -197,7 +197,7 @@ private fun CsvMappingContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -207,14 +207,14 @@ private fun CsvMappingContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MockSurface)
+                        .background(ChapSurface)
                         .padding(start = 24.dp, end = 24.dp, top = CompactHeaderTopPadding, bottom = CompactHeaderBottomPadding),
                 ) {
                     CsvNavRow(title = "Column mapping", onBack = onBack)
                     Spacer(modifier = Modifier.height(CompactHeaderHeroGap))
                     Text(
                         text = "Match your CSV columns",
-                        color = MockWhite,
+                        color = ChapWhite,
                         fontSize = 32.sp,
                         lineHeight = 34.sp,
                         fontWeight = FontWeight.Bold,
@@ -222,7 +222,7 @@ private fun CsvMappingContent(
                     Spacer(modifier = Modifier.height(7.dp))
                     Text(
                         text = "Tell Chap which columns contain the date, merchant, and amount before importing.",
-                        color = MockTextLightMuted,
+                        color = ChapTextLightMuted,
                         fontSize = 15.sp,
                         lineHeight = 22.sp,
                         fontWeight = FontWeight.Medium,
@@ -259,7 +259,7 @@ private fun CsvMappingContent(
                         }
                             ?: state.error
                             ?: "Only mapped fields will be imported.",
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Medium,
@@ -272,13 +272,13 @@ private fun CsvMappingContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(MockBackground)
+                .background(ChapBackground)
                 .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 32.dp),
         ) {
             if (!state.isMappingComplete) {
                 Text(
                     text = "Choose which column holds the date, description and amount.",
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 13.sp,
                     lineHeight = 18.sp,
                     textAlign = TextAlign.Center,
@@ -293,10 +293,10 @@ private fun CsvMappingContent(
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MockPrimaryAlt,
-                    contentColor = MockWhite,
-                    disabledContainerColor = MockFillMuted,
-                    disabledContentColor = MockNeutral,
+                    containerColor = ChapPrimaryAlt,
+                    contentColor = ChapWhite,
+                    disabledContainerColor = ChapFillMuted,
+                    disabledContentColor = ChapNeutral,
                 ),
             ) {
                 Text(if (state.isImporting) "Importing..." else "Confirm & Import", fontSize = 17.sp, fontWeight = FontWeight.Bold)
@@ -317,7 +317,7 @@ private fun CsvDarkNav(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, color = MockWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = ChapWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -331,7 +331,7 @@ private fun CsvNavRow(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, color = MockWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text(title, color = ChapWhite, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -344,19 +344,19 @@ private fun HeaderToggleCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(start = 18.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("First row is header", color = MockMaterialSurface, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        Text("First row is header", color = ChapMaterialSurface, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
         Box(
             modifier = Modifier
                 .size(width = 54.dp, height = 32.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(if (checked) MockPrimaryAlt else MockSurfaceNearWhiteAlt)
+                .background(if (checked) ChapPrimaryAlt else ChapSurfaceNearWhiteAlt)
                 .padding(3.dp),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
@@ -364,7 +364,7 @@ private fun HeaderToggleCard(
                 modifier = Modifier
                     .size(26.dp)
                     .clip(CircleShape)
-                    .background(MockWhite),
+                    .background(ChapWhite),
             )
         }
     }
@@ -384,8 +384,8 @@ private fun MappingCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp)),
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp)),
     ) {
         MappingRow("Date", state, state.dateIndex, onDateIndex, required = true)
         MappingRow("Description", state, state.descriptionIndex, onDescriptionIndex, required = true)
@@ -409,12 +409,12 @@ private fun MappingRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (showDivider) Modifier.border(0.dp, MockSurfacePale) else Modifier)
+            .then(if (showDivider) Modifier.border(0.dp, ChapSurfacePale) else Modifier)
             .padding(start = 18.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, color = MockMaterialSurface, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        Text(label, color = ChapMaterialSurface, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
         ColumnOption(
             text = state.columnLabel(displayIndex, required),
             onClick = { onSelected(nextColumnIndex(displayIndex, state.columns.size)) },
@@ -432,15 +432,15 @@ private fun ColumnOption(
             .widthIn(min = 168.dp)
             .height(45.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background(MockSurfaceNearWhiteAlt)
-            .border(1.dp, MockFillMuted, RoundedCornerShape(15.dp))
+            .background(ChapSurfaceNearWhiteAlt)
+            .border(1.dp, ChapFillMuted, RoundedCornerShape(15.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
             text = text,
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -461,15 +461,15 @@ private fun PreviewSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Text("DATA PREVIEW", color = MockNeutral, fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.56.sp)
-            Text("${state.rowCount.coerceAtLeast(0)} rows", color = MockNeutral, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text("DATA PREVIEW", color = ChapNeutral, fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.56.sp)
+            Text("${state.rowCount.coerceAtLeast(0)} rows", color = ChapNeutral, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(MockWhite)
-                .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp)),
+                .background(ChapWhite)
+                .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp)),
         ) {
             dataRows.take(5).forEachIndexed { index, row ->
                 PreviewRow(
@@ -497,9 +497,9 @@ private fun PreviewRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(date, color = if (muted) MockTextLight else MockNeutral, fontSize = 14.sp, modifier = Modifier.weight(0.34f), maxLines = 1)
-        Text(description, color = if (muted) MockNeutral else MockMaterialSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.44f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(amount, color = if (muted) MockNeutral else MockMaterialSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(0.22f), maxLines = 1)
+        Text(date, color = if (muted) ChapTextLight else ChapNeutral, fontSize = 14.sp, modifier = Modifier.weight(0.34f), maxLines = 1)
+        Text(description, color = if (muted) ChapNeutral else ChapMaterialSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.44f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(amount, color = if (muted) ChapNeutral else ChapMaterialSurface, fontSize = 15.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(0.22f), maxLines = 1)
     }
 }
 
@@ -596,20 +596,20 @@ private fun UnrecognisedFileNotice() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .padding(20.dp),
     ) {
         Text(
             text = "This file does not look like a CSV export",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Chap could not find date, description or amount columns in it. Export your statement as CSV from your bank and try again.",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 14.sp,
             lineHeight = 20.sp,
         )

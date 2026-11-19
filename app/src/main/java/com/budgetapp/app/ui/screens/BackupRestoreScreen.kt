@@ -40,16 +40,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.ui.components.StandardLightHeader
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockInk
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurfaceNearWhite
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockTextMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapInk
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurfaceNearWhite
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapTextMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 import com.budgetapp.app.security.LocalTrustedExternalActivityCoordinator
 import com.budgetapp.app.security.launchTrustedExternalActivity
 import java.io.ByteArrayOutputStream
@@ -107,7 +107,7 @@ fun BackupRestoreScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MockBackground),
+                .background(ChapBackground),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             StandardLightHeader(
@@ -128,7 +128,7 @@ fun BackupRestoreScreen(
                         title = "Create backup",
                         copy = "Save an encrypted local backup for this device and app install.",
                         button = if (state.isCreatingBackup) "Creating..." else "Create backup",
-                        buttonColor = MockPrimaryAlt,
+                        buttonColor = ChapPrimaryAlt,
                         enabled = !state.isBusy,
                         onClick = {
                             externalActivityCoordinator.launchTrustedExternalActivity {
@@ -140,8 +140,8 @@ fun BackupRestoreScreen(
                         title = "Restore backup",
                         copy = "Restore a backup created on this same device and replace current local data.",
                         button = if (state.isRestoringBackup) "Restoring..." else "Choose backup file",
-                        buttonColor = MockSurfaceNearWhite,
-                        textColor = MockTextMuted,
+                        buttonColor = ChapSurfaceNearWhite,
+                        textColor = ChapTextMuted,
                         enabled = !state.isBusy,
                         onClick = {
                             externalActivityCoordinator.launchTrustedExternalActivity {
@@ -153,8 +153,8 @@ fun BackupRestoreScreen(
                         title = "Delete data",
                         copy = "Permanently remove all local envelopes, rules, profile settings, and transactions.",
                         button = if (state.isDeletingData) "Deleting..." else "Delete data",
-                        buttonColor = MockDanger.copy(alpha = 0.08f),
-                        textColor = MockDanger,
+                        buttonColor = ChapDanger.copy(alpha = 0.08f),
+                        textColor = ChapDanger,
                         enabled = !state.isBusy,
                         onClick = { isDeleteConfirming = true },
                     )
@@ -166,7 +166,7 @@ fun BackupRestoreScreen(
                     BackupMetaPanel(lastBackup = formatBackupTimestamp(state.lastBackupAtMillis))
                     Text(
                         text = "Backup files stay on your device unless you choose to share or store them elsewhere. They are protected by a key held in this app install, so they restore here only.",
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 13.sp,
                         lineHeight = 19.sp,
                         textAlign = TextAlign.Center,
@@ -184,7 +184,7 @@ fun BackupRestoreScreen(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(MockInk.copy(alpha = 0.54f))
+                        .background(ChapInk.copy(alpha = 0.54f))
                         .clickable {
                             isDeleteConfirming = false
                             pendingRestoreUri = null
@@ -197,7 +197,7 @@ fun BackupRestoreScreen(
                         body = "This permanently removes every envelope, transaction, rule and profile setting on this device. Backups you already saved are kept and still restore here.",
                         confirmLabel = "Delete",
                         busyLabel = "Deleting...",
-                        confirmColor = MockDanger,
+                        confirmColor = ChapDanger,
                         isBusy = state.isDeletingData,
                         onCancel = { isDeleteConfirming = false },
                         onConfirm = {
@@ -214,7 +214,7 @@ fun BackupRestoreScreen(
                         body = "Restoring replaces every envelope, transaction, rule and profile setting currently on this device. Create a backup first if you still need the current data.",
                         confirmLabel = "Restore",
                         busyLabel = "Restoring...",
-                        confirmColor = MockPrimaryAlt,
+                        confirmColor = ChapPrimaryAlt,
                         isBusy = state.isRestoringBackup,
                         onCancel = { pendingRestoreUri = null },
                         onConfirm = {
@@ -239,7 +239,7 @@ private fun BackupCard(
     copy: String,
     button: String,
     buttonColor: androidx.compose.ui.graphics.Color,
-    textColor: androidx.compose.ui.graphics.Color = MockWhite,
+    textColor: androidx.compose.ui.graphics.Color = ChapWhite,
     enabled: Boolean = true,
     onClick: () -> Unit = {},
 ) {
@@ -249,13 +249,13 @@ private fun BackupCard(
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(MockWhite)
-                .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+                .background(ChapWhite)
+                .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
                 .padding(20.dp),
     ) {
-        Text(title, color = MockMaterialSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(title, color = ChapMaterialSurface, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(6.dp))
-        Text(copy, color = MockNeutral, fontSize = 14.sp, lineHeight = 20.sp)
+        Text(copy, color = ChapNeutral, fontSize = 14.sp, lineHeight = 20.sp)
         Spacer(modifier = Modifier.height(18.dp))
         Button(
             onClick = onClick,
@@ -266,8 +266,8 @@ private fun BackupCard(
                 ButtonDefaults.buttonColors(
                     containerColor = buttonColor,
                     contentColor = textColor,
-                    disabledContainerColor = MockSurfaceNearWhite,
-                    disabledContentColor = MockTextMuted,
+                    disabledContainerColor = ChapSurfaceNearWhite,
+                    disabledContentColor = ChapTextMuted,
                 ),
         ) {
             Text(button, fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -282,7 +282,7 @@ private fun BackupStatusText(
 ) {
     Text(
         text = text,
-        color = if (isError) MockDanger else MockPrimaryAlt,
+        color = if (isError) ChapDanger else ChapPrimaryAlt,
         fontSize = 14.sp,
         lineHeight = 19.sp,
         fontWeight = FontWeight.Bold,
@@ -302,8 +302,8 @@ private fun BackupMetaPanel(lastBackup: String) {
                 .fillMaxWidth()
                 .padding(top = 16.dp)
                 .clip(RoundedCornerShape(22.dp))
-                .background(MockWhite.copy(alpha = 0.56f))
-                .border(1.dp, MockSurfacePale, RoundedCornerShape(22.dp))
+                .background(ChapWhite.copy(alpha = 0.56f))
+                .border(1.dp, ChapSurfacePale, RoundedCornerShape(22.dp))
                 .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -322,8 +322,8 @@ private fun BackupMetaRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, color = MockNeutral, fontSize = 14.sp)
-        Text(value, color = MockMaterialSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
+        Text(label, color = ChapNeutral, fontSize = 14.sp)
+        Text(value, color = ChapMaterialSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End)
     }
 }
 
@@ -346,13 +346,13 @@ private fun ConfirmSheet(
                 .navigationBarsPadding()
                 .padding(16.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(MockWhite)
+                .background(ChapWhite)
                 .padding(22.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = title,
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 22.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -361,7 +361,7 @@ private fun ConfirmSheet(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = body,
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 15.sp,
             lineHeight = 21.sp,
             textAlign = TextAlign.Center,
@@ -376,7 +376,7 @@ private fun ConfirmSheet(
                 enabled = !isBusy,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MockSurfaceNearWhite, contentColor = MockTextMuted),
+                colors = ButtonDefaults.buttonColors(containerColor = ChapSurfaceNearWhite, contentColor = ChapTextMuted),
             ) {
                 Text("Cancel", fontWeight = FontWeight.Bold)
             }
@@ -385,7 +385,7 @@ private fun ConfirmSheet(
                 enabled = !isBusy,
                 modifier = Modifier.weight(1f).height(52.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = confirmColor, contentColor = MockWhite),
+                colors = ButtonDefaults.buttonColors(containerColor = confirmColor, contentColor = ChapWhite),
             ) {
                 Text(if (isBusy) busyLabel else confirmLabel, fontWeight = FontWeight.Bold)
             }

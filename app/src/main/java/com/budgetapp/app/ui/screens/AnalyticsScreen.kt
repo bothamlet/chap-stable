@@ -44,22 +44,22 @@ import com.budgetapp.app.domain.budgetPeriod
 import com.budgetapp.app.ui.components.CompactHeaderTopPadding
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
-import com.budgetapp.app.ui.theme.MockAccentDeep
-import com.budgetapp.app.ui.theme.MockBorderDeep
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceMuted
-import com.budgetapp.app.ui.theme.MockSurfaceRaisedAlt
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextSecondary
-import com.budgetapp.app.ui.theme.MockTextTertiary
-import com.budgetapp.app.ui.theme.MockWarningBright
-import com.budgetapp.app.ui.theme.MockWhite
-import com.budgetapp.app.ui.theme.MockDivider
-import com.budgetapp.app.ui.theme.MockBorderPurple
-import com.budgetapp.app.ui.theme.MockPurpleDeep
-import com.budgetapp.app.ui.theme.MockPurpleInk
+import com.budgetapp.app.ui.theme.ChapAccentDeep
+import com.budgetapp.app.ui.theme.ChapBorderDeep
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceMuted
+import com.budgetapp.app.ui.theme.ChapSurfaceRaisedAlt
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextSecondary
+import com.budgetapp.app.ui.theme.ChapTextTertiary
+import com.budgetapp.app.ui.theme.ChapWarningBright
+import com.budgetapp.app.ui.theme.ChapWhite
+import com.budgetapp.app.ui.theme.ChapDivider
+import com.budgetapp.app.ui.theme.ChapBorderPurple
+import com.budgetapp.app.ui.theme.ChapPurpleDeep
+import com.budgetapp.app.ui.theme.ChapPurpleInk
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -94,7 +94,7 @@ private fun AnalyticsEmptyContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MockSurface),
+            .background(ChapSurface),
     ) {
         AnalyticsTopBar(
             title = "Analytics",
@@ -111,7 +111,7 @@ private fun AnalyticsEmptyContent(
                 actionText = "Import transactions",
                 onAction = onImport,
                 icon = {
-                    AnalyticsIcon(AnalyticsIconKind.Bars, Modifier.size(44.dp), MockPrimaryAlt)
+                    AnalyticsIcon(AnalyticsIconKind.Bars, Modifier.size(44.dp), ChapPrimaryAlt)
                 },
             )
         }
@@ -127,7 +127,7 @@ private fun AnalyticsFullContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MockSurface),
+            .background(ChapSurface),
     ) {
         Column(
             modifier = Modifier
@@ -160,7 +160,7 @@ private fun AnalyticsFullContent(
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Forecast estimates where spending lands if the current pace continues.",
-                    color = MockTextTertiary,
+                    color = ChapTextTertiary,
                     fontSize = 13.sp,
                     lineHeight = 18.sp,
                     fontWeight = FontWeight.Medium,
@@ -196,7 +196,7 @@ private fun AnalyticsTopBar(
     ) {
         Text(
             text = title,
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = if (centered) TextAlign.Center else TextAlign.Start,
@@ -213,7 +213,7 @@ private fun AnalyticsTopRow(onBack: () -> Unit) {
     ) {
         Text(
             text = "Analytics",
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
@@ -231,7 +231,7 @@ private fun PeriodTabs() {
             // ANALYTICS-FULL.html gives the tab row a 1px rgba(255,255,255,0.07) bottom border.
             .drawBehind {
                 drawLine(
-                    color = MockWhite.copy(alpha = 0.07f),
+                    color = ChapWhite.copy(alpha = 0.07f),
                     start = Offset(0f, size.height),
                     end = Offset(size.width, size.height),
                     strokeWidth = 1.dp.toPx(),
@@ -250,8 +250,8 @@ private fun PeriodTabs() {
                     .then(
                         if (isActive) {
                             Modifier
-                                .background(MockSurfaceMuted)
-                                .border(1.dp, MockBorderDeep, RoundedCornerShape(99.dp))
+                                .background(ChapSurfaceMuted)
+                                .border(1.dp, ChapBorderDeep, RoundedCornerShape(99.dp))
                         } else {
                             Modifier.semantics { disabled() }
                         },
@@ -260,7 +260,7 @@ private fun PeriodTabs() {
             ) {
                 Text(
                     text = label,
-                    color = if (isActive) MockWhite else MockTextSecondary,
+                    color = if (isActive) ChapWhite else ChapTextSecondary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -274,7 +274,7 @@ private fun PeriodTabs() {
 private fun AnalyticsSectionTitle(title: String) {
     Text(
         text = title.uppercase(Locale.US),
-        color = MockTextTertiary,
+        color = ChapTextTertiary,
         fontSize = 13.sp,
         fontWeight = FontWeight.Bold,
         letterSpacing = 1.43.sp,
@@ -286,12 +286,12 @@ private fun AnalyticsSectionTitle(title: String) {
 private fun HighlightGrid(state: AnalyticsState) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            MetricCard("Total spent", state.profileSettings.formatMoney(state.spentCents), "${state.budgetPercent}% of budget", MockPrimaryAlt, Modifier.weight(1f))
-            MetricCard("Forecast", state.profileSettings.formatMoney(state.forecastCents), forecastNote(state), MockWarningBright, Modifier.weight(1f))
+            MetricCard("Total spent", state.profileSettings.formatMoney(state.spentCents), "${state.budgetPercent}% of budget", ChapPrimaryAlt, Modifier.weight(1f))
+            MetricCard("Forecast", state.profileSettings.formatMoney(state.forecastCents), forecastNote(state), ChapWarningBright, Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            MetricCard("Most active", state.mostActiveDay, "Spending peak", MockWhite, Modifier.weight(1f))
-            MetricCard("Top envelope", state.topEnvelope?.name ?: "None", topEnvelopeNote(state.topEnvelope, state.profileSettings), if ((state.topEnvelope?.spentCents ?: 0L) > (state.topEnvelope?.ceilingCents ?: Long.MAX_VALUE)) MockDanger else MockWhite, Modifier.weight(1f))
+            MetricCard("Most active", state.mostActiveDay, "Spending peak", ChapWhite, Modifier.weight(1f))
+            MetricCard("Top envelope", state.topEnvelope?.name ?: "None", topEnvelopeNote(state.topEnvelope, state.profileSettings), if ((state.topEnvelope?.spentCents ?: 0L) > (state.topEnvelope?.ceilingCents ?: Long.MAX_VALUE)) ChapDanger else ChapWhite, Modifier.weight(1f))
         }
     }
 }
@@ -307,15 +307,15 @@ private fun MetricCard(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockDivider, RoundedCornerShape(16.dp))
+            .background(ChapSurfaceRaisedAlt)
+            .border(1.dp, ChapDivider, RoundedCornerShape(16.dp))
             .padding(16.dp),
     ) {
-        Text(label.uppercase(Locale.US), color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.96.sp)
+        Text(label.uppercase(Locale.US), color = ChapTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.96.sp)
         Spacer(modifier = Modifier.height(6.dp))
         Text(value, color = valueColor, fontSize = 22.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Spacer(modifier = Modifier.height(3.dp))
-        Text(note, color = MockTextTertiary, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(note, color = ChapTextTertiary, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -326,17 +326,17 @@ private fun TrendPanel(state: AnalyticsState) {
             .fillMaxWidth()
             .height(270.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
+            .background(ChapSurfaceRaisedAlt)
+            .border(1.dp, ChapDivider, RoundedCornerShape(18.dp))
             .padding(14.dp),
     ) {
-        Text("${state.profileSettings.formatMoney(state.budgetCents)} budget", color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text("${state.profileSettings.formatMoney(state.budgetCents)} budget", color = ChapTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         Column(
             modifier = Modifier.align(Alignment.TopEnd),
             horizontalAlignment = Alignment.End,
         ) {
-            Text(state.profileSettings.formatMoney(state.spentCents), color = MockPrimaryAlt, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Text("spent so far", color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(state.profileSettings.formatMoney(state.spentCents), color = ChapPrimaryAlt, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+            Text("spent so far", color = ChapTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
         TrendChart(
             transactions = state.periodExpenses,
@@ -362,7 +362,7 @@ private fun TrendChart(
         val height = size.height
         repeat(4) { index ->
             val y = height * (index + 1) / 5f
-            drawLine(MockBorderDeep, Offset(0f, y), Offset(width, y), strokeWidth = 1.dp.toPx())
+            drawLine(ChapBorderDeep, Offset(0f, y), Offset(width, y), strokeWidth = 1.dp.toPx())
         }
         val days = period.lengthInDays.coerceAtLeast(1)
         val byDay = transactions.groupBy { (it.postedAtMillis.toAnalyticsDate().toEpochDay() - period.start.toEpochDay() + 1).toInt() }
@@ -380,10 +380,10 @@ private fun TrendChart(
                 moveTo(points.first().x, points.first().y)
                 points.drop(1).forEach { lineTo(it.x, it.y) }
             }
-            drawPath(path, MockPrimaryAlt, style = Stroke(4.dp.toPx(), cap = StrokeCap.Round))
+            drawPath(path, ChapPrimaryAlt, style = Stroke(4.dp.toPx(), cap = StrokeCap.Round))
             val last = points.last()
-            drawCircle(MockPrimaryAlt, radius = 7.dp.toPx(), center = last)
-            drawLine(MockPrimaryAlt.copy(alpha = 0.45f), Offset(last.x, 0f), Offset(last.x, height), strokeWidth = 1.dp.toPx())
+            drawCircle(ChapPrimaryAlt, radius = 7.dp.toPx(), center = last)
+            drawLine(ChapPrimaryAlt.copy(alpha = 0.45f), Offset(last.x, 0f), Offset(last.x, height), strokeWidth = 1.dp.toPx())
             // Show projected spending as a dashed line.
             val forecastEndY = height - (height * ((running.toFloat() / todayIndex) * days / maxValue))
             val forecastPath = Path().apply {
@@ -392,7 +392,7 @@ private fun TrendChart(
             }
             drawPath(
                 path = forecastPath,
-                color = MockWarningBright,
+                color = ChapWarningBright,
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round,
@@ -401,15 +401,15 @@ private fun TrendChart(
             )
         }
         val budgetY = height - (height * (budgetCents / maxValue))
-        drawLine(MockTextLightMuted.copy(alpha = 0.55f), Offset(0f, budgetY), Offset(width, budgetY), strokeWidth = 1.2.dp.toPx())
+        drawLine(ChapTextLightMuted.copy(alpha = 0.55f), Offset(0f, budgetY), Offset(width, budgetY), strokeWidth = 1.2.dp.toPx())
     }
 }
 
 @Composable
 private fun Legend() {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        LegendItem("Actual", MockPrimaryAlt)
-        LegendItem("Forecast", MockWarningBright)
+        LegendItem("Actual", ChapPrimaryAlt)
+        LegendItem("Forecast", ChapWarningBright)
     }
 }
 
@@ -417,7 +417,7 @@ private fun Legend() {
 private fun LegendItem(label: String, color: androidx.compose.ui.graphics.Color) {
     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(width = 20.dp, height = 3.dp).clip(RoundedCornerShape(99.dp)).background(color))
-        Text(label, color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text(label, color = ChapTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -427,21 +427,21 @@ private fun BreakdownPanel(envelopes: List<EnvelopeBalance>, profileSettings: Pr
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
+            .background(ChapSurfaceRaisedAlt)
+            .border(1.dp, ChapDivider, RoundedCornerShape(18.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         envelopes.take(6).forEach { envelope ->
             val progress = if (envelope.ceilingCents <= 0L) 0f else (envelope.spentCents.toFloat() / envelope.ceilingCents).coerceAtLeast(0f)
             val color = when {
-                progress >= 1f -> MockDanger
-                progress >= 0.7f -> MockWarningBright
-                else -> MockPrimaryAlt
+                progress >= 1f -> ChapDanger
+                progress >= 0.7f -> ChapWarningBright
+                else -> ChapPrimaryAlt
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(envelope.name, color = MockWhite, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(0.36f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Box(modifier = Modifier.weight(0.38f).height(4.dp).clip(RoundedCornerShape(99.dp)).background(MockBorderPurple)) {
+                Text(envelope.name, color = ChapWhite, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(0.36f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Box(modifier = Modifier.weight(0.38f).height(4.dp).clip(RoundedCornerShape(99.dp)).background(ChapBorderPurple)) {
                     Box(modifier = Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(4.dp).background(color))
                 }
                 Text("${profileSettings.formatMoney(envelope.spentCents)}/${profileSettings.formatMoney(envelope.ceilingCents)}", color = color, fontSize = 13.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.End, modifier = Modifier.weight(0.26f), maxLines = 1)
@@ -459,11 +459,11 @@ private fun ComparisonPanel(state: AnalyticsState) {
             .fillMaxWidth()
             .height(250.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
+            .background(ChapSurfaceRaisedAlt)
+            .border(1.dp, ChapDivider, RoundedCornerShape(18.dp))
             .padding(14.dp),
     ) {
-        Text("budget", color = MockTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.align(Alignment.TopEnd))
+        Text("budget", color = ChapTextTertiary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.align(Alignment.TopEnd))
         Canvas(modifier = Modifier.fillMaxSize().padding(top = 18.dp)) {
             val bars = monthSpending.map { it.spentCents.toFloat() }
             val maxValue = max(state.budgetCents.toFloat(), bars.maxOrNull() ?: 1f).coerceAtLeast(1f)
@@ -472,16 +472,16 @@ private fun ComparisonPanel(state: AnalyticsState) {
                 val x = size.width * (index + 0.8f) / 7f
                 val barHeight = size.height * 0.72f * (value / maxValue)
                 val color = if (value > state.budgetCents) {
-                    MockDanger
+                    ChapDanger
                 } else if (monthSpending[index].isCurrent) {
-                    MockWarningBright
+                    ChapWarningBright
                 } else {
-                    MockPrimaryAlt.copy(alpha = 0.65f)
+                    ChapPrimaryAlt.copy(alpha = 0.65f)
                 }
                 drawRoundRect(color, Offset(x, size.height * 0.82f - barHeight), androidx.compose.ui.geometry.Size(barWidth, barHeight), androidx.compose.ui.geometry.CornerRadius(5.dp.toPx(), 5.dp.toPx()))
             }
             val budgetY = size.height * 0.82f - size.height * 0.72f * (state.budgetCents / maxValue)
-            drawLine(MockTextLightMuted.copy(alpha = 0.55f), Offset(0f, budgetY), Offset(size.width, budgetY), strokeWidth = 1.2.dp.toPx())
+            drawLine(ChapTextLightMuted.copy(alpha = 0.55f), Offset(0f, budgetY), Offset(size.width, budgetY), strokeWidth = 1.2.dp.toPx())
         }
         Row(
             modifier = Modifier
@@ -493,7 +493,7 @@ private fun ComparisonPanel(state: AnalyticsState) {
             monthSpending.forEach { item ->
                 Text(
                     text = item.label,
-                    color = if (item.isCurrent) MockWarningBright else MockTextTertiary,
+                    color = if (item.isCurrent) ChapWarningBright else ChapTextTertiary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center,
@@ -513,13 +513,13 @@ private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings:
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(MockSurfaceRaisedAlt)
-            .border(1.dp, MockDivider, RoundedCornerShape(18.dp))
+            .background(ChapSurfaceRaisedAlt)
+            .border(1.dp, ChapDivider, RoundedCornerShape(18.dp))
             .padding(horizontal = 18.dp, vertical = 18.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
             weekdays.forEach {
-                Text(it.getDisplayName(TextStyle.SHORT, Locale.US).uppercase(Locale.US), color = MockTextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+                Text(it.getDisplayName(TextStyle.SHORT, Locale.US).uppercase(Locale.US), color = ChapTextTertiary, fontSize = 10.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -534,16 +534,16 @@ private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings:
                         val amount = amounts[day] ?: 0L
                         val ratio = amount.toFloat() / maxAmount
                         val color = when {
-                            amount == 0L -> MockPurpleDeep
-                            ratio > 0.66f -> MockPrimaryAlt
-                            ratio > 0.33f -> MockAccentDeep
-                            else -> MockPurpleInk
+                            amount == 0L -> ChapPurpleDeep
+                            ratio > 0.66f -> ChapPrimaryAlt
+                            ratio > 0.33f -> ChapAccentDeep
+                            else -> ChapPurpleInk
                         }
                         Box(
                             modifier = Modifier.weight(1f).height(42.dp).clip(RoundedCornerShape(9.dp)).background(color),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Text(period.start.plusDays((day - 1).toLong()).dayOfMonth.toString(), color = if (ratio > 0.66f) MockWhite else MockTextLightMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                            Text(period.start.plusDays((day - 1).toLong()).dayOfMonth.toString(), color = if (ratio > 0.66f) ChapWhite else ChapTextLightMuted, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
@@ -551,7 +551,7 @@ private fun HeatmapPanel(transactions: List<TransactionEntity>, profileSettings:
             }
             Spacer(modifier = Modifier.height(6.dp))
         }
-        Text("SPENDING LEVEL", color = MockTextTertiary, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.88.sp, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+        Text("SPENDING LEVEL", color = ChapTextTertiary, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.88.sp, textAlign = TextAlign.End, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
     }
 }
 

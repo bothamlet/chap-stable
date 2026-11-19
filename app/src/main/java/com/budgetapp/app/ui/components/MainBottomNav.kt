@@ -29,11 +29,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.budgetapp.app.ui.theme.MockBorderDeep
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBorderDeep
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapWhite
 
 @Composable
 fun MainBottomNav(
@@ -46,14 +46,14 @@ fun MainBottomNav(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(MockSurface)
+            .background(ChapSurface)
             .navigationBarsPadding(),
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(MockBorderDeep),
+                .background(ChapBorderDeep),
         )
         Row(
             modifier = Modifier
@@ -76,14 +76,14 @@ fun MainBottomNav(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(MockPrimaryAlt)
+                        .background(ChapPrimaryAlt)
                         .clickable(onClick = onAddTransaction)
                         .semantics { contentDescription = "Add transaction" },
                     contentAlignment = Alignment.Center,
                 ) {
                     MainNavIconCanvas(
                         icon = MainNavIcon.Plus,
-                        tint = MockWhite,
+                        tint = ChapWhite,
                         modifier = Modifier.size(26.dp),
                     )
                 }
@@ -113,7 +113,7 @@ private fun MainNavItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val tint = if (isActive) MockPrimaryAlt else MockNeutral
+    val tint = if (isActive) ChapPrimaryAlt else ChapNeutral
     Column(
         modifier = modifier
             .height(56.dp)

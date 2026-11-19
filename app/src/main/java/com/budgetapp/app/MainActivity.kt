@@ -33,10 +33,10 @@ import com.budgetapp.app.security.BiometricGate
 import com.budgetapp.app.security.AppLockCoordinator
 import com.budgetapp.app.security.LocalTrustedExternalActivityCoordinator
 import com.budgetapp.app.ui.theme.BudgetTheme
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapWhite
 
 class MainActivity : FragmentActivity() {
     private lateinit var biometricGate: BiometricGate
@@ -147,21 +147,21 @@ private fun LockedScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MockSurface)
+            .background(ChapSurface)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "Chap",
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 38.sp,
             lineHeight = 40.sp,
             fontWeight = FontWeight.Bold,
         )
         Text(
             text = notice ?: "Unlock to view your budget.",
-            color = MockTextLightMuted,
+            color = ChapTextLightMuted,
             fontSize = 16.sp,
             lineHeight = 22.sp,
             textAlign = TextAlign.Center,
@@ -170,8 +170,8 @@ private fun LockedScreen(
         Button(
             onClick = if (notice == null) onUnlock else onOpenSecuritySettings,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
             ),
         ) {
             Text(if (notice == null) "Unlock" else "Open security settings", fontWeight = FontWeight.Bold)
@@ -179,14 +179,14 @@ private fun LockedScreen(
         if (notice != null) {
             Text(
                 text = "Try unlocking again",
-                color = MockPrimaryAlt,
+                color = ChapPrimaryAlt,
                 modifier = Modifier.clickable(onClick = onUnlock).padding(12.dp),
             )
         }
         if (canContinueWithoutLock) {
             Text(
                 text = "Continue without the lock",
-                color = MockPrimaryAlt,
+                color = ChapPrimaryAlt,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
@@ -196,7 +196,7 @@ private fun LockedScreen(
             )
             Text(
                 text = "Your budget stays encrypted on this device either way.",
-                color = MockTextLightMuted,
+                color = ChapTextLightMuted,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
                 textAlign = TextAlign.Center,

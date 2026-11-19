@@ -25,13 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.ui.components.SimpleDarkHeader
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryPale
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceRaised
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextSoft
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryPale
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceRaised
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextSoft
+import com.budgetapp.app.ui.theme.ChapWhite
 
 @Composable
 fun SupportScreen(
@@ -42,7 +42,7 @@ fun SupportScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MockSurface),
+                .background(ChapSurface),
     ) {
         SimpleDarkHeader("Support Chap", onBack)
         Column(
@@ -52,13 +52,13 @@ fun SupportScreen(
                     .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            MenuIcon(MenuIconKind.Heart, Modifier.size(44.dp), MockPrimaryAlt)
+            MenuIcon(MenuIconKind.Heart, Modifier.size(44.dp), ChapPrimaryAlt)
             Spacer(modifier = Modifier.height(22.dp))
-            Text("Support Chap", color = MockWhite, fontSize = 38.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold)
+            Text("Support Chap", color = ChapWhite, fontSize = 38.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(11.dp))
             Text(
                 "If this app helps you budget, you can leave a small thank you.",
-                color = MockTextLightMuted,
+                color = ChapTextLightMuted,
                 fontSize = 16.sp,
                 lineHeight = 23.sp,
                 textAlign = TextAlign.Center,
@@ -69,8 +69,8 @@ fun SupportScreen(
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(26.dp))
-                        .background(MockSurfaceRaised)
-                        .border(1.dp, MockWhite.copy(alpha = 0.08f), RoundedCornerShape(26.dp))
+                        .background(ChapSurfaceRaised)
+                        .border(1.dp, ChapWhite.copy(alpha = 0.08f), RoundedCornerShape(26.dp))
                         .padding(20.dp),
             ) {
                 Row(
@@ -79,17 +79,17 @@ fun SupportScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column {
-                        Text("Buy me a coffee", color = MockWhite, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Text("Processed by Buy Me a Coffee.", color = MockTextSoft, fontSize = 14.sp)
+                        Text("Buy me a coffee", color = ChapWhite, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text("Processed by Buy Me a Coffee.", color = ChapTextSoft, fontSize = 14.sp)
                     }
-                    Text("EUR 3+", color = MockPrimaryPale, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("EUR 3+", color = ChapPrimaryPale, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.height(18.dp))
                 Button(
                     onClick = {},
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MockPrimaryAlt, contentColor = MockWhite),
+                    colors = ButtonDefaults.buttonColors(containerColor = ChapPrimaryAlt, contentColor = ChapWhite),
                 ) {
                     Text("Support with EUR 3", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }

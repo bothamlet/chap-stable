@@ -45,14 +45,14 @@ import androidx.compose.ui.unit.sp
 import com.budgetapp.app.data.model.ProfileSettings
 import com.budgetapp.app.ui.components.ProfileAvatar
 import com.budgetapp.app.ui.components.StandardLightHeader
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockSurfaceTintAlt
-import com.budgetapp.app.ui.theme.MockTextLight
-import com.budgetapp.app.ui.theme.MockTextMutedBlue
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapSurfaceTintAlt
+import com.budgetapp.app.ui.theme.ChapTextLight
+import com.budgetapp.app.ui.theme.ChapTextMutedBlue
+import com.budgetapp.app.ui.theme.ChapWhite
 import com.budgetapp.app.security.LocalTrustedExternalActivityCoordinator
 import com.budgetapp.app.security.launchTrustedExternalActivity
 
@@ -92,7 +92,7 @@ fun ProfileScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MockBackground),
+                .background(ChapBackground),
     ) {
         StandardLightHeader(
             title = "Profile",
@@ -112,8 +112,8 @@ fun ProfileScreen(
                         Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(24.dp))
-                            .background(MockWhite)
-                            .border(1.dp, MockSurfacePale, RoundedCornerShape(24.dp)),
+                            .background(ChapWhite)
+                            .border(1.dp, ChapSurfacePale, RoundedCornerShape(24.dp)),
                 ) {
                     ProfileInputBlock(
                         label = "Name",
@@ -190,14 +190,14 @@ fun ProfileScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MockPrimaryAlt, contentColor = MockWhite),
+                    colors = ButtonDefaults.buttonColors(containerColor = ChapPrimaryAlt, contentColor = ChapWhite),
                 ) {
                     Text("Save profile", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
                 if (isSaved) {
                     Text(
                         text = "Profile saved",
-                        color = MockPrimaryAlt,
+                        color = ChapPrimaryAlt,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
@@ -225,10 +225,10 @@ private fun ProfileSelectBlock(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .then(if (!isLast) Modifier.border(0.dp, MockSurfacePale) else Modifier)
+                .then(if (!isLast) Modifier.border(0.dp, ChapSurfacePale) else Modifier)
                 .padding(16.dp),
     ) {
-        Text(label, color = MockTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = ChapTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(9.dp))
         Box {
             Row(
@@ -237,8 +237,8 @@ private fun ProfileSelectBlock(
                         .fillMaxWidth()
                         .height(48.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(MockSurfaceTintAlt)
-                        .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp))
+                        .background(ChapSurfaceTintAlt)
+                        .border(1.dp, ChapSurfacePale, RoundedCornerShape(14.dp))
                         .clickable { expanded = true }
                         .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -246,29 +246,29 @@ private fun ProfileSelectBlock(
             ) {
                 Text(
                     text = value,
-                    color = MockMaterialSurface,
+                    color = ChapMaterialSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text("v", color = MockTextLight, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text("v", color = ChapTextLight, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier =
                     Modifier
-                        .background(MockWhite)
-                        .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp)),
+                        .background(ChapWhite)
+                        .border(1.dp, ChapSurfacePale, RoundedCornerShape(14.dp)),
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = option,
-                                color = MockMaterialSurface,
+                                color = ChapMaterialSurface,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.SemiBold,
                             )
@@ -295,23 +295,23 @@ private fun ProfileInputBlock(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .then(if (!isLast) Modifier.border(0.dp, MockSurfacePale) else Modifier)
+                .then(if (!isLast) Modifier.border(0.dp, ChapSurfacePale) else Modifier)
                 .padding(16.dp),
     ) {
-        Text(label, color = MockTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(label, color = ChapTextMutedBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(9.dp))
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
-            textStyle = TextStyle(color = MockMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+            textStyle = TextStyle(color = ChapMaterialSurface, fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MockSurfaceTintAlt)
-                    .border(1.dp, MockSurfacePale, RoundedCornerShape(14.dp))
+                    .background(ChapSurfaceTintAlt)
+                    .border(1.dp, ChapSurfacePale, RoundedCornerShape(14.dp))
                     .padding(horizontal = 16.dp),
             decorationBox = { inner -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) { inner() } },
         )
@@ -339,7 +339,7 @@ private fun ProfileAvatarBlock(
         )
         Text(
             text = "Change picture",
-            color = MockPrimaryAlt,
+            color = ChapPrimaryAlt,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.clickable(onClick = onChangePicture),

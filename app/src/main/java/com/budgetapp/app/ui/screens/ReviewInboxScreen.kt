@@ -49,24 +49,24 @@ import com.budgetapp.app.ui.components.CompactHeaderHeroGap
 import com.budgetapp.app.ui.components.CompactHeaderTopPadding
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockLavenderMuted
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryBright
-import com.budgetapp.app.ui.theme.MockPrimaryLight
-import com.budgetapp.app.ui.theme.MockPurpleNight
-import com.budgetapp.app.ui.theme.MockPurplePale
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceBarely
-import com.budgetapp.app.ui.theme.MockSurfaceLight
-import com.budgetapp.app.ui.theme.MockSurfacePale
-import com.budgetapp.app.ui.theme.MockSurfaceTintAlt
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextMutedBlue
-import com.budgetapp.app.ui.theme.MockWarningGold
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapLavenderMuted
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryBright
+import com.budgetapp.app.ui.theme.ChapPrimaryLight
+import com.budgetapp.app.ui.theme.ChapPurpleNight
+import com.budgetapp.app.ui.theme.ChapPurplePale
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceBarely
+import com.budgetapp.app.ui.theme.ChapSurfaceLight
+import com.budgetapp.app.ui.theme.ChapSurfacePale
+import com.budgetapp.app.ui.theme.ChapSurfaceTintAlt
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextMutedBlue
+import com.budgetapp.app.ui.theme.ChapWarningGold
+import com.budgetapp.app.ui.theme.ChapWhite
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -123,7 +123,7 @@ private fun ReviewInboxContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         InboxHeader(
             count = state.groups.sumOf { it.transactionIds.size },
@@ -167,7 +167,7 @@ private fun InboxHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MockSurface)
+            .background(ChapSurface)
             .padding(start = 24.dp, end = 24.dp, top = CompactHeaderTopPadding, bottom = CompactHeaderBottomPadding),
     ) {
         Row(
@@ -177,7 +177,7 @@ private fun InboxHeader(
         ) {
             Text(
                 text = "Review inbox",
-                color = MockWhite,
+                color = ChapWhite,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f),
@@ -186,13 +186,13 @@ private fun InboxHeader(
                 modifier = Modifier
                     .height(33.dp)
                     .clip(RoundedCornerShape(99.dp))
-                    .background(MockPurpleNight)
+                    .background(ChapPurpleNight)
                     .padding(horizontal = 13.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = count.toString(),
-                    color = MockPrimaryLight,
+                    color = ChapPrimaryLight,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -201,7 +201,7 @@ private fun InboxHeader(
         Spacer(modifier = Modifier.height(CompactHeaderHeroGap))
         Text(
             text = "Assign transactions",
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 32.sp,
             lineHeight = 34.sp,
             fontWeight = FontWeight.Bold,
@@ -209,7 +209,7 @@ private fun InboxHeader(
         Spacer(modifier = Modifier.height(7.dp))
         Text(
             text = "Assign each transaction to an envelope.",
-            color = MockTextLightMuted,
+            color = ChapTextLightMuted,
             fontSize = 15.sp,
             lineHeight = 22.sp,
             fontWeight = FontWeight.Medium,
@@ -233,8 +233,8 @@ private fun InboxTransactionCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .padding(start = 16.dp, end = 16.dp, top = 18.dp, bottom = 14.dp),
     ) {
         Row(
@@ -245,7 +245,7 @@ private fun InboxTransactionCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = group.title,
-                    color = MockMaterialSurface,
+                    color = ChapMaterialSurface,
                     fontSize = 18.sp,
                     lineHeight = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -255,7 +255,7 @@ private fun InboxTransactionCard(
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "${group.postedAtMillis.toInboxDateLabel(profileSettings)} \u00b7 ${group.transactionIds.size} ${if (group.transactionIds.size == 1) "transaction" else "transactions"}",
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                 )
@@ -266,7 +266,7 @@ private fun InboxTransactionCard(
                 } else {
                     profileSettings.formatMoney(abs(group.amountCents))
                 },
-                color = if (group.amountCents > 0L) MockPrimaryAlt else MockMaterialSurface,
+                color = if (group.amountCents > 0L) ChapPrimaryAlt else ChapMaterialSurface,
                 fontSize = 21.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -279,7 +279,7 @@ private fun InboxTransactionCard(
                 } else {
                     "Create an envelope first."
                 },
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -313,10 +313,10 @@ private fun InboxTransactionCard(
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                InboxIcon(InboxIconKind.Star, Modifier.size(15.dp), MockWarningGold)
+                InboxIcon(InboxIconKind.Star, Modifier.size(15.dp), ChapWarningGold)
                 Text(
                     text = "Always assign ${group.title.toInboxRulePattern()} to ${selectedEnvelopeName ?: "this envelope"}",
-                    color = MockTextMutedBlue,
+                    color = ChapTextMutedBlue,
                     fontSize = 15.sp,
                     lineHeight = 18.sp,
                     fontWeight = FontWeight.Medium,
@@ -338,10 +338,10 @@ private fun InboxTransactionCard(
                 .height(50.dp),
             shape = RoundedCornerShape(15.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
-                disabledContainerColor = MockSurfaceBarely,
-                disabledContentColor = MockTextMutedBlue,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
+                disabledContainerColor = ChapSurfaceBarely,
+                disabledContentColor = ChapTextMutedBlue,
             ),
         ) {
             Text(
@@ -362,8 +362,8 @@ private fun InboxChip(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
-            .background(if (selected) MockPrimaryAlt else MockSurfaceTintAlt)
-            .border(1.dp, if (selected) MockPrimaryAlt.copy(alpha = 0.35f) else MockSurfaceLight, RoundedCornerShape(99.dp))
+            .background(if (selected) ChapPrimaryAlt else ChapSurfaceTintAlt)
+            .border(1.dp, if (selected) ChapPrimaryAlt.copy(alpha = 0.35f) else ChapSurfaceLight, RoundedCornerShape(99.dp))
             .clickable(onClick = onClick)
             .heightIn(min = 48.dp)
             .padding(horizontal = 13.dp, vertical = 8.dp),
@@ -371,7 +371,7 @@ private fun InboxChip(
     ) {
         Text(
             text = text,
-            color = if (selected) MockWhite else MockNeutral,
+            color = if (selected) ChapWhite else ChapNeutral,
             fontSize = 14.sp,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             maxLines = 1,
@@ -403,7 +403,7 @@ private fun InboxSwitch(
             modifier = Modifier
                 .size(width = 54.dp, height = 32.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(if (checked) MockPurplePale else MockSurfaceBarely)
+                .background(if (checked) ChapPurplePale else ChapSurfaceBarely)
                 .padding(4.dp),
             contentAlignment = if (checked) Alignment.CenterEnd else Alignment.CenterStart,
         ) {
@@ -411,7 +411,7 @@ private fun InboxSwitch(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(if (checked) MockPrimaryBright else MockNeutral),
+                    .background(if (checked) ChapPrimaryBright else ChapNeutral),
             )
         }
     }
@@ -425,7 +425,7 @@ private fun InboxEmptyScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MockSurface),
+            .background(ChapSurface),
     ) {
         StandardEmptyStateViewport(
             modifier = Modifier.align(Alignment.Center),
@@ -433,9 +433,9 @@ private fun InboxEmptyScreen(
             StandardEmptyState(
                 title = "All caught up",
                 copy = "New transactions will categorize automatically.",
-                copyColor = MockLavenderMuted,
+                copyColor = ChapLavenderMuted,
                 icon = {
-                    InboxIcon(InboxIconKind.Check, Modifier.size(42.dp), MockPrimaryAlt)
+                    InboxIcon(InboxIconKind.Check, Modifier.size(42.dp), ChapPrimaryAlt)
                 },
             )
         }

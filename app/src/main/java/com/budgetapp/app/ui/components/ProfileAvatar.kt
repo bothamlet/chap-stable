@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.budgetapp.app.ui.theme.MockPanelRaised
-import com.budgetapp.app.ui.theme.MockPrimarySoft
+import com.budgetapp.app.ui.theme.ChapPanelRaised
+import com.budgetapp.app.ui.theme.ChapPrimarySoft
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -51,7 +51,7 @@ fun ProfileAvatar(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(MockPanelRaised),
+            .background(ChapPanelRaised),
         contentAlignment = Alignment.Center,
     ) {
         val resolvedBitmap = bitmap
@@ -65,7 +65,7 @@ fun ProfileAvatar(
         } else {
             Text(
                 text = name.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "C",
-                color = MockPrimarySoft,
+                color = ChapPrimarySoft,
                 fontSize = (size.value * 0.34f).sp,
                 fontWeight = FontWeight.Bold,
             )

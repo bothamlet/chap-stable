@@ -13,18 +13,18 @@ import androidx.compose.ui.text.font.FontWeight
 import com.budgetapp.app.R
 
 private val BudgetColorScheme = darkColorScheme(
-    primary = MockPrimaryBright,
-    onPrimary = MockWhite,
-    secondary = MockPrimaryLight,
-    onSecondary = MockInk,
-    background = MockSurfaceDeep,
-    onBackground = MockWhiteSoft,
-    surface = MockPanel,
-    onSurface = MockWhiteSoft,
-    surfaceVariant = MockPanelRaised,
-    onSurfaceVariant = MockTextLight,
-    error = MockDanger,
-    onError = MockWhite,
+    primary = ChapPrimaryBright,
+    onPrimary = ChapWhite,
+    secondary = ChapPrimaryLight,
+    onSecondary = ChapInk,
+    background = ChapSurfaceDeep,
+    onBackground = ChapWhiteSoft,
+    surface = ChapPanel,
+    onSurface = ChapWhiteSoft,
+    surfaceVariant = ChapPanelRaised,
+    onSurfaceVariant = ChapTextLight,
+    error = ChapDanger,
+    onError = ChapWhite,
 )
 
 @OptIn(ExperimentalTextApi::class)

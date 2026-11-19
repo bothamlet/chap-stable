@@ -43,7 +43,7 @@ import com.budgetapp.app.ui.screens.ProfileMenuScreen
 import com.budgetapp.app.ui.screens.ProfileScreen
 import com.budgetapp.app.ui.screens.ReviewInboxScreen
 import com.budgetapp.app.ui.screens.SupportScreen
-import com.budgetapp.app.ui.theme.MockSurface
+import com.budgetapp.app.ui.theme.ChapSurface
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -105,7 +105,7 @@ fun BudgetNavHost() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MockSurface)
+            .background(ChapSurface)
             .clipToBounds(),
     ) {
         NavHost(
@@ -113,7 +113,7 @@ fun BudgetNavHost() {
             startDestination = AppRoute.EnvelopeList,
             modifier = Modifier
                 .fillMaxSize()
-                .background(MockSurface)
+                .background(ChapSurface)
                 .clipToBounds(),
             enterTransition = {
                 fadeIn(tween(durationMillis = 340, easing = EaseOut)) +

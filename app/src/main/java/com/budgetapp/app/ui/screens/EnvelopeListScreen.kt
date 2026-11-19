@@ -58,23 +58,23 @@ import com.budgetapp.app.ui.components.EnvelopeCategoryIcon
 import com.budgetapp.app.ui.components.StandardEmptyStateViewport
 import com.budgetapp.app.ui.components.StandardEmptyState
 import com.budgetapp.app.ui.components.EnvelopePickerList
-import com.budgetapp.app.ui.theme.MockBackground
-import com.budgetapp.app.ui.theme.MockBorderLightAlt
-import com.budgetapp.app.ui.theme.MockDanger
-import com.budgetapp.app.ui.theme.MockInk
-import com.budgetapp.app.ui.theme.MockLavenderPale
-import com.budgetapp.app.ui.theme.MockMaterialSurface
-import com.budgetapp.app.ui.theme.MockNeutral
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockPrimaryDeep
-import com.budgetapp.app.ui.theme.MockPrimaryGlowAlt
-import com.budgetapp.app.ui.theme.MockPrimaryWash
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockSurfaceBarelyAlt
-import com.budgetapp.app.ui.theme.MockSurfaceLightAlt
-import com.budgetapp.app.ui.theme.MockTextSoftPurple
-import com.budgetapp.app.ui.theme.MockWarningBright
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapBackground
+import com.budgetapp.app.ui.theme.ChapBorderLightAlt
+import com.budgetapp.app.ui.theme.ChapDanger
+import com.budgetapp.app.ui.theme.ChapInk
+import com.budgetapp.app.ui.theme.ChapLavenderPale
+import com.budgetapp.app.ui.theme.ChapMaterialSurface
+import com.budgetapp.app.ui.theme.ChapNeutral
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryDeep
+import com.budgetapp.app.ui.theme.ChapPrimaryGlowAlt
+import com.budgetapp.app.ui.theme.ChapPrimaryWash
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapSurfaceBarelyAlt
+import com.budgetapp.app.ui.theme.ChapSurfaceLightAlt
+import com.budgetapp.app.ui.theme.ChapTextSoftPurple
+import com.budgetapp.app.ui.theme.ChapWarningBright
+import com.budgetapp.app.ui.theme.ChapWhite
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -100,9 +100,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import com.budgetapp.app.ui.theme.MockLavenderTint
-import com.budgetapp.app.ui.theme.MockWhiteSoft
-import com.budgetapp.app.ui.theme.MockSurfacePale
+import com.budgetapp.app.ui.theme.ChapLavenderTint
+import com.budgetapp.app.ui.theme.ChapWhiteSoft
+import com.budgetapp.app.ui.theme.ChapSurfacePale
 import kotlinx.coroutines.delay
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.EaseOut
@@ -154,13 +154,13 @@ internal fun DashboardScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MockInk),
+            .background(ChapInk),
         contentAlignment = Alignment.TopCenter,
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MockSurface),
+                .background(ChapSurface),
         ) {
             if (state.envelopes.isEmpty()) {
                 EmptyDashboard(
@@ -235,7 +235,7 @@ fun AddTransactionOverlay(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MockInk.copy(alpha = 0.46f))
+                .background(ChapInk.copy(alpha = 0.46f))
                 .clickable(onClick = ::requestClose)
                 .semantics { contentDescription = "Dismiss add transaction" },
         )
@@ -316,13 +316,13 @@ internal fun PopulatedDashboard(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(MockBackground),
+            .background(ChapBackground),
     ) {
         item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MockSurface)
+                    .background(ChapSurface)
                     .padding(start = 24.dp, end = 24.dp, top = 92.dp, bottom = 54.dp),
             ) {
                 HeaderBlock(
@@ -395,7 +395,7 @@ internal fun HeaderBlock(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = monthLabel.uppercase(Locale.US),
-                color = MockTextSoftPurple,
+                color = ChapTextSoftPurple,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.8.sp,
@@ -420,7 +420,7 @@ internal fun HeaderBlock(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = dayLine,
-            color = MockWhite,
+            color = ChapWhite,
             fontSize = 36.sp,
             lineHeight = 39.sp,
             fontWeight = FontWeight.Bold,
@@ -429,7 +429,7 @@ internal fun HeaderBlock(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Back to this period",
-                color = MockPrimaryGlowAlt,
+                color = ChapPrimaryGlowAlt,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -456,7 +456,7 @@ private fun PeriodArrow(
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(width = 12.dp, height = 22.dp)) {
-            val color = if (enabled) MockPrimaryGlowAlt else MockTextSoftPurple.copy(alpha = 0.4f)
+            val color = if (enabled) ChapPrimaryGlowAlt else ChapTextSoftPurple.copy(alpha = 0.4f)
             val outerX = if (label == "\u2039") size.width else 0f
             val innerX = size.width - outerX
             drawLine(color, Offset(outerX, 0f), Offset(innerX, size.height / 2f), 2.dp.toPx(), StrokeCap.Round)
@@ -480,7 +480,7 @@ internal fun EmptyContent(
             DashboardIconCanvas(
                 icon = DashboardIcon.Book,
                 modifier = Modifier.size(52.dp),
-                tint = MockPrimaryGlowAlt,
+                tint = ChapPrimaryGlowAlt,
             )
         },
     )
@@ -503,8 +503,8 @@ internal fun SummaryCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(22.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(22.dp))
             .padding(horizontal = 22.dp, vertical = 20.dp),
     ) {
         Row(
@@ -514,27 +514,27 @@ internal fun SummaryCard(
         ) {
             Text(
                 text = "${profileSettings.formatMoney(budget)} budget",
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
             )
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = "${profileSettings.formatMoney(spent)} spent",
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = profileSettings.formatMoney(remaining),
-                    color = MockPrimaryAlt,
+                    color = ChapPrimaryAlt,
                     fontSize = 32.sp,
                     lineHeight = 32.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = "remaining",
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -558,7 +558,7 @@ internal fun SummaryCard(
             chartTickLabels(period).forEach {
                 Text(
                     text = it,
-                    color = MockNeutral,
+                    color = ChapNeutral,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -576,9 +576,9 @@ internal fun BurnRateChart(
 ) {
     val textMeasurer = rememberTextMeasurer()
     Canvas(modifier = modifier.semantics { contentDescription = "Spending forecast" }) {
-        val gridColor = MockSurfaceBarelyAlt
-        val actualColor = MockPrimaryAlt
-        val forecastColor = MockLavenderPale
+        val gridColor = ChapSurfaceBarelyAlt
+        val actualColor = ChapPrimaryAlt
+        val forecastColor = ChapLavenderPale
         val actualStroke = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round)
         val forecastStroke = Stroke(
             width = 3.dp.toPx(),
@@ -628,18 +628,18 @@ internal fun BurnRateChart(
             }
             drawPath(forecast, forecastColor, style = forecastStroke)
             drawCircle(
-                color = MockWhite,
+                color = ChapWhite,
                 radius = 6.5.dp.toPx(),
                 center = last,
             )
             drawCircle(
-                color = MockPrimaryAlt,
+                color = ChapPrimaryAlt,
                 radius = 5.dp.toPx(),
                 center = last,
             )
             val label = textMeasurer.measure(
                 AnnotatedString("forecast"),
-                style = TextStyle(color = MockNeutral, fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                style = TextStyle(color = ChapNeutral, fontSize = 12.sp, fontWeight = FontWeight.Bold),
             )
             drawText(
                 textLayoutResult = label,
@@ -662,14 +662,14 @@ internal fun InboxPill(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MockPrimaryWash)
+            .background(ChapPrimaryWash)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp)
             .semantics { contentDescription = "Review transactions" },
     ) {
         Text(
             text = "\u2726 $count transactions to review \u2192",
-            color = MockPrimaryDeep,
+            color = ChapPrimaryDeep,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -696,8 +696,8 @@ internal fun CashTransactionDrawer(
             .imePadding()
             .navigationBarsPadding()
             .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             .verticalScroll(rememberScrollState())
             .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 24.dp),
     ) {
@@ -706,12 +706,12 @@ internal fun CashTransactionDrawer(
                 .align(Alignment.CenterHorizontally)
                 .size(width = 44.dp, height = 5.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockLavenderTint),
+                .background(ChapLavenderTint),
         )
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = if (isGoal) "Add contribution" else "Add transaction",
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 23.sp,
             lineHeight = 25.sp,
             fontWeight = FontWeight.Bold,
@@ -766,7 +766,7 @@ internal fun CashTransactionDrawer(
         if (!editor.isNoteOpen) {
             Text(
                 text = "+ Add note",
-                color = MockPrimaryAlt,
+                color = ChapPrimaryAlt,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -793,10 +793,10 @@ internal fun CashTransactionDrawer(
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MockPrimaryAlt,
-                contentColor = MockWhite,
-                disabledContainerColor = MockLavenderTint,
-                disabledContentColor = MockNeutral,
+                containerColor = ChapPrimaryAlt,
+                contentColor = ChapWhite,
+                disabledContainerColor = ChapLavenderTint,
+                disabledContentColor = ChapNeutral,
             ),
         ) {
             Text(
@@ -818,7 +818,7 @@ internal fun CashField(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label.uppercase(Locale.US),
-            color = if (error == null) MockNeutral else MockDanger,
+            color = if (error == null) ChapNeutral else ChapDanger,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 0.96.sp,
@@ -829,7 +829,7 @@ internal fun CashField(
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = error,
-                color = MockDanger,
+                color = ChapDanger,
                 fontSize = 13.sp,
                 lineHeight = 16.sp,
                 fontWeight = FontWeight.Bold,
@@ -850,7 +850,7 @@ internal fun CashTextInput(
         value = value,
         onValueChange = onValueChange,
         textStyle = TextStyle(
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
         ),
@@ -859,10 +859,10 @@ internal fun CashTextInput(
             .fillMaxWidth()
             .height(minHeight)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
+            .background(ChapWhiteSoft)
             .border(
                 1.dp,
-                if (isError) MockDanger else MockSurfaceLightAlt,
+                if (isError) ChapDanger else ChapSurfaceLightAlt,
                 RoundedCornerShape(16.dp),
             )
             .padding(horizontal = 16.dp),
@@ -874,7 +874,7 @@ internal fun CashTextInput(
                 if (value.isBlank()) {
                     Text(
                         text = placeholder,
-                        color = MockNeutral,
+                        color = ChapNeutral,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -897,14 +897,14 @@ internal fun CashAmountInput(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, if (isError) MockDanger else MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, if (isError) ChapDanger else ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = currencySymbol,
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(end = 8.dp),
@@ -913,7 +913,7 @@ internal fun CashAmountInput(
             value = value,
             onValueChange = onValueChange,
             textStyle = TextStyle(
-                color = MockMaterialSurface,
+                color = ChapMaterialSurface,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
@@ -930,7 +930,7 @@ internal fun CashAmountInput(
                     if (value.isBlank()) {
                         Text(
                             text = "0.00",
-                            color = MockNeutral,
+                            color = ChapNeutral,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -972,21 +972,21 @@ internal fun CashDateControl(
             .fillMaxWidth()
             .height(54.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MockWhiteSoft)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(16.dp))
+            .background(ChapWhiteSoft)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(16.dp))
             .clickable { isPickerOpen = true }
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
             text = profileSettings.formatDate(date),
-            color = MockMaterialSurface,
+            color = ChapMaterialSurface,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
             text = "Pick",
-            color = MockPrimaryAlt,
+            color = ChapPrimaryAlt,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterEnd),
@@ -1035,14 +1035,14 @@ internal fun EnvelopeSection(
         ) {
             Text(
                 text = title,
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.2.sp,
             )
             Text(
                 text = "${profileSettings.formatMoney(remaining)} remaining",
-                color = if (remaining < 0) MockDanger else MockNeutral,
+                color = if (remaining < 0) ChapDanger else ChapNeutral,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
             )
@@ -1096,10 +1096,10 @@ internal fun EnvelopeCard(
         (envelope.spentCents.toFloat() / envelope.ceilingCents.toFloat()).coerceIn(0f, 1f)
     }
     val statusColor = when {
-        remaining < 0 -> MockDanger
-        envelope.spentCents == 0L -> MockNeutral
-        progress >= 0.75f -> MockWarningBright
-        else -> MockPrimaryGlowAlt
+        remaining < 0 -> ChapDanger
+        envelope.spentCents == 0L -> ChapNeutral
+        progress >= 0.75f -> ChapWarningBright
+        else -> ChapPrimaryGlowAlt
     }
 
     Column(
@@ -1107,20 +1107,20 @@ internal fun EnvelopeCard(
             .fillMaxWidth()
             .heightIn(min = 140.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfacePale, RoundedCornerShape(20.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfacePale, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
     ) {
         EnvelopeCategoryIcon(
             token = envelope.iconToken,
             modifier = Modifier.size(24.dp),
-            tint = MockPrimaryGlowAlt,
+            tint = ChapPrimaryGlowAlt,
         )
         Spacer(modifier = Modifier.height(18.dp))
         Text(
             text = envelope.name,
-            color = MockInk,
+            color = ChapInk,
             fontSize = 17.sp,
             lineHeight = 19.sp,
             fontWeight = FontWeight.Bold,
@@ -1137,7 +1137,7 @@ internal fun EnvelopeCard(
         )
         Text(
             text = "${profileSettings.formatMoney(envelope.spentCents)} / ${profileSettings.formatMoney(envelope.ceilingCents)}",
-            color = MockBorderLightAlt,
+            color = ChapBorderLightAlt,
             fontSize = 11.sp,
             lineHeight = 13.sp,
         )
@@ -1147,7 +1147,7 @@ internal fun EnvelopeCard(
                 .fillMaxWidth()
                 .height(7.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockSurfaceLightAlt),
+                .background(ChapSurfaceLightAlt),
         ) {
             Box(
                 modifier = Modifier
@@ -1170,7 +1170,7 @@ internal fun GoalSection(
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Goals",
-            color = MockNeutral,
+            color = ChapNeutral,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.2.sp,
@@ -1199,14 +1199,14 @@ internal fun GoalCard(
     } else {
         (envelope.spentCents.toFloat() / envelope.ceilingCents.toFloat()).coerceIn(0f, 1f)
     }
-    val statusColor = if (envelope.spentCents == 0L) MockNeutral else MockPrimaryGlowAlt
+    val statusColor = if (envelope.spentCents == 0L) ChapNeutral else ChapPrimaryGlowAlt
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(MockWhite)
-            .border(1.dp, MockSurfaceLightAlt, RoundedCornerShape(18.dp))
+            .background(ChapWhite)
+            .border(1.dp, ChapSurfaceLightAlt, RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 15.dp),
     ) {
@@ -1223,11 +1223,11 @@ internal fun GoalCard(
                 EnvelopeCategoryIcon(
                     token = envelope.iconToken,
                     modifier = Modifier.size(22.dp),
-                    tint = MockPrimaryGlowAlt,
+                    tint = ChapPrimaryGlowAlt,
                 )
                 Text(
                     text = envelope.name,
-                    color = MockInk,
+                    color = ChapInk,
                     fontSize = 16.sp,
                     lineHeight = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -1238,7 +1238,7 @@ internal fun GoalCard(
             }
             Text(
                 text = "${profileSettings.formatMoney(envelope.spentCents)} of ${profileSettings.formatMoney(envelope.ceilingCents)} saved",
-                color = MockNeutral,
+                color = ChapNeutral,
                 fontSize = 13.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -1253,7 +1253,7 @@ internal fun GoalCard(
                 .fillMaxWidth()
                 .height(7.dp)
                 .clip(RoundedCornerShape(99.dp))
-                .background(MockSurfaceLightAlt),
+                .background(ChapSurfaceLightAlt),
         ) {
             Box(
                 modifier = Modifier
@@ -1270,7 +1270,7 @@ internal fun GoalCard(
 internal fun DashboardIconCanvas(
     icon: DashboardIcon,
     modifier: Modifier = Modifier,
-    tint: androidx.compose.ui.graphics.Color = MockWhite,
+    tint: androidx.compose.ui.graphics.Color = ChapWhite,
 ) {
     Canvas(modifier = modifier) {
         val stroke = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round)

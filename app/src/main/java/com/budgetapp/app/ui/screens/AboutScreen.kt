@@ -17,11 +17,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.budgetapp.app.ui.components.SimpleDarkHeader
-import com.budgetapp.app.ui.theme.MockPrimaryAlt
-import com.budgetapp.app.ui.theme.MockSurface
-import com.budgetapp.app.ui.theme.MockTextLightMuted
-import com.budgetapp.app.ui.theme.MockTextSecondary
-import com.budgetapp.app.ui.theme.MockWhite
+import com.budgetapp.app.ui.theme.ChapPrimaryAlt
+import com.budgetapp.app.ui.theme.ChapSurface
+import com.budgetapp.app.ui.theme.ChapTextLightMuted
+import com.budgetapp.app.ui.theme.ChapTextSecondary
+import com.budgetapp.app.ui.theme.ChapWhite
 
 @Composable
 fun AboutScreen(
@@ -32,7 +32,7 @@ fun AboutScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(MockSurface),
+                .background(ChapSurface),
     ) {
         SimpleDarkHeader("About", onBack)
         Column(
@@ -42,21 +42,21 @@ fun AboutScreen(
                     .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            MenuIcon(MenuIconKind.Info, Modifier.size(48.dp), MockPrimaryAlt)
+            MenuIcon(MenuIconKind.Info, Modifier.size(48.dp), ChapPrimaryAlt)
             Spacer(modifier = Modifier.height(24.dp))
-            Text("Chap", color = MockWhite, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+            Text("Chap", color = ChapWhite, fontSize = 40.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Envelope budgeting, simplified.", color = MockPrimaryAlt, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text("Envelope budgeting, simplified.", color = ChapPrimaryAlt, fontSize = 15.sp, fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(48.dp))
             Text(
                 text = "No data leaves your device.\nAll transactions are stored locally.",
-                color = MockTextLightMuted,
+                color = ChapTextLightMuted,
                 fontSize = 17.sp,
                 lineHeight = 27.sp,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(48.dp))
-            Text("Built with Jetpack Compose & Room.", color = MockTextSecondary, fontSize = 14.sp)
+            Text("Built with Jetpack Compose & Room.", color = ChapTextSecondary, fontSize = 14.sp)
         }
     }
 }
